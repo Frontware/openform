@@ -1,16 +1,16 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(request: NextRequest, response?: NextResponse) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   // If env vars are not set, just continue without auth
   if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.next({ request })
+    return response || NextResponse.next({ request })
   }
 
-  let supabaseResponse = NextResponse.next({
+  let supabaseResponse = response || NextResponse.next({
     request,
   })
 
@@ -39,22 +39,41 @@ export async function updateSession(request: NextRequest) {
 
   // Define protected routes
   const protectedRoutes = ['/dashboard', '/forms']
+  const path = request.nextUrl.pathname
+  
+  // Remove locale prefix (en, th, fr) to get internal path
+  // Matches /en, /en/, /en/path, /path
+  const internalPath = path.replace(/^\/(?:en|th|fr)(?:\/|$)/, '/')
+
   const isProtectedRoute = protectedRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
+    internalPath === route || internalPath.startsWith(`${route}/`)
   )
 
   // Redirect to login if accessing protected route without auth
   if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('redirect', request.nextUrl.pathname)
+    // Keep the locale if present, or default to en?
+    // If we are at /fr/dashboard, we want to go to /fr/login
+    // But modifying pathname directly replaces everything.
+    // simpler: construct new URL based on current locale
+    
+    const localeMatch = path.match(/^\/(en|th|fr)/)
+    const locale = localeMatch ? localeMatch[0] : ''
+    
+    url.pathname = `${locale}/login`
+    url.searchParams.set('redirect', path)
     return NextResponse.redirect(url)
   }
 
   // Redirect to dashboard if already logged in and accessing login page
-  if (request.nextUrl.pathname === '/login' && user) {
+  // /login or /en/login -> /en/dashboard
+  if ((internalPath === '/login' || internalPath === '/login/') && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    
+    const localeMatch = path.match(/^\/(en|th|fr)/)
+    const locale = localeMatch ? localeMatch[0] : ''
+    
+    url.pathname = `${locale}/dashboard`
     return NextResponse.redirect(url)
   }
 

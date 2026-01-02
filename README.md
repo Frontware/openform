@@ -6,12 +6,13 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 
 ## Features
 
-- **6 beautiful themes** - Midnight, Ocean, Sunset, Forest, Lavender, Minimal
+- **7 beautiful themes** - Midnight, Ocean, Sunset, Forest, Lavender, Weladee, Minimal
 - **Keyboard navigation** - Navigate with Enter, arrow keys, and scroll wheel
 - **Mobile-first forms** - Responsive form-taking experience
 - **Secure authentication** - Google OAuth and Magic Link
 - **Response dashboard** - View, search, filter, and export to CSV
 - **13 question types** - Text, multiple choice, rating, file upload, and more
+- **Internationalization** - Support for English and Thai
 
 ## Question types
 
@@ -36,7 +37,8 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL)
 - **Auth**: Supabase Auth (Google OAuth + Magic Link)
-- **Styling**: Tailwind CSS + shadcn/ui
+- **i18n**: next-intl
+- **Styling**: Tailwind CSS 4 + shadcn/ui
 - **Animations**: Framer Motion
 - **File storage**: Cloudflare R2 (optional)
 
@@ -51,8 +53,8 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/yourusername/openform.git
-cd openform
+git clone https://github.com/yourusername/weladee-form.git
+cd weladee-form
 npm install
 ```
 
@@ -114,7 +116,7 @@ To enable file uploads, configure Cloudflare R2:
 R2_ACCOUNT_ID=your-account-id
 R2_ACCESS_KEY_ID=your-access-key
 R2_SECRET_ACCESS_KEY=your-secret-key
-R2_BUCKET_NAME=openform-uploads
+R2_BUCKET_NAME=weladee-form-uploads
 R2_PUBLIC_URL=https://your-bucket.r2.dev
 ```
 
@@ -132,7 +134,7 @@ Remember to update your Supabase URL Configuration with your production URL.
 ## Project structure
 
 ```
-openform/
+weladee-form/
 ├── app/
 │   ├── (auth)/           # Auth pages (login)
 │   ├── (dashboard)/      # Protected dashboard pages
@@ -153,10 +155,12 @@ openform/
 │   ├── database.types.ts # TypeScript types
 │   ├── questions.ts      # Question type definitions
 │   └── themes.ts         # Theme configurations
+├── src/
+│   ├── i18n/             # i18n configuration
+│   └── messages/         # Translation files (en, th)
 └── supabase/
     └── schema.sql        # Database schema
 ```
-
 ## License
 
 MIT License - feel free to use this for any project.

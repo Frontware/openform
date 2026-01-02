@@ -1,0 +1,11 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "forms": "Mes formulaires",
+    "create": "Créer un formulaire"
+  },
+  "form": {
+    "title": "Titre du formulaire",
+    "submit": "Soumettre"
+  }
+}

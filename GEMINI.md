@@ -10,7 +10,7 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 - **Responses:** Dashboard to view, filter, and export form responses.
 - **Authentication:** Supabase Auth (Google OAuth, Magic Link).
 - **Storage:** Cloudflare R2 (optional) for file uploads.
-- **i18n:** Multi-language support (English, Thai).
+- **i18n:** Multi-language support (English, Thai, French).
 
 ## Tech Stack
 - **Framework:** Next.js 16 (App Router), React 19
@@ -23,12 +23,11 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 - **i18n:** next-intl
 
 ## Project Structure
-- `app/(auth)/`: Authentication routes (login).
-- `app/(dashboard)/`: Protected routes for authenticated users (dashboard, editor, settings).
-- `app/f/[slug]/`: Public-facing form player routes.
+- `app/(main)/[locale]/`: Main application routes (dashboard, auth, landing) wrapped with localization provider.
+- `app/(form-player)/`: Public-facing form player routes (unlocalized or handled separately).
 - `app/api/`: Backend API routes (e.g., file upload).
-- `src/i18n/`: Internationalization routing and configuration.
-- `src/messages/`: Translation files (en, th).
+- `i18n/`: Internationalization routing and configuration.
+- `messages/`: Translation files (en, th, fr).
 - `components/`:
     - `ui/`: Reusable UI components (likely shadcn/ui).
     - `form-builder/`: Components for the editor interface.
