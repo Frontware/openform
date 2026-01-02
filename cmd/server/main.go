@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -86,17 +88,44 @@ func runServer(cmd *cobra.Command, args []string) error {
 	// Enable reflection for development tools
 	reflection.Register(grpcServer)
 
-	// Start server
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))
-	if err != nil {
-		return fmt.Errorf("failed to listen: %w", err)
+	// Wrap gRPC server with gRPC-Web middleware
+	wrappedGrpc := grpcweb.WrapServer(grpcServer,
+		grpcweb.WithOriginFunc(func(origin string) bool { return true }), // Allow all origins for now
+	)
+
+	// Setup CORS
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Allow all origins for dev
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+
+	// Create HTTP handler
+	httpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if wrappedGrpc.IsGrpcWebRequest(r) || wrappedGrpc.IsAcceptableGrpcCorsRequest(r) {
+			wrappedGrpc.ServeHTTP(w, r)
+		} else {
+			// Fallback to standard gRPC if needed, or handle other HTTP requests
+			// Since we can't easily multiplex standard gRPC on the same port with this setup 
+			// without cmux, we'll assume this port is primarily for gRPC-Web/HTTP.
+			// Standard gRPC clients might need a separate port or cmux.
+			// For simplicity in this migration, we serve gRPC-Web.
+			w.WriteHeader(http.StatusNotFound)
+		}
+	})
+
+	// Start HTTP server
+	httpServer := &http.Server{
+		Addr:    fmt.Sprintf(":%s", cfg.GRPCPort),
+		Handler: corsHandler.Handler(httpHandler),
 	}
 
-	log.Printf("🚀 Weladee Form gRPC server starting on port %s", cfg.GRPCPort)
+	log.Printf("🚀 Weladee Form gRPC-Web server starting on port %s", cfg.GRPCPort)
 
 	// Graceful shutdown
 	go func() {
-		if err := grpcServer.Serve(listener); err != nil {
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Printf("Failed to serve: %v", err)
 		}
 	}()
@@ -107,18 +136,19 @@ func runServer(cmd *cobra.Command, args []string) error {
 	<-quit
 
 	log.Println("Shutting down server...")
-	grpcServer.GracefulStop()
-
-	// Wait for graceful shutdown or timeout
+	
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Printf("Server forced to shutdown: %v", err)
+	}
+	
+	grpcServer.GracefulStop()
 
 	// Try to shutdown the database connection
 	dbPool.Close()
-	if ctx.Err() == context.DeadlineExceeded {
-		log.Println("Warning: database shutdown timed out")
-	}
-
+	
 	log.Println("✓ Server stopped")
 	return nil
 }

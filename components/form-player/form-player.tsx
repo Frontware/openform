@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Form, QuestionConfig, Json } from '@/lib/database.types'
 import { getTheme, getThemeCSSVariables } from '@/lib/themes'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,13 +9,13 @@ import { Button } from '@/components/ui/button'
 import { ChevronUp, ChevronDown, Check, ArrowRight } from 'lucide-react'
 import { QuestionRenderer } from './question-renderer'
 import { toast } from 'sonner'
+import { responseClient } from '@/lib/grpc-client'
 
 interface FormPlayerProps {
   form: Form
 }
 
 export function FormPlayer({ form }: FormPlayerProps) {
-  const supabase = createClient()
   const questions = (form.questions as QuestionConfig[]) || []
   const theme = getTheme(form.theme)
   const themeStyles = getThemeCSSVariables(theme)
@@ -108,22 +107,30 @@ export function FormPlayer({ form }: FormPlayerProps) {
 
   const handleSubmit = async () => {
     if (!validateCurrentQuestion()) return
-    
-    setIsSubmitting(true)
-    
-    const insertData = {
-      form_id: form.id,
-      answers: answers,
-    }
-    const { error } = await supabase
-      .from('responses')
-      .insert(insertData as never)
 
-    if (error) {
+    setIsSubmitting(true)
+
+    try {
+      // Map answers to gRPC format
+      const grpcAnswers = Object.entries(answers).map(([questionId, value]) => ({
+        questionId,
+        // Map different answer types based on the question
+        answerText: typeof value === 'string' ? value : undefined,
+        answerNumber: typeof value === 'number' ? value : undefined,
+        answerChoices: typeof value === 'object' && Array.isArray(value) ? { items: value } : undefined,
+      }))
+
+      await responseClient.submitResponse({
+        formId: form.id,
+        complete: true,
+        answers: grpcAnswers,
+      })
+
+      setIsSubmitted(true)
+    } catch (error) {
+      console.error('Failed to submit response:', error)
       toast.error('Failed to submit response')
       setIsSubmitting(false)
-    } else {
-      setIsSubmitted(true)
     }
   }
 

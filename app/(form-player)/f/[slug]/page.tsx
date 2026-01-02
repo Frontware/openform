@@ -1,7 +1,4 @@
-import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { FormPlayer } from '@/components/form-player/form-player'
-import { Form } from '@/lib/database.types'
+import { FormPlayerWrapper } from '@/components/form-player/form-player-wrapper'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,45 +7,14 @@ interface FormPageProps {
 }
 
 export async function generateMetadata({ params }: FormPageProps) {
-  const { slug } = await params
-  const supabase = await createClient()
-
-  const { data } = await supabase
-    .from('forms')
-    .select('title, description')
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .single()
-
-  const form = data as { title: string; description: string | null } | null
-
-  if (!form) {
-    return { title: 'Form Not Found' }
-  }
-
+  // Metadata generation skipped for migration as it requires server-side fetching via gRPC-Web
   return {
-    title: form.title || 'Form',
-    description: form.description || 'Fill out this form',
+    title: 'Weladee Form',
+    description: 'Fill out this form',
   }
 }
 
 export default async function FormPage({ params }: FormPageProps) {
   const { slug } = await params
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('forms')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .single()
-
-  const form = data as Form | null
-
-  if (error || !form) {
-    notFound()
-  }
-
-  return <FormPlayer form={form} />
+  return <FormPlayerWrapper slug={slug} />
 }
-
