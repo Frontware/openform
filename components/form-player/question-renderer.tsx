@@ -461,8 +461,8 @@ export function QuestionRenderer({
       return (
         <FileUploadQuestion
           question={question}
-          value={value as FileUploadValue | null}
-          onChange={onChange}
+          value={value as unknown as FileUploadValue | null}
+          onChange={(val) => onChange(val as unknown as Json)}
           theme={theme}
         />
       )

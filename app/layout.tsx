@@ -29,8 +29,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "OpenForm - Create Beautiful Forms",
-  description: "Build stunning, TypeForm-style forms in minutes. Free and open source.",
+  title: "Weladee Form - Create Beautiful Forms",
+  description: "Build stunning forms with Weladee Form. Free and open source.",
 };
 
 export default function RootLayout({

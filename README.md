@@ -1,8 +1,8 @@
-# OpenForm
+# Weladee Form
 
 A beautiful, open-source TypeForm alternative. Create engaging forms with a one-question-at-a-time experience.
 
-![OpenForm Logo](logo.jpg)
+![Weladee Form Logo](weladee-logo.png)
 
 ## Features
 

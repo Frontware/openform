@@ -242,7 +242,7 @@ export function FormPlayer({ form }: FormPlayerProps) {
             Your response has been recorded.
           </p>
           
-          {/* OpenForm branding */}
+          {/* Weladee Form branding */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -257,7 +257,7 @@ export function FormPlayer({ form }: FormPlayerProps) {
               style={{ color: theme.textColor }}
             >
               <span>Made with</span>
-              <span className="font-semibold">OpenForm</span>
+              <span className="font-semibold">Weladee Form</span>
             </a>
           </motion.div>
         </motion.div>
@@ -488,7 +488,7 @@ export function FormPlayer({ form }: FormPlayerProps) {
           </Button>
         </div>
 
-        {/* OpenForm branding */}
+        {/* Weladee Form branding */}
         <a 
           href="/"
           target="_blank"
@@ -496,7 +496,7 @@ export function FormPlayer({ form }: FormPlayerProps) {
           className="text-sm opacity-50 hover:opacity-70 transition-opacity"
           style={{ color: theme.textColor }}
         >
-          Powered by <span className="font-semibold">OpenForm</span>
+          Powered by <span className="font-semibold">Weladee Form</span>
         </a>
       </footer>
     </div>

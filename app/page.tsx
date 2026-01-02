@@ -127,7 +127,7 @@ export default async function HomePage() {
               </div>
               <div className="flex-1 flex justify-center">
                 <div className="px-4 py-1 bg-white rounded-md text-xs text-slate-500 font-medium">
-                  openform.app/your-form
+                  forms.weladee.com/your-form
                 </div>
               </div>
             </div>
@@ -238,7 +238,7 @@ export default async function HomePage() {
               Ready to create your first form?
             </h2>
             <p className="text-lg text-blue-100 mb-8 relative">
-              Join thousands of people using OpenForm to collect responses.
+              Join thousands of people using Weladee Form to collect responses.
             </p>
             <Link href="/login">
               <Button size="lg" className="h-14 px-8 text-lg bg-white text-blue-600 hover:bg-blue-50 shadow-xl shadow-blue-900/20 relative transition-all hover:-translate-y-0.5">
@@ -254,7 +254,7 @@ export default async function HomePage() {
       <footer className="relative z-10 py-8 px-6 border-t border-slate-100 bg-white">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-600 text-sm">
-            © 2026 OpenForm. Open source and free forever.
+            © 2026 Weladee Form. Open source and free forever.
           </p>
           <div className="flex items-center gap-6">
             <a href="https://github.com" className="text-slate-500 hover:text-slate-700 text-sm transition-colors">

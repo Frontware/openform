@@ -46,6 +46,15 @@ export const themes: Record<ThemePreset, ThemeConfig> = {
     accentColor: '#C084FC',
     fontFamily: "'Sora', sans-serif",
   },
+  weladee: {
+    id: 'weladee',
+    name: 'Weladee',
+    primaryColor: '#1ABC9C',
+    backgroundColor: '#FFFFFF',
+    textColor: '#2C3E50',
+    accentColor: '#E74C3C',
+    fontFamily: "'DM Sans', sans-serif",
+  },
   minimal: {
     id: 'minimal',
     name: 'Minimal',

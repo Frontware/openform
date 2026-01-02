@@ -32,6 +32,7 @@ export type ThemePreset =
   | 'sunset'
   | 'forest'
   | 'lavender'
+  | 'weladee'
   | 'minimal'
 
 export interface ThemeConfig {

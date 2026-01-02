@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 interface LogoProps {
@@ -11,28 +12,29 @@ interface LogoProps {
 
 export function Logo({ href = '/', size = 'md', className }: LogoProps) {
   const sizes = {
-    sm: 'text-lg',
-    md: 'text-xl',
-    lg: 'text-2xl',
+    sm: { width: 120, height: 32 },
+    md: { width: 150, height: 40 },
+    lg: { width: 180, height: 48 },
   }
 
+  const { width, height } = sizes[size]
+
   const content = (
-    <span
-      className={cn(
-        sizes[size],
-        'font-bold tracking-tight text-blue-600',
-        'hover:text-blue-500 transition-colors',
-        className
-      )}
-    >
-      Open
-      <span className="font-extrabold text-slate-900">Form</span>
-    </span>
+    <div className={cn("relative", className)}>
+      <Image
+        src="/weladee-logo.png"
+        alt="Weladee Form"
+        width={width}
+        height={height}
+        className="object-contain"
+        priority
+      />
+    </div>
   )
 
   if (href) {
     return (
-      <Link href={href} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
+      <Link href={href} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
         {content}
       </Link>
     )
