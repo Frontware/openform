@@ -9,8 +9,8 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - **7 beautiful themes** - Midnight, Ocean, Sunset, Forest, Lavender, Weladee, Minimal
 - **Keyboard navigation** - Navigate with Enter, arrow keys, and scroll wheel
 - **Mobile-first forms** - Responsive form-taking experience
-- **Secure authentication** - Google OAuth and Magic Link
-- **Response dashboard** - View, search, filter, and export to CSV
+- **Secure authentication** - Weladee Redis token validation
+- **Response dashboard** - View, search, filter, and export to CSV/JSON
 - **13 question types** - Text, multiple choice, rating, file upload, and more
 - **Internationalization** - Support for English and Thai
 
@@ -34,24 +34,23 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 
 ## Tech stack
 
-- **Framework**: Next.js 16 (App Router)
-- **Backend**: Go (gRPC)
-- **Database**: PostgreSQL
-- **Auth**: Google OAuth + Magic Link
+- **Frontend**: Next.js 16 (App Router) + React 19
+- **Backend**: Go 1.21+ with gRPC
+- **Database**: PostgreSQL with SQLC for type-safe queries
+- **Auth**: Weladee Redis token validation
 - **i18n**: next-intl
 - **Styling**: Tailwind CSS 4 + shadcn/ui
 - **Animations**: Framer Motion
-- **File storage**: S3 (MinIO / AWS)
+- **File storage**: S3-compatible (MinIO / AWS S3 / Cloudflare R2)
 
 ## Getting started
 
 ### Prerequisites
 
 - Node.js 18+
-- Go 1.22+
+- Go 1.21+
 - PostgreSQL
-- Redis (for session management)
-- SMTP server (for email authentication)
+- Redis (for Weladee token validation)
 - S3-compatible storage (optional, for file uploads)
 
 ### 1. Clone and install
@@ -63,11 +62,20 @@ cd weladee-form
 
 ### 2. Set up Database
 
-1. Create a PostgreSQL database.
-2. Run the schema migration:
-   ```bash
-   psql -d your_database -f sql/schema/form_schema.sql
-   ```
+Create a PostgreSQL database and run the schema migration:
+
+```bash
+psql -d your_database -f sql/schema/form_schema.sql
+```
+
+The schema creates the `form` schema with the following tables:
+- `users` - Form users linked to Weladee accounts
+- `forms` - Form definitions
+- `questions` - Form questions
+- `responses` - Form submissions
+- `answers` - Response answers
+- `file_uploads` - Uploaded file metadata
+- `analytics` - Daily form analytics
 
 ### 3. Configure Environment
 
@@ -81,10 +89,10 @@ Weladee Form supports three methods for configuration, in order of priority:
 #### Method 1: Command Line Flags
 ```bash
 # Using long flags
-./weladee-form --database-url="postgresql://user:pass@localhost/db" --grpc-port=8080
+./bin/weladee-form --database-url="postgresql://user:pass@localhost/db" --grpc-port=8080
 
 # Using short flags
-./weladee-form -d "postgresql://user:pass@localhost/db" -p 8080
+./bin/weladee-form -d "postgresql://user:pass@localhost/db" -p 8080
 ```
 
 Available flags:
@@ -92,15 +100,6 @@ Available flags:
 - `-d, --database-url`: PostgreSQL database URL (required)
 - `-r, --redis-url`: Redis server URL (default: redis://localhost:6379)
 - `--redis-prefix`: Redis key prefix (default: weladee:auth:token)
-- `--smtp-host`: SMTP server host (e.g., smtp.gmail.com)
-- `--smtp-port`: SMTP server port (default: 587)
-- `--smtp-username`: SMTP server username
-- `--smtp-password`: SMTP server password
-- `--smtp-from`: SMTP from email address
-- `--google-client-id`: Google OAuth client ID
-- `--google-client-secret`: Google OAuth client secret
-- `--oauth-redirect-url`: OAuth redirect URL
-- `--jwt-secret`: JWT secret key
 - `--s3-region`: S3 region (default: auto)
 - `--s3-bucket`: S3 bucket name
 - `--s3-access-key`: S3 access key
@@ -112,18 +111,10 @@ Available flags:
 export DATABASE_URL="postgresql://user:pass@localhost/db"
 export GRPC_PORT="50051"
 export REDIS_URL="redis://localhost:6379"
-export SMTP_HOST="smtp.gmail.com"
-export SMTP_PORT="587"
-export SMTP_USERNAME="your-email@gmail.com"
-export SMTP_PASSWORD="your-app-password"
-export SMTP_FROM="noreply@yourdomain.com"
-export GOOGLE_CLIENT_ID="your-google-client-id"
-export GOOGLE_CLIENT_SECRET="your-google-client-secret"
-export OAUTH_REDIRECT_URL="http://localhost:3000/auth/callback"
-export JWT_SECRET="your-jwt-secret-key"
+export REDIS_KEY_PREFIX="weladee:auth:token"
 # ... other variables
 
-./weladee-form
+./bin/weladee-form
 ```
 
 #### Method 3: Configuration File
@@ -141,19 +132,6 @@ database_url: "postgresql://user:pass@localhost/db"
 redis_url: "redis://localhost:6379"
 redis_prefix: "weladee:auth:token"
 
-# SMTP configuration (required for email authentication)
-smtp_host: "smtp.gmail.com"
-smtp_port: "587"
-smtp_username: "your-email@gmail.com"
-smtp_password: "your-app-password"
-smtp_from: "noreply@yourdomain.com"
-
-# OAuth configuration (required for Google authentication)
-google_client_id: "your-google-client-id"
-google_client_secret: "your-google-client-secret"
-oauth_redirect_url: "http://localhost:3000/auth/callback"
-jwt_secret: "your-jwt-secret-key"
-
 # Optional S3 configuration
 s3_region: "auto"
 s3_bucket: "your-bucket"
@@ -168,7 +146,15 @@ s3_endpoint: "https://your-endpoint.com"
 
 **Backend:**
 ```bash
+# Using Makefile (recommended)
+make dev
+
+# Or directly
 go run cmd/server/main.go
+
+# Or build and run
+make build-local
+./bin/weladee-form-linux
 ```
 
 **Frontend:**
@@ -183,19 +169,186 @@ Open [http://localhost:3000](http://localhost:3000) to see your app.
 
 ```
 weladee-form/
-├── app/
+├── app/                  # Next.js App Router
 │   ├── (main)/           # Main application routes (localized)
 │   ├── (form-player)/    # Public form player routes
 │   └── api/              # API routes
 ├── cmd/                  # Go application entrypoints
-├── internal/             # Private application code
+│   └── server/
+│       └── main.go       # gRPC server entry point
+├── internal/             # Private Go application code
+│   ├── auth/             # Authentication (Redis token validation)
+│   ├── db/               # Database layer (SQLC)
+│   ├── gapi/             # gRPC service implementations
+│   ├── storage/          # S3 storage client
+│   └── utils/            # Utilities (CSV/JSON export)
+├── proto/                # gRPC protocol buffer definitions
+│   └── pb/               # Generated protobuf Go code
 ├── sql/                  # SQL queries and schemas
-├── proto/                # gRPC protocol buffers
+│   ├── schema/           # Database schemas
+│   └── queries/          # SQLC query definitions
 ├── components/           # React components
 ├── lib/                  # Shared libraries
 ├── i18n/                 # Internationalization config
-└── messages/             # Translation files
+├── messages/             # Translation files
+└── Makefile             # Build automation
 ```
+
+## Backend (Go/gRPC)
+
+### gRPC Services
+
+**FormService**
+- `CreateForm` - Create a new form with questions
+- `GetForm` - Get a form by ID
+- `UpdateForm` - Update form properties
+- `DeleteForm` - Delete a form
+- `ListForms` - List user's forms with pagination
+- `PublishForm` - Publish a form
+- `GetFormStats` - Get form response statistics
+- `CreateQuestion` - Add a question to a form
+
+**ResponseService**
+- `SubmitResponse` - Submit or partially save form responses
+- `GetResponse` - Get a response by ID
+- `ListResponses` - List form responses with pagination
+- `ExportResponses` - Export responses to CSV or JSON
+
+**FileService**
+- `UploadFile` - Streaming file upload
+- `GetFileUrl` - Get a presigned URL for file download
+
+### Database Layer
+
+The database layer uses [SQLC](https://sqlc.dev/) for type-safe SQL queries:
+
+- **SQL Queries**: `sql/queries/*.sql`
+  - `user.sql` - User queries
+  - `form.sql` - Form queries
+  - `question.sql` - Question queries
+  - `response.sql` - Response queries
+  - `analytics.sql` - Analytics queries
+  - `file.sql` - File upload queries
+
+- **Generated Code**: `internal/db/sqlc/*.go`
+  - `models.go` - Database table models
+  - `querier.go` - Query interface
+  - `*.sql.go` - Generated query functions
+
+### Authentication
+
+Authentication uses Weladee Redis token validation:
+- Frontend obtains Weladee token (from external auth service)
+- Token passed in gRPC metadata: `authorization: Bearer <token>`
+- Auth interceptor validates token against Weladee Redis
+- User claims extracted and added to request context
+
+## Development
+
+### Frontend Development
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+```
+
+### Backend Development
+
+```bash
+# Using Makefile (recommended)
+make dev             # Run Go server in development mode
+make build           # Build for all platforms
+make build-local     # Build for local platform
+make test            # Run tests
+make db-generate     # Regenerate SQLC code from SQL queries
+make proto           # Regenerate protobuf Go code
+make fmt             # Format Go code
+make lint            # Run linter
+make vet             # Run go vet
+make help            # Show all available commands
+
+# Direct Go commands
+go run cmd/server/main.go                    # Run server directly
+go build -o bin/weladee-form cmd/server/main.go  # Build binary
+sqlc generate                                  # Generate SQLC code
+```
+
+### Code Generation
+
+After modifying SQL queries or proto definitions:
+
+```bash
+# Regenerate SQLC code
+sqlc generate
+
+# Regenerate protobuf Go code
+make proto
+# or
+protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    proto/*.proto
+```
+
+## Database Schema
+
+### Tables (PostgreSQL - form schema)
+
+**form.users** - Form users linked to Weladee accounts
+- `id` (UUID)
+- `weladee_user_id` (int32)
+- `email`, `full_name`, `avatar_url`
+- `created_at`, `updated_at`
+
+**form.forms** - Form definitions
+- `id` (UUID)
+- `user_id` (UUID)
+- `title`, `description`, `theme`
+- `is_published`, `is_accepting_responses`, `require_login`, `allow_multiple_submissions`
+- `show_progress_bar`
+- `custom_thank_you_message`, `redirect_url`
+- `settings` (JSONB)
+- `created_at`, `updated_at`
+
+**form.questions** - Form questions
+- `id`, `form_id` (UUIDs)
+- `type`, `label`, `description`, `placeholder`
+- `required`, `order_index`
+- `options`, `validation_rules`, `settings` (JSONB)
+- `created_at`, `updated_at`
+
+**form.responses** - Form submissions
+- `id`, `form_id` (UUIDs)
+- `respondent_user_id` (UUID, nullable)
+- `respondent_email`, `respondent_name` (text, nullable)
+- `ip_address` (inet), `user_agent` (text)
+- `completed` (boolean), `submitted_at` (timestamptz)
+- `created_at`, `updated_at`
+
+**form.answers** - Response answers
+- `id`, `response_id`, `question_id` (UUIDs)
+- `answer_text` (text, nullable)
+- `answer_number` (numeric, nullable)
+- `answer_date` (date, nullable)
+- `answer_time` (time, nullable)
+- `answer_choices` (JSONB, nullable)
+- `answer_file_url` (text, nullable)
+- `created_at`, `updated_at`
+
+**form.file_uploads** - File metadata
+- `id` (UUID)
+- `form_id`, `question_id`, `response_id` (UUIDs)
+- `filename`, `original_filename`, `mime_type`
+- `file_size`
+- `s3_key`, `s3_url`
+- `created_at`
+
+**form.analytics** - Daily analytics
+- `id` (UUID)
+- `form_id` (UUID)
+- `date` (date)
+- `total_views`, `total_starts`, `total_completions`
 
 ## License
 

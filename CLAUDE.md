@@ -4,14 +4,82 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OpenForm is an open-source TypeForm alternative built with Next.js 16 (App Router). It allows users to create beautiful, one-question-at-a-time forms with 6 themes and 13 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
+Weladee Form is an open-source TypeForm alternative built with:
+- **Frontend**: Next.js 16 (App Router) with React 19
+- **Backend**: Go 1.21+ with gRPC
+- **Database**: PostgreSQL with SQLC for type-safe queries
+- **Auth**: Weladee Redis token validation
+
+Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
 
 **Key Features:**
-- **Form Builder** - Create forms with drag-and-drop question ordering (components/form-builder/)
-- **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (components/form-player/)
-- **Response Dashboard** - View, search, filter, and export responses to CSV (components/responses/)
-- **Themes** - 6 preset themes: midnight, ocean, sunset, forest, lavender, minimal (lib/themes.ts)
-- **Authentication** - Supabase Auth (Google OAuth + Magic Link)
+- **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit)
+- **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (app/(form-player)/f/[slug])
+- **Response Dashboard** - View, search, filter, and export responses to CSV/JSON (app/(main)/dashboard/forms/[id]/responses)
+- **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
+- **Authentication** - Weladee Redis token validation
+
+## Backend Architecture
+
+### gRPC Services
+
+The Go backend implements three gRPC services defined in `proto/`:
+
+**FormService** (`proto/form.proto`)
+- `CreateForm` - Create a new form with questions
+- `GetForm` - Get a form by ID (with optional questions)
+- `UpdateForm` - Update form properties
+- `DeleteForm` - Delete a form
+- `ListForms` - List user's forms with pagination
+- `PublishForm` - Publish a form
+- `GetFormStats` - Get form response statistics
+- `CreateQuestion` - Add a question to a form
+
+**ResponseService** (`proto/response.proto`)
+- `SubmitResponse` - Submit or partially save form responses
+- `GetResponse` - Get a response by ID
+- `ListResponses` - List form responses with pagination
+- `ExportResponses` - Export responses to CSV or JSON
+
+**FileService** (`proto/file.proto`)
+- `UploadFile` - Streaming file upload (for file upload questions)
+- `GetFileUrl` - Get a presigned URL for file download
+
+### Database Layer (SQLC)
+
+The database layer uses SQLC for type-safe SQL queries:
+
+- **SQL Queries**: `sql/queries/*.sql`
+  - `user.sql` - User queries (CreateFormUser, GetFormUserByWeladeeID)
+  - `form.sql` - Form queries (CreateForm, GetForm, ListUserForms, CountUserForms, etc.)
+  - `question.sql` - Question queries (CreateQuestion, ListFormQuestions)
+  - `response.sql` - Response queries (CreateResponse, GetResponse, CountFormResponses, etc.)
+  - `analytics.sql` - Analytics queries (IncrementFormViews, etc.)
+  - `file.sql` - File upload queries
+
+- **Generated Code**: `internal/db/sqlc/*.go`
+  - `models.go` - Database table models (FormForm, FormQuestion, FormResponse, FormAnswer, etc.)
+  - `querier.go` - Query interface
+  - `*.sql.go` - Generated query functions
+
+### Authentication Flow
+
+**Weladee Token Validation**:
+1. Frontend obtains Weladee token (from external auth service)
+2. Token passed in gRPC metadata: `authorization: Bearer <token>`
+3. Auth interceptor validates token against Weladee Redis
+4. User claims (UserID, Email, DisplayName) extracted and added to context
+5. Public endpoints (like GetFormBySlug, SubmitResponse for public forms) bypass auth
+
+**Auth Files**:
+- `internal/auth/redis.go` - RedisTokenValidator for token validation
+- `internal/auth/interceptor.go` - gRPC auth interceptor with public method whitelist
+
+### Storage Layer
+
+**S3/Cloudflare R2** for file uploads:
+- `internal/storage/s3.go` - S3Storage client with presigned URL generation
+- Supports AWS S3 and S3-compatible storage (Cloudflare R2, MinIO)
 
 ## Backend Configuration
 
@@ -39,15 +107,15 @@ The Go backend supports three configuration methods with the following priority:
 
 **Command Line Flags:**
 ```bash
-./weladee-form --database-url="postgresql://user:pass@localhost/db" --grpc-port=8080
-./weladee-form -d "postgresql://user:pass@localhost/db" -p 8080
+./bin/weladee-form --database-url="postgresql://user:pass@localhost/db" --grpc-port=8080
+./bin/weladee-form -d "postgresql://user:pass@localhost/db" -p 8080
 ```
 
 **Environment Variables:**
 ```bash
 export DATABASE_URL="postgresql://user:pass@localhost/db"
 export GRPC_PORT="8080"
-./weladee-form
+./bin/weladee-form
 ```
 
 **Configuration File:**
@@ -65,6 +133,7 @@ s3_endpoint: "https://your-endpoint.com"
 
 ## Development Commands
 
+### Frontend (Next.js)
 ```bash
 npm run dev          # Start development server on http://localhost:3000
 npm run build        # Build for production
@@ -72,78 +141,201 @@ npm run start        # Start production server
 npm run lint         # Run ESLint
 ```
 
+### Backend (Go)
+```bash
+# Using Makefile
+make dev             # Run Go server in development mode
+make build           # Build for all platforms
+make build-local     # Build for local platform
+make test            # Run tests
+make db-generate     # Regenerate SQLC code from SQL queries
+make proto           # Regenerate protobuf Go code
+
+# Direct Go commands
+go run cmd/server/main.go                    # Run server directly
+go build -o bin/weladee-form cmd/server/main.go  # Build binary
+sqlc generate                                  # Generate SQLC code
+protoc --go_out=. --go-grpc_out=. proto/*.proto  # Generate proto code
+```
+
 ## Environment Setup
 
-1. Copy `.env.example` to `.env.local`
-2. Configure required Supabase environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anon key
+### 1. Database Setup
 
-3. (Optional) For file uploads, configure Cloudflare R2:
-   - `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`
-   - `R2_BUCKET_NAME`, `R2_PUBLIC_URL`
+Create a PostgreSQL database and run the schema:
 
-4. Run the database schema from `supabase/schema.sql` in Supabase SQL Editor
+```bash
+psql -d your_database -f sql/schema/form_schema.sql
+```
 
-## Architecture
+The schema creates the `form` schema with tables:
+- `users` - Form users (linked to Weladee user ID)
+- `forms` - Form definitions
+- `questions` - Form questions
+- `responses` - Form submissions
+- `answers` - Response answers
+- `file_uploads` - Uploaded file metadata
+- `analytics` - Form analytics (views, starts, completions)
+
+### 2. Generate Code
+
+After modifying SQL queries or proto definitions:
+
+```bash
+# Regenerate SQLC code
+sqlc generate
+
+# Regenerate protobuf Go code
+make proto
+# or
+protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    proto/*.proto
+```
+
+### 3. Configure Environment
+
+Set required environment variables:
+```bash
+export DATABASE_URL="postgresql://user:pass@localhost/db"
+export REDIS_URL="redis://localhost:6379"
+```
+
+Optional (for file uploads):
+```bash
+export S3_BUCKET="your-bucket"
+export S3_ACCESS_KEY="your-key"
+export S3_SECRET_KEY="your-secret"
+export S3_ENDPOINT="https://your-endpoint.com"
+```
+
+## Frontend Architecture
 
 ### Route Structure (App Router)
 
-- `app/(auth)/` - Authentication routes (login page)
-- `app/(dashboard)/` - Protected routes requiring authentication
+- `app/(main)/` - Main application routes (localized, auth required)
   - `dashboard/` - List of user's forms
   - `forms/new` - Create new form
   - `forms/[id]/edit` - Form builder/editor
   - `forms/[id]/responses` - View and manage form responses
   - `settings/` - User settings
-- `app/f/[slug]/` - Public form pages (no auth required, handled by middleware exclusion)
-- `app/api/upload` - File upload API endpoint
-- `app/auth/callback` - OAuth callback handler
-
-### Middleware Protection
-
-The middleware (`middleware.ts`) protects all routes except:
-- Static files (`_next/static`, `_next/image`, public folder)
-- Public form pages (`/f/*` - used by respondents to take forms)
-- Auth callback (`/auth/callback`)
+- `app/(form-player)/` - Public form pages (no auth required)
+  - `f/[slug]` - Public form player
+- `app/api/` - API routes (if any Next.js API routes needed)
+- `middleware.ts` - Auth middleware for route protection
 
 ### Key Directories
 
+Frontend:
 - `components/ui/` - shadcn/ui base components (Radix UI primitives)
 - `components/form-builder/` - Form creation/editing UI
 - `components/form-player/` - Public form display with one-question-at-a-time navigation
 - `components/dashboard/` - Dashboard-specific components
 - `components/responses/` - Response management UI with search/filter/export
-- `lib/supabase/` - Supabase client initialization (client, server, middleware)
-- `lib/database.types.ts` - TypeScript types for database schema
 - `lib/questions.ts` - Question type definitions and helper functions
 - `lib/themes.ts` - Theme configuration objects
-- `supabase/schema.sql` - PostgreSQL schema with RLS policies
+- `lib/grpc-client.ts` - gRPC client for backend communication
+- `i18n/` - Internationalization configuration
+- `messages/` - Translation files (en.json, th.json, fr.json)
+
+Backend:
+- `cmd/server/main.go` - Server entry point
+- `proto/` - Protocol buffer definitions
+- `proto/pb/` - Generated protobuf Go code
+- `internal/gapi/` - gRPC service implementations
+  - `rpc_form.go` - FormService implementation
+  - `rpc_response.go` - ResponseService implementation
+  - `rpc_file.go` - FileService implementation
+  - `server.go` - Server constructors
+- `internal/db/` - Database layer
+  - `database.go` - Database connection wrapper
+  - `sqlc/` - SQLC generated code
+- `internal/auth/` - Authentication
+  - `redis.go` - Redis token validation
+  - `interceptor.go` - gRPC auth interceptor
+- `internal/storage/s3.go` - S3 storage client
+- `internal/utils/export.go` - CSV/JSON export utilities
+- `sql/schema/` - Database schemas
+- `sql/queries/` - SQLC query definitions
 
 ## Data Model
 
-### Tables (Supabase/PostgreSQL)
+### PostgreSQL Tables (form schema)
 
-**profiles** - User profiles extending `auth.users`
-- `id` (UUID, references auth.users)
+**form.users** - Form users linked to Weladee accounts
+- `id` (UUID, primary key)
+- `weladee_user_id` (int32, references Weladee user)
 - `email`, `full_name`, `avatar_url`
+- `created_at`, `updated_at`
 
-**forms** - Form definitions
-- `id`, `user_id`, `title`, `description`, `slug` (unique per user)
-- `status` (enum: draft, published, closed)
-- `theme` (enum: midnight, ocean, sunset, forest, lavender, minimal)
-- `questions` (JSONB array of QuestionConfig)
-- `thank_you_message`
+**form.forms** - Form definitions
+- `id` (UUID, primary key)
+- `user_id` (UUID, references form.users)
+- `title`, `description` (text)
+- `theme` (enum: midnight, ocean, sunset, forest, lavender, weladee, minimal)
+- `is_published`, `is_accepting_responses`, `require_login`, `allow_multiple_submissions`
+- `show_progress_bar`
+- `custom_thank_you_message`, `redirect_url`
+- `settings` (JSONB)
+- `created_at`, `updated_at`
 
-**responses** - Form submissions
-- `id`, `form_id`, `answers` (JSONB), `submitted_at`
+**form.questions** - Form questions
+- `id` (UUID, primary key)
+- `form_id` (UUID, references form.forms)
+- `type` (enum: short_text, long_text, dropdown, checkboxes, email, phone, number, date, rating, opinion_scale, yes_no, file_upload, url)
+- `label`, `description`, `placeholder`
+- `required`
+- `order_index`
+- `options`, `validation_rules`, `settings` (JSONB)
+- `created_at`, `updated_at`
 
-### Row Level Security (RLS)
+**form.responses** - Form submissions
+- `id` (UUID, primary key)
+- `form_id` (UUID, references form.forms)
+- `respondent_user_id` (UUID, nullable, references form.users)
+- `respondent_email`, `respondent_name` (text, nullable)
+- `ip_address` (inet)
+- `user_agent` (text)
+- `completed` (boolean)
+- `submitted_at` (timestamptz, nullable)
+- `created_at`, `updated_at`
 
-All tables have RLS policies:
-- Users can only access their own profiles, forms, and responses
-- Published forms are publicly readable (for `/f/[slug]` pages)
-- Anyone can submit responses to published forms
+**form.answers** - Response answers
+- `id` (UUID, primary key)
+- `response_id` (UUID, references form.responses)
+- `question_id` (UUID, references form.questions)
+- `answer_text` (text, nullable)
+- `answer_number` (numeric, nullable)
+- `answer_date` (date, nullable)
+- `answer_time` (time, nullable)
+- `answer_choices` (JSONB, nullable)
+- `answer_file_url` (text, nullable)
+- `created_at`, `updated_at`
+
+**form.file_uploads** - File metadata
+- `id` (UUID, primary key)
+- `form_id`, `question_id`, `response_id` (UUIDs)
+- `filename`, `original_filename`, `mime_type`
+- `file_size`
+- `s3_key`, `s3_url`
+- `created_at`
+
+**form.analytics** - Daily analytics
+- `id` (UUID, primary key)
+- `form_id` (UUID)
+- `date` (date)
+- `total_views`, `total_starts`, `total_completions`
+
+### SQLC Generated Types
+
+- `FormUser` - User model
+- `FormForm` - Form model
+- `FormQuestion` - Question model
+- `FormResponse` - Response model
+- `FormAnswer` - Answer model
+- `FormFileUpload` - File upload model
+- `FormAnalytic` - Analytics model
+- `CreateFormParams`, `UpdateFormParams`, etc. - Query parameters
 
 ## Question Types (13 total)
 
@@ -171,7 +363,7 @@ Helper functions:
 
 ## Theme System
 
-Defined in `lib/themes.ts` with 6 presets. Each theme has:
+Defined in `lib/themes.ts` with 7 presets. Each theme has:
 - `primaryColor`, `backgroundColor`, `textColor`, `accentColor`
 - `fontFamily`
 
@@ -179,11 +371,24 @@ Helper functions:
 - `getTheme(preset)` - Get theme config by preset name
 - `getThemeCSSVariables(theme)` - Convert to CSS custom properties
 
-## Supabase Client Usage
+## gRPC Client Usage
 
-- **Client-side** - `createClient()` from `lib/supabase/client.ts`
-- **Server-side** - `createClient()` from `lib/supabase/server.ts` (uses cookies)
-- **Middleware** - `updateSession()` from `lib/supabase/middleware.ts`
+The frontend will use a gRPC client (to be implemented in `lib/grpc-client.ts`) to communicate with the backend:
+
+```typescript
+// Example: Create a form
+const client = new WeladeeFormClient('http://localhost:50051');
+const form = await client.formService.createForm({
+  title: 'My Form',
+  theme: FormTheme.FORM_THEME_MINIMAL,
+  questions: [{
+    type: QuestionType.QUESTION_TYPE_SHORT_TEXT,
+    label: 'What is your name?',
+    required: true,
+    orderIndex: 0,
+  }],
+});
+```
 
 ## Keyboard Navigation (Form Player)
 
@@ -195,82 +400,120 @@ The form player (`components/form-player/`) supports:
 ## File Upload Flow
 
 1. File selected in form player
-2. Upload to `app/api/upload/route.ts` (Cloudflare R2)
-3. Returns file URL to be stored in response answers
-4. Requires R2 environment variables to be configured
+2. Upload via gRPC streaming to FileService.UploadFile
+3. File stored in S3/R2, metadata saved to database
+4. Returns file URL to be stored in response answers
 
 ## Common Patterns
 
-### Creating a new form
+### Creating a new form (gRPC)
 
 ```typescript
-import { createClient } from '@/lib/supabase/server'
-import { createDefaultQuestion } from '@/lib/questions'
-
-const supabase = createClient()
-const { data: { user } } = await supabase.auth.getUser()
-
-const slug = generateUniqueSlug(title, user.id) // Uses PostgreSQL function
-
-const { data: form } = await supabase
-  .from('forms')
-  .insert({
-    user_id: user.id,
-    title,
-    slug,
-    questions: [createDefaultQuestion('short_text')],
-    theme: 'minimal',
-  })
-  .select()
-  .single()
+const client = new WeladeeFormClient('http://localhost:50051');
+const { form } = await client.formService.createForm({
+  title: 'Customer Feedback',
+  description: 'Help us improve our service',
+  theme: FormTheme.FORM_THEME_OCEAN,
+  questions: [
+    createDefaultQuestion('short_text'),
+  ],
+});
 ```
 
-### Fetching form by slug (public)
+### Submitting a response (gRPC)
 
 ```typescript
-const supabase = createClient()
-const { data: form } = await supabase
-  .from('forms')
-  .select('*')
-  .eq('slug', slug)
-  .eq('status', 'published')
-  .single()
-```
-
-### Submitting a response
-
-```typescript
-const { data: response } = await supabase
-  .from('responses')
-  .insert({
-    form_id: form.id,
-    answers: {
-      'question-id-1': 'answer value',
-      'question-id-2': ['choice1', 'choice2'],
+const { response } = await client.responseService.submitResponse({
+  formId: form.id,
+  complete: true,
+  answers: [
+    {
+      questionId: question.id,
+      answerText: 'John Doe',
     },
-  })
-  .select()
-  .single()
+  ],
+});
+```
+
+### Exporting responses (gRPC)
+
+```typescript
+const { data, filename, mimeType } = await client.responseService.exportResponses({
+  formId: form.id,
+  format: 'csv', // or 'json'
+});
 ```
 
 ## Type Safety
 
-All database types are defined in `lib/database.types.ts`:
-- `Profile`, `Form`, `Response` - Database row types
-- `FormInsert`, `FormUpdate` - Insert/update types
-- `QuestionConfig`, `ThemeConfig` - Domain types
+### SQLC Types
 
-When updating Supabase schema, regenerate types:
-```bash
-npx supabase gen types typescript --project-id YOUR_PROJECT_ID > lib/database.types.ts
-```
+Database types are defined in `internal/db/sqlc/models.go`:
+- `FormForm`, `FormQuestion`, `FormResponse`, `FormAnswer`, `FormUser`, `FormFileUpload`, `FormAnalytic`
+- `CreateFormParams`, `UpdateFormParams`, etc. - Query parameter types
+
+### Protobuf Types
+
+gRPC types are defined in `proto/pb/*.pb.go`:
+- `Form`, `Question`, `Response`, `Answer`
+- `CreateFormRequest`, `CreateFormResponse`, etc.
+- Enums: `FormTheme`, `QuestionType`, `FormStatus`
+
+### TypeScript Types
+
+Frontend types are generated from protobuf definitions (to be implemented):
+- `Form`, `Question`, `Response`, `Answer`
+- Request/Response types for all gRPC methods
 
 ## Dependencies
 
+### Backend
+- **Go 1.21+**
+- **gRPC** - RPC framework
+- **PostgreSQL** - Database with pgx/v5 driver
+- **SQLC** - Type-safe SQL generation
+- **Redis** - Token validation (Weladee auth)
+- **AWS SDK v2** - S3 storage
+
+### Frontend
 - **Next.js 16** - App Router with React 19
-- **Supabase** - Database, Auth, Storage (@supabase/supabase-js, @supabase/ssr)
 - **shadcn/ui** - Component library built on Radix UI
 - **Tailwind CSS 4** - Styling
 - **Framer Motion** - Animations
-- **React Hook Form + Zod** - Form validation
+- **next-intl** - Internationalization
 - **Lucide React** - Icons
+
+## Makefile Commands
+
+The project includes a comprehensive Makefile for common operations:
+
+```bash
+make help            # Show all available commands
+make dev             # Run Go server in development mode
+make build           # Build binaries for all platforms
+make build-local     # Build for local development
+make test            # Run all tests
+make fmt             # Format Go code
+make lint            # Run linter
+make vet             # Run go vet
+make proto           # Generate protobuf Go code
+make db-generate     # Generate SQLC code from SQL queries
+make deps-tidy       # Clean up Go dependencies
+make clean           # Clean build artifacts
+```
+
+## Development Workflow
+
+1. **Modify SQL queries**: Edit files in `sql/queries/`, then run `make db-generate`
+2. **Modify proto definitions**: Edit files in `proto/`, then run `make proto`
+3. **Modify Go code**: Use `make dev` or `go run cmd/server/main.go`
+4. **Run tests**: `make test`
+5. **Build for deployment**: `make build`
+
+## Notes
+
+- The backend uses gRPC reflection for development tools (grpcurl)
+- All gRPC calls require authentication except public endpoints (defined in `internal/auth/interceptor.go`)
+- File uploads use streaming gRPC for efficient handling of large files
+- Responses can be partially saved (completed=false) and finalized later
+- The database schema uses a separate `form` schema for organization
