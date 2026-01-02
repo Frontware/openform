@@ -1,6 +1,6 @@
 import { FormPlayerWrapper } from '@/components/form-player/form-player-wrapper'
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-static'
 
 interface FormPageProps {
   params: Promise<{ slug: string }>

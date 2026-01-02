@@ -105,6 +105,39 @@ func runServer(cmd *cobra.Command, args []string) error {
 
 	// Create HTTP handler
 	httpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Handle /api/upload
+		if r.Method == http.MethodPost && r.URL.Path == "/api/upload" {
+			if s3Storage == nil {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				fmt.Fprintf(w, `{"error": "Storage not configured"}`)
+				return
+			}
+
+			// Max 10MB
+			r.ParseMultipartForm(10 << 20)
+			file, handler, err := r.FormFile("file")
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				fmt.Fprintf(w, `{"error": "Failed to get file: %v"}`, err)
+				return
+			}
+			defer file.Close()
+
+			// Upload to S3
+			key := fmt.Sprintf("uploads/%d-%s", time.Now().Unix(), handler.Filename)
+			_, fileURL, err := s3Storage.UploadFileReader(r.Context(), key, handler.Header.Get("Content-Type"), file)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(w, `{"error": "Upload failed: %v"}`, err)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, `{"success": true, "url": "%s", "file": {"name": "%s", "type": "%s", "size": %d}}`, 
+				fileURL, handler.Filename, handler.Header.Get("Content-Type"), handler.Size)
+			return
+		}
+
 		if wrappedGrpc.IsGrpcWebRequest(r) || wrappedGrpc.IsAcceptableGrpcCorsRequest(r) {
 			// Check for JWT token in URL parameters and add to metadata
 			if token := r.URL.Query().Get("token"); token != "" {

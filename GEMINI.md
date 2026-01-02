@@ -53,8 +53,8 @@ make build-local           # Creates bin/weladee-form (27MB)
 
 # The binary contains:
 # - Complete Go gRPC backend
-# - Full Next.js React frontend
-# - All static assets (CSS, JS, images)
+- Full Next.js React frontend
+- All static assets (CSS, JS, images)
 
 # Run the embedded binary
 ./bin/weladee-form --database-url="postgresql://..."

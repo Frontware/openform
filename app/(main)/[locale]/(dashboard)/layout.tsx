@@ -1,18 +1,32 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { DashboardNav } from '@/components/dashboard/nav'
+'use client'
 
-export default async function DashboardLayout({
+import { DashboardNav } from '@/components/dashboard/nav'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [user, setUser] = useState<any>(null)
+  const router = useRouter()
 
-  if (!user) {
-    redirect('/login')
-  }
+  useEffect(() => {
+    const token = localStorage.getItem('weladee_token')
+    if (!token) {
+      // For now, redirect to landing if no token
+      // router.replace('/')
+    }
+    // Mock user
+    setUser({
+      email: 'eric.fairon@gmail.com',
+      user_metadata: {
+        full_name: 'Eric Fairon',
+        avatar_url: ''
+      }
+    })
+  }, [router])
 
   return (
     <div className="min-h-screen relative">
