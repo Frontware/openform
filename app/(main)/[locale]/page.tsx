@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { ArrowRight, Sparkles, Zap, Shield, Palette } from 'lucide-react'
 import { TokenHandler } from '@/components/auth/token-handler'
+import { AuthMessage } from '@/components/auth/auth-message'
 
 async function getUser() {
   // Authentication is now handled via URL token and client-side storage
@@ -15,11 +16,12 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
       <TokenHandler />
-      {/* Sophisticated Blue Gradient Background */}
+      <AuthMessage />
+      {/* Sophisticated Yellow Gradient Background */}
       <div
         className="absolute inset-0 z-0"
         style={{
-          background: "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37, 99, 235, 0.15) 0%, transparent 50%), radial-gradient(ellipse 60% 50% at 100% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%), radial-gradient(ellipse 60% 50% at 0% 80%, rgba(14, 165, 233, 0.06) 0%, transparent 50%), linear-gradient(to bottom, #ffffff 0%, #f8faff 100%)",
+          background: "linear-gradient(#fdcc52, #fdc539)",
         }}
       />
       
@@ -27,7 +29,7 @@ export default async function HomePage() {
       <div 
         className="absolute inset-0 z-0 opacity-[0.015]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232563eb' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2313a89e' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
       
@@ -45,7 +47,7 @@ export default async function HomePage() {
           <Logo href="/" />
           <div className="flex items-center gap-4">
             <Link href="/dashboard">
-              <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
+              <Button className="bg-[#13a89e] hover:bg-[#0f8a82] shadow-lg shadow-[#13a89e]/20 transition-all hover:shadow-[#13a89e]/30 hover:-translate-y-0.5">
                 Dashboard
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
@@ -57,14 +59,14 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative z-10 pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-8 border border-blue-100">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-50 text-[#13a89e] text-sm font-medium mb-8 border border-teal-100">
             <Sparkles className="w-4 h-4" />
             Free & Open Source
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-slate-900 leading-tight mb-6 tracking-tight">
             Forms that feel{' '}
-            <span className="text-blue-600">
+            <span className="text-[#13a89e]">
               human
             </span>
           </h1>
@@ -76,7 +78,7 @@ export default async function HomePage() {
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/dashboard">
-              <Button size="lg" className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/25 transition-all hover:shadow-blue-600/35 hover:-translate-y-0.5">
+              <Button size="lg" className="h-14 px-8 text-lg bg-[#13a89e] hover:bg-[#0f8a82] shadow-xl shadow-[#13a89e]/25 transition-all hover:shadow-[#13a89e]/35 hover:-translate-y-0.5">
                 Start creating
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
@@ -107,10 +109,10 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="aspect-video bg-gradient-to-br from-blue-600 via-blue-500 to-sky-500 flex items-center justify-center relative overflow-hidden">
+            <div className="aspect-video bg-gradient-to-br from-[#13a89e] via-[#16c2b1] to-teal-400 flex items-center justify-center relative overflow-hidden">
               {/* Decorative circles */}
               <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-              <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl"></div>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 max-w-lg text-center border border-white/20">
                 <h3 className="text-3xl font-bold text-white mb-4">What&apos;s your name?</h3>
@@ -140,9 +142,9 @@ export default async function HomePage() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-white border border-blue-100/60 hover:shadow-lg hover:shadow-blue-100/50 transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
-                <Zap className="w-6 h-6 text-blue-600" />
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-teal-50 to-white border border-teal-100/60 hover:shadow-lg hover:shadow-teal-100/50 transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center mb-4">
+                <Zap className="w-6 h-6 text-[#13a89e]" />
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-2">One at a Time</h3>
               <p className="text-slate-600">
@@ -152,7 +154,7 @@ export default async function HomePage() {
             
             <div className="p-6 rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100/60 hover:shadow-lg hover:shadow-sky-100/50 transition-all duration-300">
               <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center mb-4">
-                <Palette className="w-6 h-6 text-sky-600" />
+                <Palette className="w-6 h-6 text-[#13a89e]" />
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-2">Beautiful Themes</h3>
               <p className="text-slate-600">
@@ -193,7 +195,7 @@ export default async function HomePage() {
             ].map((type) => (
               <span
                 key={type}
-                className="px-4 py-2 bg-white rounded-full border border-slate-200 text-slate-700 text-sm font-medium shadow-sm hover:border-blue-200 hover:bg-blue-50 transition-colors cursor-default"
+                className="px-4 py-2 bg-white rounded-full border border-slate-200 text-slate-700 text-sm font-medium shadow-sm hover:border-teal-200 hover:bg-teal-50 transition-colors cursor-default"
               >
                 {type}
               </span>
@@ -205,10 +207,10 @@ export default async function HomePage() {
       {/* CTA */}
       <section className="relative z-10 py-20 px-6 bg-white">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-gradient-to-br from-blue-600 via-blue-600 to-sky-500 rounded-3xl p-12 md:p-16 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#13a89e] via-[#16c2b1] to-teal-400 rounded-3xl p-12 md:p-16 text-white relative overflow-hidden">
             {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-sky-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
             
             <h2 className="text-3xl md:text-4xl font-bold mb-4 relative">
               Ready to create your first form?
@@ -217,7 +219,7 @@ export default async function HomePage() {
               Join thousands of people using Weladee Form to collect responses.
             </p>
             <Link href="/login">
-              <Button size="lg" className="h-14 px-8 text-lg bg-white text-blue-600 hover:bg-blue-50 shadow-xl shadow-blue-900/20 relative transition-all hover:-translate-y-0.5">
+              <Button size="lg" className="h-14 px-8 text-lg bg-white text-[#13a89e] hover:bg-teal-50 shadow-xl shadow-teal-900/20 relative transition-all hover:-translate-y-0.5">
                 Get started for free
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>

@@ -22,7 +22,79 @@ type FormServerImpl struct {
 	pb.UnimplementedFormServiceServer
 	db      *db.Database
 	storage *storage.S3Storage // not used here, but kept for consistency
+	mockMode bool              // if true, use mock data instead of database
 }
+
+// Mock data for testing without database
+var (
+	mockFormID1 = uuid.MustParse("00000000-0000-0000-0000-000000000001")
+	mockFormID2 = uuid.MustParse("00000000-0000-0000-0000-000000000002")
+	mockQuestionID1 = uuid.MustParse("00000000-0000-0000-0000-000000000011")
+	mockQuestionID2 = uuid.MustParse("00000000-0000-0000-0000-000000000012")
+
+	mockForms = map[uuid.UUID]*pb.Form{
+		mockFormID1: {
+			Id:                     mockFormID1.String(),
+			UserId:                 "1", // Test user ID
+			Title:                  "Customer Feedback Survey",
+			Description:            "Help us improve our services",
+			Theme:                  pb.FormTheme_FORM_THEME_MINIMAL,
+			IsPublished:            true,
+			IsAcceptingResponses:   true,
+			RequireLogin:           false,
+			AllowMultipleSubmissions: false,
+			ShowProgressBar:        true,
+			CustomThankYouMessage:  "Thank you for your feedback!",
+			Settings:               &structpb.Struct{},
+			Questions: []*pb.Question{
+				{
+					Id:          mockQuestionID1.String(),
+					FormId:      mockFormID1.String(),
+					Type:        pb.QuestionType_QUESTION_TYPE_SHORT_TEXT,
+					Label:       "What is your name?",
+					Required:    true,
+					OrderIndex:  0,
+					Options:    &structpb.Struct{},
+					ValidationRules: &structpb.Struct{},
+					Settings:   &structpb.Struct{},
+					CreatedAt:  timestamppb.Now(),
+					UpdatedAt:  timestamppb.Now(),
+				},
+				{
+					Id:          mockQuestionID2.String(),
+					FormId:      mockFormID1.String(),
+					Type:        pb.QuestionType_QUESTION_TYPE_LONG_TEXT,
+					Label:       "How can we improve?",
+					Required:    false,
+					OrderIndex:  1,
+					Options:    &structpb.Struct{},
+					ValidationRules: &structpb.Struct{},
+					Settings:   &structpb.Struct{},
+					CreatedAt:  timestamppb.Now(),
+					UpdatedAt:  timestamppb.Now(),
+				},
+			},
+			CreatedAt: timestamppb.Now(),
+			UpdatedAt: timestamppb.Now(),
+		},
+		mockFormID2: {
+			Id:                     mockFormID2.String(),
+			UserId:                 "1",
+			Title:                  "Event Registration",
+			Description:            "Register for our upcoming event",
+			Theme:                  pb.FormTheme_FORM_THEME_OCEAN,
+			IsPublished:            true,
+			IsAcceptingResponses:   true,
+			RequireLogin:           false,
+			AllowMultipleSubmissions: false,
+			ShowProgressBar:        true,
+			Settings:               &structpb.Struct{},
+			Questions:              []*pb.Question{},
+			CreatedAt:              timestamppb.Now(),
+			UpdatedAt:              timestamppb.Now(),
+		},
+	}
+)
 
 // Helper: get authenticated user and ensure form user record exists
 func (s *FormServerImpl) getAuthenticatedFormUser(ctx context.Context) (sqlc.FormUser, error) {
@@ -217,6 +289,14 @@ func (s *FormServerImpl) GetForm(ctx context.Context, req *pb.GetFormRequest) (*
 		return nil, status.Errorf(codes.InvalidArgument, "invalid form ID")
 	}
 
+	// Mock mode: return mock data
+	if s.mockMode {
+		if form, ok := mockForms[formID]; ok {
+			return &pb.GetFormResponse{Form: form}, nil
+		}
+		return nil, status.Errorf(codes.NotFound, "form not found")
+	}
+
 	form, err := s.db.Queries.GetForm(ctx, formID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "form not found")
@@ -323,6 +403,31 @@ func (s *FormServerImpl) DeleteForm(ctx context.Context, req *pb.DeleteFormReque
 }
 
 func (s *FormServerImpl) ListForms(ctx context.Context, req *pb.ListFormsRequest) (*pb.ListFormsResponse, error) {
+	_, err := auth.GetUserClaims(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "authentication required: %v", err)
+	}
+
+	// Mock mode: return mock data
+	if s.mockMode {
+		var formList []*pb.Form
+		for _, form := range mockForms {
+			// Only return forms for authenticated user (user ID "1" for TEST_TOKEN)
+			formList = append(formList, form)
+		}
+
+		return &pb.ListFormsResponse{
+			Forms: formList,
+			Pagination: &pb.PaginationResponse{
+				Total:      int32(len(formList)),
+				Page:       1,
+				PageSize:   20,
+				TotalPages: 1,
+			},
+		}, nil
+	}
+
+	// Original database code
 	user, err := s.getAuthenticatedFormUser(ctx)
 	if err != nil {
 		return nil, err

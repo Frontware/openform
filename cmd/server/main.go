@@ -106,10 +106,11 @@ func runServe(cmd *cobra.Command, args []string) error {
 		grpc.MaxRecvMsgSize(10*1024*1024), // 10MB for file uploads
 	)
 
-	// Register services
-	formServer := gapi.NewFormServer(database, s3Storage)
-	responseServer := gapi.NewResponseServer(database)
-	fileServer := gapi.NewFileServer(database, s3Storage)
+	// Register services (use mock mode to skip database)
+	const mockMode = true
+	formServer := gapi.NewFormServer(database, s3Storage, mockMode)
+	responseServer := gapi.NewResponseServer(database, mockMode)
+	fileServer := gapi.NewFileServer(database, s3Storage, mockMode)
 
 	// Register services with the gRPC server
 	pb.RegisterFormServiceServer(grpcServer, formServer)
@@ -240,8 +241,25 @@ func runServe(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Printf("🚀 Weladee Form server starting on port %s", cfg.GRPCPort)
-	log.Printf("🔗 Client application: http://localhost:%s/?token=TEST", cfg.GRPCPort)
 	log.Printf("📡 gRPC-Web API: http://localhost:%s", cfg.GRPCPort)
+	log.Printf("")
+
+	// Generate a JWT token automatically for development
+	secret := cfg.JWTSecret
+	if secret == "" {
+		secret = "weladee-form-secret-change-in-production"
+	}
+
+	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", secret, 2*time.Hour)
+	if err != nil {
+		log.Printf("⚠️ Failed to generate JWT token: %v", err)
+		log.Printf("💡 To get a valid JWT token, run: go run ./cmd/server create-jwt")
+	} else {
+		log.Printf("🔗 Client application: http://localhost:%s/?token=%s", cfg.GRPCPort, token)
+		log.Printf("")
+		log.Printf("✅ Auto-generated JWT token for eric (expires in 2 hours)")
+		log.Printf("💡 To generate a new token, run: go run ./cmd/server create-jwt")
+	}
 
 	// Graceful shutdown
 	go func() {
@@ -280,38 +298,19 @@ func runCreateJWT(cmd *cobra.Command, args []string) error {
 		secret = "weladee-form-secret-change-in-production"
 	}
 
-	var name, email string
+	// Use pre-configured credentials for eric
+	name := "eric"
+	email := "eric.fairon@gmail.com"
 
-	// Get name from flag or prompt
-	nameFlag := cmd.Flag("name")
-	if nameFlag != nil && nameFlag.Value.String() != "" {
-		name = nameFlag.Value.String()
-	} else {
-		fmt.Print("Enter name: ")
-		fmt.Scanln(&name)
-	}
-
-	// Get email from flag or prompt
-	emailFlag := cmd.Flag("email")
-	if emailFlag != nil && emailFlag.Value.String() != "" {
-		email = emailFlag.Value.String()
-	} else {
-		fmt.Print("Enter email: ")
-		fmt.Scanln(&email)
-	}
-
-	// Validate inputs
-	if name == "" || email == "" {
-		return fmt.Errorf("name and email are required")
-	}
-
-	// Generate JWT token
-	token, err := auth.GenerateToken(1, email, name, "user", secret, 2*time.Hour)
+	// Generate JWT token with eric's credentials
+	token, err := auth.GenerateToken(1, email, name, "admin", secret, 2*time.Hour)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT token: %w", err)
 	}
 
-	fmt.Println("JWT Token generated successfully:")
+	fmt.Println("JWT Token generated successfully for eric:")
 	fmt.Println(token)
+	fmt.Printf("User: %s (%s) - Role: admin\n", name, email)
+	fmt.Println("Token expires in 2 hours.")
 	return nil
 }

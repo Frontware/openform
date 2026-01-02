@@ -10,22 +10,51 @@ export function TokenHandler() {
   useEffect(() => {
     const token = searchParams.get('token');
     if (token) {
-      // Store the token
-      localStorage.setItem('weladee_token', token);
-      
-      // Clean up the URL by removing the token
-      const newParams = new URLSearchParams(searchParams.toString());
-      newParams.delete('token');
-      
-      const newPath = newParams.toString() 
-        ? `${window.location.pathname}?${newParams.toString()}`
-        : window.location.pathname; // Redirect to dashboard if on home? 
-                                    // For now, just clean URL, but user might want auto-redirect.
-                                    // The prompt said "Redirect the user to /dashboard".
-      
-      router.replace('/dashboard');
+      // Validate the token before storing
+      validateToken(token)
+        .then(isValid => {
+          if (isValid) {
+            // Store the token
+            localStorage.setItem('weladee_token', token);
+            
+            // Clean up the URL by removing the token
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.delete('token');
+            
+            const newPath = newParams.toString() 
+              ? `${window.location.pathname}?${newParams.toString()}`
+              : window.location.pathname;
+            
+            router.replace('/dashboard');
+          } else {
+            // Redirect to error page if token is invalid
+            router.replace('/auth/error?error=invalid');
+          }
+        })
+        .catch(() => {
+          // Redirect to error page if validation fails
+          router.replace('/auth/error?error=server');
+        });
     }
   }, [searchParams, router]);
 
   return null;
+}
+
+async function validateToken(token: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/validate-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    const result = await response.json();
+    return result.valid;
+  } catch (error) {
+    console.error('Token validation error:', error);
+    return false;
+  }
 }

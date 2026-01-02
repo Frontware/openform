@@ -49,7 +49,7 @@ export const themes: Record<ThemePreset, ThemeConfig> = {
   weladee: {
     id: 'weladee',
     name: 'Weladee',
-    primaryColor: '#1ABC9C',
+    primaryColor: '#13a89e',
     backgroundColor: '#FFFFFF',
     textColor: '#2C3E50',
     accentColor: '#E74C3C',
