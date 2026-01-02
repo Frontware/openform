@@ -62,10 +62,35 @@ cd weladee-form
 
 ### 2. Set up Database
 
-Create a PostgreSQL database and run the schema migration:
+**Option A: Using Makefile (recommended)**
+
+```bash
+# Set DATABASE_URL or update config.yaml first
+export DATABASE_URL="postgresql://user:password@host:5432/dbname"
+
+# Run the schema
+make db-setup
+```
+
+**Option B: Using psql directly**
 
 ```bash
 psql -d your_database -f sql/schema/form_schema.sql
+```
+
+**Option C: Using Docker (local development)**
+
+```bash
+# Start PostgreSQL
+docker run --name weladee-postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_DB=weladee_form \
+  -p 5432:5432 \
+  -d postgres:16
+
+# Run the schema
+docker exec -i weladee-postgres psql -U postgres -d weladee_form < sql/schema/form_schema.sql
 ```
 
 The schema creates the `form` schema with the following tables:
