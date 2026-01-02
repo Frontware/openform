@@ -10,10 +10,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	"github.com/weladee/weladee-form/config"
 	"github.com/weladee/weladee-form/internal/auth"
 	"github.com/weladee/weladee-form/internal/db"
 	"github.com/weladee/weladee-form/internal/gapi"
@@ -21,53 +24,16 @@ import (
 	pb "github.com/weladee/weladee-form/proto/pb"
 )
 
-type Config struct {
-	GRPCPort    string
-	DatabaseURL string
-	RedisURL    string
-	RedisPrefix string
-
-	// S3 Configuration
-	S3Region     string
-	S3Bucket     string
-	S3AccessKey  string
-	S3SecretKey  string
-	S3Endpoint   string
-}
-
-func loadConfig() *Config {
-	return &Config{
-		GRPCPort:     getEnv("GRPC_PORT", "50051"),
-		DatabaseURL:  getEnv("DATABASE_URL", ""),
-		RedisURL:     getEnv("REDIS_URL", "redis://localhost:6379"),
-		RedisPrefix:  getEnv("REDIS_KEY_PREFIX", "weladee:auth:token"),
-		S3Region:     getEnv("S3_REGION", "auto"),
-		S3Bucket:     getEnv("S3_BUCKET", ""),
-		S3AccessKey:  getEnv("S3_ACCESS_KEY", ""),
-		S3SecretKey:  getEnv("S3_SECRET_KEY", ""),
-		S3Endpoint:   getEnv("S3_ENDPOINT", ""),
-	}
-}
-
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
-
-func main() {
-	cfg := loadConfig()
-
-	// Validate required environment variables
-	if cfg.DatabaseURL == "" {
-		log.Fatal("DATABASE_URL environment variable is required")
+func runServer(cmd *cobra.Command, args []string) error {
+	cfg, err := config.LoadConfig(cmd)
+	if err != nil {
+		return fmt.Errorf("failed to load configuration: %w", err)
 	}
 
 	// Connect to PostgreSQL
 	dbPool, err := pgxpool.New(context.Background(), cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 	defer dbPool.Close()
 
@@ -77,7 +43,7 @@ func main() {
 	// Connect to Redis
 	tokenValidator, err := auth.NewRedisTokenValidator(cfg.RedisURL, cfg.RedisPrefix)
 	if err != nil {
-		log.Fatalf("Failed to setup Redis: %v", err)
+		return fmt.Errorf("failed to setup Redis: %w", err)
 	}
 	defer tokenValidator.Close()
 	log.Println("✓ Connected to Redis")
@@ -93,7 +59,7 @@ func main() {
 			Endpoint:  cfg.S3Endpoint,
 		})
 		if err != nil {
-			log.Fatalf("Failed to setup S3 storage: %v", err)
+			return fmt.Errorf("failed to setup S3 storage: %w", err)
 		}
 		log.Println("✓ Connected to S3")
 	} else {
@@ -127,7 +93,7 @@ func main() {
 	// Start server
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		return fmt.Errorf("failed to listen: %w", err)
 	}
 
 	log.Printf("🚀 Weladee Form gRPC server starting on port %s", cfg.GRPCPort)
@@ -135,7 +101,7 @@ func main() {
 	// Graceful shutdown
 	go func() {
 		if err := grpcServer.Serve(listener); err != nil {
-			log.Fatalf("Failed to serve: %v", err)
+			log.Printf("Failed to serve: %v", err)
 		}
 	}()
 
@@ -158,4 +124,22 @@ func main() {
 	}
 
 	log.Println("✓ Server stopped")
+	return nil
+}
+
+func main() {
+	var rootCmd = &cobra.Command{
+		Use:   "weladee-form",
+		Short: "Weladee Form - A beautiful, open-source TypeForm alternative",
+		Long: `Weladee Form is a beautiful, open-source TypeForm alternative built with Next.js.
+It allows users to create engaging forms with a one-question-at-a-time experience.`,
+		RunE: runServer,
+	}
+
+	// Add configuration flags
+	config.AddFlags(rootCmd)
+
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatalf("Failed to execute command: %v", err)
+	}
 }

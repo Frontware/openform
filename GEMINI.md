@@ -47,6 +47,49 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 - Supabase project (configured with `schema.sql`)
 - `.env.local` file with Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 
+### Backend Configuration
+
+The backend supports three configuration methods with the following priority:
+
+1. **Command line flags** (highest priority)
+2. **Environment variables**
+3. **config.yaml file** (lowest priority)
+
+#### Configuration Options
+
+| Option | Flag | Environment Variable | Default | Description |
+|--------|------|---------------------|---------|-------------|
+| gRPC Port | `-p, --grpc-port` | `GRPC_PORT` | `50051` | gRPC server port |
+| Database URL | `-d, --database-url` | `DATABASE_URL` | - | PostgreSQL connection URL (required) |
+| Redis URL | `-r, --redis-url` | `REDIS_URL` | `redis://localhost:6379` | Redis server URL |
+| Redis Prefix | `--redis-prefix` | `REDIS_KEY_PREFIX` | `weladee:auth:token` | Redis key prefix |
+| S3 Region | `--s3-region` | `S3_REGION` | `auto` | S3 region |
+| S3 Bucket | `--s3-bucket` | `S3_BUCKET` | - | S3 bucket name |
+| S3 Access Key | `--s3-access-key` | `S3_ACCESS_KEY` | - | S3 access key |
+| S3 Secret Key | `--s3-secret-key` | `S3_SECRET_KEY` | - | S3 secret key |
+| S3 Endpoint | `--s3-endpoint` | `S3_ENDPOINT` | - | S3 endpoint URL |
+
+#### Usage Examples
+
+**Command Line:**
+```bash
+./weladee-form --database-url="postgresql://user:pass@localhost/db" --grpc-port=8080
+```
+
+**Environment Variables:**
+```bash
+export DATABASE_URL="postgresql://user:pass@localhost/db"
+export GRPC_PORT="8080"
+./weladee-form
+```
+
+**Configuration File:**
+```yaml
+grpc_port: "8080"
+database_url: "postgresql://user:pass@localhost/db"
+redis_url: "redis://localhost:6379"
+```
+
 ### Commands
 - **Install Dependencies:** `npm install`
 - **Development Server:** `npm run dev` (Runs on http://localhost:3000)

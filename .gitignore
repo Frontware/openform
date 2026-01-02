@@ -35,9 +35,20 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# config files
+config.yaml
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/server
+
+# Go build artifacts
+bin/
+/weladee-form
+coverage.out
+coverage.html
+*.prof

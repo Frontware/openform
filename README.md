@@ -69,7 +69,67 @@ cd weladee-form
 
 ### 3. Configure Environment
 
-Configure your environment variables for Database, S3, and Auth.
+Weladee Form supports three methods for configuration, in order of priority:
+
+#### Priority Order
+1. **Command line flags** (highest priority)
+2. **Environment variables**
+3. **config.yaml file** (lowest priority)
+
+#### Method 1: Command Line Flags
+```bash
+# Using long flags
+./weladee-form --database-url="postgresql://user:pass@localhost/db" --grpc-port=8080
+
+# Using short flags
+./weladee-form -d "postgresql://user:pass@localhost/db" -p 8080
+```
+
+Available flags:
+- `-p, --grpc-port`: gRPC server port (default: 50051)
+- `-d, --database-url`: PostgreSQL database URL (required)
+- `-r, --redis-url`: Redis server URL (default: redis://localhost:6379)
+- `--redis-prefix`: Redis key prefix (default: weladee:auth:token)
+- `--s3-region`: S3 region (default: auto)
+- `--s3-bucket`: S3 bucket name
+- `--s3-access-key`: S3 access key
+- `--s3-secret-key`: S3 secret key
+- `--s3-endpoint`: S3 endpoint URL
+
+#### Method 2: Environment Variables
+```bash
+export DATABASE_URL="postgresql://user:pass@localhost/db"
+export GRPC_PORT="50051"
+export REDIS_URL="redis://localhost:6379"
+# ... other variables
+
+./weladee-form
+```
+
+#### Method 3: Configuration File
+Copy `config.example.yaml` to `config.yaml` and modify the values:
+
+```bash
+cp config.example.yaml config.yaml
+# Edit config.yaml with your values
+```
+
+Example `config.yaml`:
+```yaml
+grpc_port: "50051"
+database_url: "postgresql://user:pass@localhost/db"
+redis_url: "redis://localhost:6379"
+redis_prefix: "weladee:auth:token"
+
+# Optional S3 configuration
+s3_region: "auto"
+s3_bucket: "your-bucket"
+s3_access_key: "your-key"
+s3_secret_key: "your-secret"
+s3_endpoint: "https://your-endpoint.com"
+```
+
+**Note:** The application will automatically load `config.yaml` from the current directory or `./config/` directory if it exists.
 
 ### 4. Run the application
 

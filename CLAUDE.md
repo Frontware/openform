@@ -13,6 +13,56 @@ OpenForm is an open-source TypeForm alternative built with Next.js 16 (App Route
 - **Themes** - 6 preset themes: midnight, ocean, sunset, forest, lavender, minimal (lib/themes.ts)
 - **Authentication** - Supabase Auth (Google OAuth + Magic Link)
 
+## Backend Configuration
+
+The Go backend supports three configuration methods with the following priority:
+
+1. **Command line flags** (highest priority)
+2. **Environment variables**
+3. **config.yaml file** (lowest priority)
+
+### Configuration Options
+
+| Setting | CLI Flag | Environment Variable | Default | Required |
+|---------|----------|---------------------|---------|----------|
+| gRPC Port | `-p, --grpc-port` | `GRPC_PORT` | `50051` | No |
+| Database URL | `-d, --database-url` | `DATABASE_URL` | - | **Yes** |
+| Redis URL | `-r, --redis-url` | `REDIS_URL` | `redis://localhost:6379` | No |
+| Redis Prefix | `--redis-prefix` | `REDIS_KEY_PREFIX` | `weladee:auth:token` | No |
+| S3 Region | `--s3-region` | `S3_REGION` | `auto` | No |
+| S3 Bucket | `--s3-bucket` | `S3_BUCKET` | - | No |
+| S3 Access Key | `--s3-access-key` | `S3_ACCESS_KEY` | - | No |
+| S3 Secret Key | `--s3-secret-key` | `S3_SECRET_KEY` | - | No |
+| S3 Endpoint | `--s3-endpoint` | `S3_ENDPOINT` | - | No |
+
+### Usage Examples
+
+**Command Line Flags:**
+```bash
+./weladee-form --database-url="postgresql://user:pass@localhost/db" --grpc-port=8080
+./weladee-form -d "postgresql://user:pass@localhost/db" -p 8080
+```
+
+**Environment Variables:**
+```bash
+export DATABASE_URL="postgresql://user:pass@localhost/db"
+export GRPC_PORT="8080"
+./weladee-form
+```
+
+**Configuration File:**
+```yaml
+grpc_port: "8080"
+database_url: "postgresql://user:pass@localhost/db"
+redis_url: "redis://localhost:6379"
+redis_prefix: "weladee:auth:token"
+s3_region: "auto"
+s3_bucket: "your-bucket"
+s3_access_key: "your-key"
+s3_secret_key: "your-secret"
+s3_endpoint: "https://your-endpoint.com"
+```
+
 ## Development Commands
 
 ```bash
