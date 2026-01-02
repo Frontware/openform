@@ -15,11 +15,15 @@ export function getToken(): string | null {
 export function setToken(token: string): void {
   if (typeof window === 'undefined') return
   localStorage.setItem(TOKEN_KEY, token)
+  // Also set cookie for middleware (server-side auth check)
+  document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=${2 * 60 * 60}` // 2 hours
 }
 
 export function clearToken(): void {
   if (typeof window === 'undefined') return
   localStorage.removeItem(TOKEN_KEY)
+  // Also clear cookie
+  document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`
 }
 
 export function isAuthenticated(): boolean {

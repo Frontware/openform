@@ -1,9 +1,9 @@
-import Link from 'next/link'
+import { AuthMessage } from '@/components/auth/auth-message'
+import { TokenHandler } from '@/components/auth/token-handler'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
-import { ArrowRight, Sparkles, Zap, Shield, Palette } from 'lucide-react'
-import { TokenHandler } from '@/components/auth/token-handler'
-import { AuthMessage } from '@/components/auth/auth-message'
+import { ArrowRight, Palette, Shield, Sparkles, Zap } from 'lucide-react'
+import Link from 'next/link'
 
 export default async function HomePage() {
 
@@ -55,7 +55,7 @@ export default async function HomePage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-50 text-[#13a89e] text-sm font-medium mb-8 border border-teal-100">
             <Sparkles className="w-4 h-4" />
-            Free & Open Source
+            Weladee: Your HRMS Solution
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-slate-900 leading-tight mb-6 tracking-tight">

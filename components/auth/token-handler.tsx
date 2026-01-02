@@ -14,17 +14,11 @@ export function TokenHandler() {
       validateToken(token)
         .then(isValid => {
           if (isValid) {
-            // Store the token
+            // Store the token in both localStorage and cookie
             localStorage.setItem('weladee_token', token);
-            
-            // Clean up the URL by removing the token
-            const newParams = new URLSearchParams(searchParams.toString());
-            newParams.delete('token');
-            
-            const newPath = newParams.toString() 
-              ? `${window.location.pathname}?${newParams.toString()}`
-              : window.location.pathname;
-            
+            document.cookie = `weladee_token=${token}; path=/; max-age=${2 * 60 * 60}`; // 2 hours
+
+            // Redirect to dashboard
             router.replace('/dashboard');
           } else {
             // Redirect to error page if token is invalid
