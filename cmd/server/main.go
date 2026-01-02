@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/spf13/cobra"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -41,19 +40,9 @@ func runServer(cmd *cobra.Command, args []string) error {
 	database := db.NewDatabase(dbPool)
 	log.Println("✓ Connected to PostgreSQL")
 
-	// Connect to Redis
-	tokenValidator, err := auth.NewRedisTokenValidator(cfg.RedisURL, cfg.RedisPrefix)
-	if err != nil {
-		return fmt.Errorf("failed to setup Redis: %w", err)
-	}
-	defer tokenValidator.Close()
-
-	// Create Redis client for auth service
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: cfg.RedisURL,
-	})
-	defer redisClient.Close()
-	log.Println("✓ Connected to Redis")
+	// Setup JWT token validator
+	tokenValidator := auth.NewJWTValidator(cfg.JWTSecret)
+	log.Println("✓ JWT token validator initialized")
 
 	// Setup S3 storage
 	var s3Storage *storage.S3Storage
@@ -87,26 +76,10 @@ func runServer(cmd *cobra.Command, args []string) error {
 	responseServer := gapi.NewResponseServer(database)
 	fileServer := gapi.NewFileServer(database, s3Storage)
 
-	// Create auth service configuration
-	authConfig := &gapi.Config{
-		GoogleClientID:     cfg.GoogleClientID,
-		GoogleClientSecret: cfg.GoogleClientSecret,
-		OAuthRedirectURL:   cfg.OAuthRedirectURL,
-		JWTSecret:          cfg.JWTSecret,
-		TokenPrefix:        cfg.RedisPrefix,
-		SMTPHost:           cfg.SMTPHost,
-		SMTPPort:           cfg.SMTPPort,
-		SMTPUsername:       cfg.SMTPUsername,
-		SMTPPassword:       cfg.SMTPPassword,
-		SMTPFrom:           cfg.SMTPFrom,
-	}
-	authServer := gapi.NewAuthService(database, redisClient, authConfig)
-
 	// Register services with the gRPC server
 	pb.RegisterFormServiceServer(grpcServer, formServer)
 	pb.RegisterResponseServiceServer(grpcServer, responseServer)
 	pb.RegisterFileServiceServer(grpcServer, fileServer)
-	pb.RegisterAuthServiceServer(grpcServer, authServer)
 
 	log.Println("✓ gRPC services registered")
 

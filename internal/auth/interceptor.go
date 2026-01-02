@@ -19,16 +19,16 @@ const (
 
 // AuthInterceptor provides authentication for gRPC methods
 type AuthInterceptor struct {
-	validator     *RedisTokenValidator
+	validator     *JWTValidator
 	publicMethods map[string]bool
 }
 
 // NewAuthInterceptor creates a new auth interceptor
-func NewAuthInterceptor(validator *RedisTokenValidator) *AuthInterceptor {
+func NewAuthInterceptor(validator *JWTValidator) *AuthInterceptor {
 	// Methods that don't require authentication
 	publicMethods := map[string]bool{
-		"/weladee.form.v1.FormService/GetFormBySlug":        true, // Public forms
-		"/weladee.form.v1.ResponseService/SubmitResponse":    true, // Allow anonymous responses
+		"/weladee.form.v1.FormService/GetFormBySlug":     true, // Public forms
+		"/weladee.form.v1.ResponseService/SubmitResponse": true, // Allow anonymous responses
 	}
 
 	return &AuthInterceptor{
@@ -111,7 +111,7 @@ func (i *AuthInterceptor) authenticate(ctx context.Context) (*WeladeeUserClaims,
 	}
 
 	token := strings.TrimPrefix(authHeader, "Bearer ")
-	return i.validator.ValidateToken(ctx, token)
+	return i.validator.ValidateToken(token)
 }
 
 // GetUserClaims extracts user claims from context
