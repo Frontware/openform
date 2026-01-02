@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+// import { createClient } from '@/lib/supabase/client' // TODO: Migrate to Go backend
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import {
@@ -13,9 +13,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { User } from '@supabase/supabase-js'
+// import { User } from '@supabase/supabase-js' // TODO: Migrate to Go backend
 import { LogOut, Settings, User as UserIcon } from 'lucide-react'
 import { toast } from 'sonner'
+
+// TODO: Replace with Go backend user type
+interface User {
+  id: string
+  email?: string
+  user_metadata?: {
+    avatar_url?: string
+    full_name?: string
+  }
+}
 
 interface DashboardNavProps {
   user: User | null
@@ -23,16 +33,17 @@ interface DashboardNavProps {
 
 export function DashboardNav({ user }: DashboardNavProps) {
   const router = useRouter()
-  const supabase = createClient()
+  // const supabase = createClient() // TODO: Migrate to Go backend
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      toast.error('Failed to sign out')
-    } else {
-      router.push('/')
-      router.refresh()
-    }
+    // TODO: Implement sign out with Go backend
+    // const { error } = await supabase.auth.signOut()
+    // if (error) {
+    //   toast.error('Failed to sign out')
+    // } else {
+    router.push('/')
+    router.refresh()
+    // }
   }
 
   const initials = user?.email?.slice(0, 2).toUpperCase() || 'U'
