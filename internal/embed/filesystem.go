@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-//go:embed all:out
+//go:embed all:dist
 var distFS embed.FS
 
 // FileSystem provides access to embedded static files
@@ -21,7 +21,7 @@ type FileSystem struct {
 
 // NewFileSystem creates a new embedded file system
 func NewFileSystem() *FileSystem {
-	root, err := fs.Sub(distFS, "out")
+	root, err := fs.Sub(distFS, "dist")
 	if err != nil {
 		panic(fmt.Sprintf("failed to create embedded filesystem: %v", err))
 	}
