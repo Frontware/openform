@@ -50,7 +50,9 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - Node.js 18+
 - Go 1.22+
 - PostgreSQL
-- S3-compatible storage (e.g., MinIO, AWS S3)
+- Redis (for session management)
+- SMTP server (for email authentication)
+- S3-compatible storage (optional, for file uploads)
 
 ### 1. Clone and install
 
@@ -90,6 +92,15 @@ Available flags:
 - `-d, --database-url`: PostgreSQL database URL (required)
 - `-r, --redis-url`: Redis server URL (default: redis://localhost:6379)
 - `--redis-prefix`: Redis key prefix (default: weladee:auth:token)
+- `--smtp-host`: SMTP server host (e.g., smtp.gmail.com)
+- `--smtp-port`: SMTP server port (default: 587)
+- `--smtp-username`: SMTP server username
+- `--smtp-password`: SMTP server password
+- `--smtp-from`: SMTP from email address
+- `--google-client-id`: Google OAuth client ID
+- `--google-client-secret`: Google OAuth client secret
+- `--oauth-redirect-url`: OAuth redirect URL
+- `--jwt-secret`: JWT secret key
 - `--s3-region`: S3 region (default: auto)
 - `--s3-bucket`: S3 bucket name
 - `--s3-access-key`: S3 access key
@@ -101,6 +112,15 @@ Available flags:
 export DATABASE_URL="postgresql://user:pass@localhost/db"
 export GRPC_PORT="50051"
 export REDIS_URL="redis://localhost:6379"
+export SMTP_HOST="smtp.gmail.com"
+export SMTP_PORT="587"
+export SMTP_USERNAME="your-email@gmail.com"
+export SMTP_PASSWORD="your-app-password"
+export SMTP_FROM="noreply@yourdomain.com"
+export GOOGLE_CLIENT_ID="your-google-client-id"
+export GOOGLE_CLIENT_SECRET="your-google-client-secret"
+export OAUTH_REDIRECT_URL="http://localhost:3000/auth/callback"
+export JWT_SECRET="your-jwt-secret-key"
 # ... other variables
 
 ./weladee-form
@@ -120,6 +140,19 @@ grpc_port: "50051"
 database_url: "postgresql://user:pass@localhost/db"
 redis_url: "redis://localhost:6379"
 redis_prefix: "weladee:auth:token"
+
+# SMTP configuration (required for email authentication)
+smtp_host: "smtp.gmail.com"
+smtp_port: "587"
+smtp_username: "your-email@gmail.com"
+smtp_password: "your-app-password"
+smtp_from: "noreply@yourdomain.com"
+
+# OAuth configuration (required for Google authentication)
+google_client_id: "your-google-client-id"
+google_client_secret: "your-google-client-secret"
+oauth_redirect_url: "http://localhost:3000/auth/callback"
+jwt_secret: "your-jwt-secret-key"
 
 # Optional S3 configuration
 s3_region: "auto"
