@@ -1,10 +1,18 @@
 import { routing } from '@/i18n/routing'
 import { ResponsesClient } from './ResponsesClient'
 
+// Mock form IDs for static export
+const MOCK_FORM_IDS = [
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000002',
+]
+
 export function generateStaticParams() {
   const paths: { locale: string; id: string }[] = []
   routing.locales.forEach((locale) => {
-    paths.push({ locale, id: 'id' })
+    MOCK_FORM_IDS.forEach((id) => {
+      paths.push({ locale, id })
+    })
   })
   return paths
 }

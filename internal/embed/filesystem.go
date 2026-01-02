@@ -90,36 +90,36 @@ func (fs *FileSystem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		indexInnerPath := filePath + "/index.html"
 		if filePath == "" { // Root directory
 			indexInnerPath = "index.html"
-		} else if strings.HasSuffix(filePath, "/") {
-			indexInnerPath = filePath + "index.html"
+		} else if !strings.HasSuffix(filePath, "/") {
+			indexInnerPath = filePath + "/index.html"
 		}
-		
+
 		if fIndex, errIndex := fs.root.Open(indexInnerPath); errIndex == nil {
 			fIndex.Close() // Close immediately, we just wanted to check existence
-			
+
 			// Re-open/serve the index file
 			f.Close() // Close the directory
-			
+
 			// Update filePath for content type detection
 			filePath = indexInnerPath
-			
+
 			f, err = fs.root.Open(filePath)
 			if err != nil {
 				fs.serveIndex(w, r)
 				return
 			}
 			defer f.Close()
-			
+
 			// Update stat
 			stat, _ = f.Stat()
 		} else {
 			// If index.html not found in directory, check if there is a .html file with same name as directory
 			// e.g. /en/dashboard/ -> exists as dir, but maybe we want /en/dashboard.html
 			// This logic handles the case where Next.js creates both a dir and an html file
-			
+			// Remove trailing slash before adding .html
 			dirName := strings.TrimSuffix(filePath, "/")
 			htmlPath := dirName + ".html"
-			
+
 			if fHtml, errHtml := fs.root.Open(htmlPath); errHtml == nil {
 				f.Close() // Close directory
 				f = fHtml

@@ -290,11 +290,14 @@ The database layer uses [SQLC](https://sqlc.dev/) for type-safe SQL queries:
 
 ### Authentication
 
-Authentication uses JWT token validation:
-- JWT tokens can be passed in Authorization header: `authorization: Bearer <token>`
-- JWT tokens can also be passed in URL parameters: `?token=<jwt_token>`
-- Auth interceptor validates JWT tokens directly using configured secret
-- User claims extracted and added to request context
+**Important:** This application has **NO** standalone login page. It is designed to be embedded or accessed from another application that provides a JWT token.
+
+- **Access:** A valid JWT token is mandatory to access the application. Accessing without a token will result in an error or a mandatory token page.
+- **Transport:**
+    - **URL:** Passed via the `?token=<jwt_token>` parameter for initial access.
+    - **gRPC:** Passed in the `Authorization: Bearer <token>` header for API calls.
+- **Validation:** The Go backend's auth interceptor validates the token on every request.
+- **Internal:** Uses JWT token validation. User claims are extracted and added to the request context.
 
 ## Development
 

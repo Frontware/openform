@@ -9,7 +9,20 @@ export interface WeladeeUser {
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null
-  return localStorage.getItem(TOKEN_KEY)
+  // First check localStorage
+  const localToken = localStorage.getItem(TOKEN_KEY)
+  if (localToken) return localToken
+
+  // If not in localStorage, check cookies
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === TOKEN_KEY && value) {
+      return value
+    }
+  }
+
+  return null
 }
 
 export function setToken(token: string): void {

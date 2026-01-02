@@ -184,9 +184,24 @@ func runServe(cmd *cobra.Command, args []string) error {
 			}
 			wrappedGrpc.ServeHTTP(w, r)
 		} else {
-			// Redirect root to default locale
+			// Redirect root to default locale, preserving token parameter
 			if r.URL.Path == "/" {
-				http.Redirect(w, r, "/en/", http.StatusFound)
+				// Preserve query parameters (like ?token=...)
+				targetURL := "/en/"
+				if r.URL.RawQuery != "" {
+					targetURL = "/en/?" + r.URL.RawQuery
+				}
+				http.Redirect(w, r, targetURL, http.StatusFound)
+				return
+			}
+
+			// Redirect bare locale paths (e.g., /en -> /en/, /fr -> /fr/), preserving token
+			if r.URL.Path == "/en" || r.URL.Path == "/fr" || r.URL.Path == "/th" {
+				targetURL := r.URL.Path + "/"
+				if r.URL.RawQuery != "" {
+					targetURL += "?" + r.URL.RawQuery
+				}
+				http.Redirect(w, r, targetURL, http.StatusFound)
 				return
 			}
 

@@ -64,12 +64,16 @@ The database layer uses SQLC for type-safe SQL queries:
 
 ### Authentication Flow
 
+**Important:** There is **NO** login page. The application must be accessed with a valid token.
+
 **JWT Token Validation**:
-1. JWT tokens can be passed in Authorization header: `authorization: Bearer <token>`
-2. JWT tokens can also be passed in URL parameters: `?token=<jwt_token>`
-3. Auth interceptor validates JWT tokens directly using configured secret
-4. User claims (UserID, Email, DisplayName) extracted and added to context
-5. Public endpoints (like GetFormBySlug, SubmitResponse for public forms) bypass auth
+1. **Mandatory Token:** A valid JWT token is required for all access.
+2. **Transport**:
+   - `Authorization` header: `Bearer <token>` (standard gRPC calls)
+   - URL parameter: `?token=<jwt_token>` (initial access/gRPC-Web)
+3. **Validation:** Auth interceptor (`internal/auth/interceptor.go`) validates tokens using the configured secret. Invalid tokens result in an error.
+4. **Context:** User claims (UserID, Email, DisplayName) are extracted and added to the context.
+5. **Public Endpoints:** Only specific public endpoints (like GetFormBySlug for answering forms) bypass auth.
 
 **Auth Files**:
 - `internal/auth/jwt.go` - JWT token validation
