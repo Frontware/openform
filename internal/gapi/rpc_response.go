@@ -295,6 +295,20 @@ func (s *ResponseServerImpl) GetResponse(ctx context.Context, req *pb.GetRespons
 	return &pb.GetResponseResponse{Response: pbResp}, nil
 }
 
+func (s *ResponseServerImpl) DeleteResponse(ctx context.Context, req *pb.DeleteResponseRequest) (*pb.DeleteResponseResponse, error) {
+	responseID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid response ID")
+	}
+
+	err = s.db.Queries.DeleteResponse(ctx, responseID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to delete response: %v", err)
+	}
+
+	return &pb.DeleteResponseResponse{Success: true}, nil
+}
+
 func (s *ResponseServerImpl) ListResponses(ctx context.Context, req *pb.ListResponsesRequest) (*pb.ListResponsesResponse, error) {
 	_, _, err := s.getFormForResponse(ctx, uuid.Nil, true) // require owner
 	if err != nil {

@@ -2,19 +2,21 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { Trash2, Loader2 } from 'lucide-react'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
+import { formClient } from '@/lib/grpc-client'
 
 interface DeleteFormButtonProps {
   formId: string
@@ -22,65 +24,66 @@ interface DeleteFormButtonProps {
 }
 
 export function DeleteFormButton({ formId, formTitle }: DeleteFormButtonProps) {
-  const [open, setOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const handleDelete = async () => {
     setIsDeleting(true)
-    const { error } = await supabase
-      .from('forms')
-      .delete()
-      .eq('id', formId)
-
-    if (error) {
-      toast.error('Failed to delete form')
-      setIsDeleting(false)
-    } else {
+    try {
+      await formClient.deleteForm({ id: formId })
       toast.success('Form deleted successfully')
       setOpen(false)
       router.refresh()
+    } catch (error) {
+      console.error('Delete error:', error)
+      toast.error('Failed to delete form')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
   return (
-    <>
-      <DropdownMenuItem
-        onClick={(e) => {
-          e.preventDefault()
-          setOpen(true)
-        }}
-        className="cursor-pointer text-red-600 focus:text-red-600"
-      >
-        <Trash2 className="mr-2 h-4 w-4" />
-        Delete
-      </DropdownMenuItem>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete form</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete &quot;{formTitle || 'Untitled Form'}&quot;? 
-              This action cannot be undone. All responses will also be deleted.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? 'Deleting...' : 'Delete form'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <DropdownMenuItem 
+          onSelect={(e) => e.preventDefault()}
+          className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete
+        </DropdownMenuItem>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete "{formTitle}" and all its responses.
+            This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault()
+              handleDelete()
+            }}
+            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              'Delete'
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

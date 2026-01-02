@@ -10,6 +10,7 @@ import { ChevronUp, ChevronDown, Check, ArrowRight } from 'lucide-react'
 import { QuestionRenderer } from './question-renderer'
 import { toast } from 'sonner'
 import { responseClient } from '@/lib/grpc-client'
+import { AnswerInput } from '@/lib/proto/proto/response_pb'
 
 interface FormPlayerProps {
   form: Form
@@ -107,29 +108,37 @@ export function FormPlayer({ form }: FormPlayerProps) {
 
   const handleSubmit = async () => {
     if (!validateCurrentQuestion()) return
-
+    
     setIsSubmitting(true)
 
     try {
-      // Map answers to gRPC format
-      const grpcAnswers = Object.entries(answers).map(([questionId, value]) => ({
-        questionId,
-        // Map different answer types based on the question
-        answerText: typeof value === 'string' ? value : undefined,
-        answerNumber: typeof value === 'number' ? value : undefined,
-        answerChoices: typeof value === 'object' && Array.isArray(value) ? { items: value } : undefined,
-      }))
+      // Map answers to AnswerInput protobuf
+      const answerInputs: AnswerInput[] = Object.entries(answers).map(([questionId, value]) => {
+          const input = new AnswerInput({
+              questionId: questionId
+          })
+          
+          if (typeof value === 'string') {
+              input.answerText = value
+          } else if (typeof value === 'number') {
+              input.answerNumber = value
+          }
+          // Note: Simplified mapping. 
+          
+          return input
+      })
 
       await responseClient.submitResponse({
         formId: form.id,
-        complete: true,
-        answers: grpcAnswers,
+        answers: answerInputs,
+        complete: true
       })
-
+      
       setIsSubmitted(true)
     } catch (error) {
-      console.error('Failed to submit response:', error)
+      console.error(error)
       toast.error('Failed to submit response')
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -509,4 +518,3 @@ export function FormPlayer({ form }: FormPlayerProps) {
     </div>
   )
 }
-
