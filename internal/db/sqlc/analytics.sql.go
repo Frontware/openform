@@ -12,6 +12,10 @@ import (
 )
 
 const incrementFormCompletions = `-- name: IncrementFormCompletions :exec
+/**
+ * Increment the total completions for a form on a given date
+ * @param {uuid} form_id - The ID of the form
+ */
 INSERT INTO form.analytics (form_id, date, total_completions)
 VALUES ($1::uuid, CURRENT_DATE, 1)
 ON CONFLICT (form_id, date)
@@ -24,6 +28,10 @@ func (q *Queries) IncrementFormCompletions(ctx context.Context, formID uuid.UUID
 }
 
 const incrementFormStarts = `-- name: IncrementFormStarts :exec
+/**
+ * Increment the total starts for a form on a given date
+ * @param {uuid} form_id - The ID of the form
+ */
 INSERT INTO form.analytics (form_id, date, total_starts)
 VALUES ($1::uuid, CURRENT_DATE, 1)
 ON CONFLICT (form_id, date)
@@ -36,6 +44,10 @@ func (q *Queries) IncrementFormStarts(ctx context.Context, formID uuid.UUID) err
 }
 
 const incrementFormViews = `-- name: IncrementFormViews :exec
+/**
+ * Increment the total views for a form on a given date
+ * @param {uuid} form_id - The ID of the form
+ */
 INSERT INTO form.analytics (form_id, date, total_views)
 VALUES ($1::uuid, CURRENT_DATE, 1)
 ON CONFLICT (form_id, date)

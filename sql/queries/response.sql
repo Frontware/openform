@@ -83,3 +83,8 @@ FROM form.responses r
 LEFT JOIN form.answers a ON r.id = a.response_id
 WHERE r.form_id = @form_id::uuid AND r.completed = true
 ORDER BY r.submitted_at DESC, a.question_id;
+
+-- name: CountFormResponses :one
+SELECT COUNT(*) as count
+FROM form.responses
+WHERE form_id = @form_id::uuid;

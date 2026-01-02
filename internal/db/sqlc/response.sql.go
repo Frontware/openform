@@ -43,6 +43,19 @@ func (q *Queries) CompleteResponse(ctx context.Context, id uuid.UUID) (FormRespo
 	return i, err
 }
 
+const countFormResponses = `-- name: CountFormResponses :one
+SELECT COUNT(*) as count
+FROM form.responses
+WHERE form_id = $1::uuid
+`
+
+func (q *Queries) CountFormResponses(ctx context.Context, formID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countFormResponses, formID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createAnswer = `-- name: CreateAnswer :one
 INSERT INTO form.answers (
     response_id, question_id, answer_text, answer_number,

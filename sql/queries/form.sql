@@ -90,3 +90,8 @@ GROUP BY f.id;
 -- name: GetQuestion :one
 SELECT * FROM form.questions
 WHERE id = @id::uuid;
+
+-- name: CountUserForms :one
+SELECT COUNT(*) as count
+FROM form.forms
+WHERE user_id = @user_id::uuid;

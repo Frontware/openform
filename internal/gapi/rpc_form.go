@@ -355,7 +355,12 @@ func (s *FormServerImpl) ListForms(ctx context.Context, req *pb.ListFormsRequest
 		pbForms = append(pbForms, pbF)
 	}
 
-	total := int32(1000) // TODO: implement count query
+	// Get total count for pagination
+	total64, err := s.db.Queries.CountUserForms(ctx, user.ID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to count forms: %v", err)
+	}
+	total := int32(total64)
 	pages := total / limit
 	if total%limit > 0 {
 		pages++

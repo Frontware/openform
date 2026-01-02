@@ -336,8 +336,12 @@ func (s *ResponseServerImpl) ListResponses(ctx context.Context, req *pb.ListResp
 		pbResponses = append(pbResponses, pbR)
 	}
 
-	// TODO: proper total count query
-	total := int32(1000)
+	// Get total count for pagination
+	total64, err := s.db.Queries.CountFormResponses(ctx, formID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to count responses: %v", err)
+	}
+	total := int32(total64)
 
 	return &pb.ListResponsesResponse{
 		Responses: pbResponses,

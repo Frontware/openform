@@ -12,6 +12,8 @@ import (
 
 type Querier interface {
 	CompleteResponse(ctx context.Context, id uuid.UUID) (FormResponse, error)
+	CountFormResponses(ctx context.Context, formID uuid.UUID) (int64, error)
+	CountUserForms(ctx context.Context, userID uuid.UUID) (int64, error)
 	CreateAnswer(ctx context.Context, arg CreateAnswerParams) (FormAnswer, error)
 	CreateFileUpload(ctx context.Context, arg CreateFileUploadParams) (uuid.UUID, error)
 	CreateForm(ctx context.Context, arg CreateFormParams) (FormForm, error)
