@@ -117,7 +117,6 @@ function formatFileSize(bytes: number): string {
 
 export function ResponsesDashboard({ form, responses: initialResponses }: ResponsesDashboardProps) {
   const router = useRouter()
-  // const supabase = createClient() // TODO: Migrate to Go backend
   const questions = (form.questions as QuestionConfig[]) || []
 
   const [responses, setResponses] = useState(initialResponses)
