@@ -161,8 +161,8 @@ Weladee Form supports building as a single binary that contains both the Go back
 
 ### How Embedded Builds Work
 
-1. **Next.js Build**: `npm run build` creates optimized static files in `dist/`
-2. **Go Embed**: Go's `//go:embed` directive bundles the `dist/` directory
+1. **Next.js Build**: `npm run build` creates optimized static files in `internal/embed/dist/`
+2. **Go Embed**: Go's `//go:embed` directive bundles the `internal/embed/dist/` directory
 3. **Single Binary**: Result is one executable containing everything
 
 ### Build Commands

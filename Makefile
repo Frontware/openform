@@ -4,7 +4,7 @@
 # Variables
 BINARY_NAME=weladee-form
 BINARY_DIR=bin
-MAIN_PATH=cmd/server/main.go
+MAIN_PATH=./cmd/server
 GO_MODULE=github.com/weladee/weladee-form
 BUILD_DIR=build
 DOCKER_IMAGE=weladee-form
@@ -65,29 +65,29 @@ build: clean build-linux build-windows build-darwin ## Build binaries for all pl
 build-linux: build-frontend ## Build for Linux with embedded client
 	@echo "Building for Linux..."
 	@mkdir -p $(BINARY_DIR)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -tags=embed -o $(BINARY_DIR)/$(BINARY_NAME)-linux $(MAIN_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-linux $(MAIN_PATH)
 
 .PHONY: build-windows
 build-windows: build-frontend ## Build for Windows with embedded client
 	@echo "Building for Windows..."
 	@mkdir -p $(BINARY_DIR)
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -tags=embed -o $(BINARY_DIR)/$(BINARY_NAME)-windows.exe $(MAIN_PATH)
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-windows.exe $(MAIN_PATH)
 
 .PHONY: build-darwin
 build-darwin: build-frontend ## Build for macOS with embedded client
 	@echo "Building for macOS..."
 	@mkdir -p $(BINARY_DIR)
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -tags=embed -o $(BINARY_DIR)/$(BINARY_NAME)-darwin $(MAIN_PATH)
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-darwin $(MAIN_PATH)
 
 .PHONY: build-local
 build-local: build-frontend ## Build for local development with embedded client
 	@echo "Building for local development..."
 	@mkdir -p $(BINARY_DIR)
-	$(GOBUILD) $(LDFLAGS) -tags=embed -o $(BINARY_DIR)/$(BINARY_NAME) $(MAIN_PATH)
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME) $(MAIN_PATH)
 
 .PHONY: build-dev
-build-dev: ## Build for local development without embedded client
-	@echo "Building for local development (no embedded client)..."
+build-dev: ## Build for local development
+	@echo "Building for local development..."
 	@mkdir -p $(BINARY_DIR)
 	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-dev $(MAIN_PATH)
 

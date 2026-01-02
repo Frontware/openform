@@ -16,7 +16,7 @@
 # next.js
 /.next/
 /out/
-/dist/
+/internal/embed/dist/
 
 # production
 /build

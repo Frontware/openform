@@ -1,10 +1,9 @@
-//go:build embed
-
 package embed
 
 import (
 	"embed"
 	"fmt"
+	"io"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -48,6 +47,30 @@ func (fs *FileSystem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Try to serve the file directly
 	f, err := fs.root.Open(filePath)
+	
+	// If file doesn't exist, try adding .html (for clean URLs like /en/dashboard)
+	if err != nil {
+		if !strings.HasSuffix(filePath, ".html") {
+			htmlPath := filePath + ".html"
+			if fHtml, errHtml := fs.root.Open(htmlPath); errHtml == nil {
+				f = fHtml
+				filePath = htmlPath
+				err = nil
+			} else {
+				// If still not found, try to find a parallel .html for a directory request
+				// e.g. /en/dashboard/ -> /en/dashboard.html
+				if strings.HasSuffix(filePath, "/") {
+					htmlPath := strings.TrimSuffix(filePath, "/") + ".html"
+					if fHtml, errHtml := fs.root.Open(htmlPath); errHtml == nil {
+						f = fHtml
+						filePath = htmlPath
+						err = nil
+					}
+				}
+			}
+		}
+	}
+
 	if err != nil {
 		// If file doesn't exist, serve index.html for SPA routing
 		fs.serveIndex(w, r)
@@ -63,9 +86,51 @@ func (fs *FileSystem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if stat.IsDir() {
-		// If directory, serve index.html for SPA routing
-		fs.serveIndex(w, r)
-		return
+		// If directory, look for index.html inside
+		indexInnerPath := filePath + "/index.html"
+		if filePath == "" { // Root directory
+			indexInnerPath = "index.html"
+		} else if strings.HasSuffix(filePath, "/") {
+			indexInnerPath = filePath + "index.html"
+		}
+		
+		if fIndex, errIndex := fs.root.Open(indexInnerPath); errIndex == nil {
+			fIndex.Close() // Close immediately, we just wanted to check existence
+			
+			// Re-open/serve the index file
+			f.Close() // Close the directory
+			
+			// Update filePath for content type detection
+			filePath = indexInnerPath
+			
+			f, err = fs.root.Open(filePath)
+			if err != nil {
+				fs.serveIndex(w, r)
+				return
+			}
+			defer f.Close()
+			
+			// Update stat
+			stat, _ = f.Stat()
+		} else {
+			// If index.html not found in directory, check if there is a .html file with same name as directory
+			// e.g. /en/dashboard/ -> exists as dir, but maybe we want /en/dashboard.html
+			// This logic handles the case where Next.js creates both a dir and an html file
+			
+			dirName := strings.TrimSuffix(filePath, "/")
+			htmlPath := dirName + ".html"
+			
+			if fHtml, errHtml := fs.root.Open(htmlPath); errHtml == nil {
+				f.Close() // Close directory
+				f = fHtml
+				filePath = htmlPath
+				stat, _ = f.Stat()
+			} else {
+				// If directory and no index or parallel html, serve root index.html
+				fs.serveIndex(w, r)
+				return
+			}
+		}
 	}
 
 	// Set appropriate content type based on file extension
@@ -75,7 +140,7 @@ func (fs *FileSystem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Copy file content to response
-	http.ServeFile(w, r, filePath)
+	http.ServeContent(w, r, filePath, stat.ModTime(), f.(io.ReadSeeker))
 }
 
 // serveIndex serves the index.html file for SPA routing
