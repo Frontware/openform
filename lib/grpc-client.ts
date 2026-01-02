@@ -16,8 +16,12 @@ const transport = createGrpcWebTransport({
     // Auth interceptor: Add token to all requests
     (next) => async (req) => {
       const token = getToken();
+      console.log('[gRPC Interceptor] Token for request:', token ? 'present' : 'MISSING!');
       if (token) {
         req.header.set("Authorization", `Bearer ${token}`);
+        console.log('[gRPC Interceptor] Authorization header set');
+      } else {
+        console.log('[gRPC Interceptor] WARNING: No token available!');
       }
       return await next(req);
     },

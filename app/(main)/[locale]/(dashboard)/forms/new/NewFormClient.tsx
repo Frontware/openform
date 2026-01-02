@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { formClient } from '@/lib/grpc-client'
 import { FormTheme } from '@/lib/proto/proto/form_pb'
+import { getToken } from '@/lib/auth/weladee'
 
 export function NewFormClient({ locale }: { locale: string }) {
   const router = useRouter()
@@ -15,7 +16,12 @@ export function NewFormClient({ locale }: { locale: string }) {
       if (creatingRef.current) return
       creatingRef.current = true
 
+      console.log('[NewFormClient] Starting form creation...')
+      const token = getToken()
+      console.log('[NewFormClient] Token for gRPC call:', token ? 'present' : 'MISSING!')
+
       try {
+        console.log('[NewFormClient] Calling formClient.createForm()...')
         const response = await formClient.createForm({
           title: 'Untitled Form',
           description: '',
@@ -24,14 +30,15 @@ export function NewFormClient({ locale }: { locale: string }) {
           settings: {},
         })
 
+        console.log('[NewFormClient] CreateForm success:', response.form?.id)
         if (response.form) {
           router.replace(`/${locale}/forms/${response.form.id}/edit`)
         } else {
-          console.error('No form returned from createForm')
+          console.error('[NewFormClient] No form returned from createForm')
           router.replace(`/${locale}/dashboard`)
         }
       } catch (error) {
-        console.error('Error creating form:', error)
+        console.error('[NewFormClient] Error creating form:', error)
         router.replace(`/${locale}/dashboard`)
       }
     }
