@@ -101,3 +101,10 @@ export async function exportResponses(formId: string, format: "csv" | "json" = "
     mimeType: response.mimeType,
   };
 }
+
+export async function deleteResponse(id: string): Promise<void> {
+  const request = new DeleteResponseRequest();
+  request.id = id;
+
+  await responseClient.deleteResponse(request);
+}

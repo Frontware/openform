@@ -221,7 +221,9 @@ func runServe(cmd *cobra.Command, args []string) error {
 				strings.HasPrefix(r.URL.Path, "/login") ||
 				strings.HasPrefix(r.URL.Path, "/en/") ||
 				strings.HasPrefix(r.URL.Path, "/fr/") ||
-				strings.HasPrefix(r.URL.Path, "/th/") {
+				strings.HasPrefix(r.URL.Path, "/th/") ||
+				r.URL.Path == "/weladee-logo.png" ||
+				r.URL.Path == "/favicon.ico" {
 				serveEmbeddedFiles(w, r)
 				return
 			}

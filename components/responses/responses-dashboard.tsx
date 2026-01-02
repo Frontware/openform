@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Form, Response, QuestionConfig, Json } from '@/lib/database.types'
 import { responseClient } from '@/lib/grpc-client'
-// import { createClient } from '@/lib/supabase/client' // TODO: Migrate to Go backend
+import { deleteResponse } from '@/lib/api/response'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -144,18 +144,14 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
     if (!responseToDelete) return
 
     setIsDeleting(true)
-    // TODO: Implement delete with Go backend
-    // const { error } = await supabase
-    //   .from('responses')
-    //   .delete()
-    //   .eq('id', responseToDelete)
-
-    // if (error) {
-    //   toast.error('Failed to delete response')
-    // } else {
-    setResponses(prev => prev.filter(r => r.id !== responseToDelete))
-    toast.success('Response deleted (TODO: Implement with Go backend)')
-    // }
+    try {
+      await deleteResponse(responseToDelete)
+      setResponses(prev => prev.filter(r => r.id !== responseToDelete))
+      toast.success('Response deleted')
+    } catch (error) {
+      console.error('Failed to delete response:', error)
+      toast.error('Failed to delete response')
+    }
     setIsDeleting(false)
     setDeleteDialogOpen(false)
     setResponseToDelete(null)
