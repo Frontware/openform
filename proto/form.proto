@@ -1,0 +1,238 @@
+syntax = "proto3";
+
+package weladee.form.v1;
+
+option go_package = "github.com/weladee/weladee-form/proto/pb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "proto/common.proto";
+
+// Enums
+enum FormStatus {
+  FORM_STATUS_UNSPECIFIED = 0;
+  FORM_STATUS_DRAFT = 1;
+  FORM_STATUS_PUBLISHED = 2;
+  FORM_STATUS_CLOSED = 3;
+}
+
+enum FormTheme {
+  FORM_THEME_UNSPECIFIED = 0;
+  FORM_THEME_MINIMAL = 1;
+  FORM_THEME_MIDNIGHT = 2;
+  FORM_THEME_OCEAN = 3;
+  FORM_THEME_SUNSET = 4;
+  FORM_THEME_FOREST = 5;
+  FORM_THEME_LAVENDER = 6;
+}
+
+enum QuestionType {
+  QUESTION_TYPE_UNSPECIFIED = 0;
+  QUESTION_TYPE_SHORT_TEXT = 1;
+  QUESTION_TYPE_LONG_TEXT = 2;
+  QUESTION_TYPE_DROPDOWN = 3;
+  QUESTION_TYPE_CHECKBOXES = 4;
+  QUESTION_TYPE_EMAIL = 5;
+  QUESTION_TYPE_PHONE = 6;
+  QUESTION_TYPE_NUMBER = 7;
+  QUESTION_TYPE_DATE = 8;
+  QUESTION_TYPE_RATING = 9;
+  QUESTION_TYPE_OPINION_SCALE = 10;
+  QUESTION_TYPE_YES_NO = 11;
+  QUESTION_TYPE_FILE_UPLOAD = 12;
+  QUESTION_TYPE_URL = 13;
+}
+
+// Messages
+message Question {
+  string id = 1;
+  string form_id = 2;
+  QuestionType type = 3;
+  string label = 4;
+  string description = 5;
+  string placeholder = 6;
+  bool required = 7;
+  int32 order_index = 8;
+  google.protobuf.Struct options = 9;
+  google.protobuf.Struct validation_rules = 10;
+  google.protobuf.Struct settings = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+}
+
+message Form {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  string description = 4;
+  FormTheme theme = 5;
+  bool is_published = 6;
+  bool is_accepting_responses = 7;
+  bool require_login = 8;
+  bool allow_multiple_submissions = 9;
+  bool show_progress_bar = 10;
+  string custom_thank_you_message = 11;
+  string redirect_url = 12;
+  google.protobuf.Struct settings = 13;
+  repeated Question questions = 14;
+  google.protobuf.Timestamp created_at = 15;
+  google.protobuf.Timestamp updated_at = 16;
+}
+
+message FormStats {
+  int64 total_responses = 1;
+  int64 completed_responses = 2;
+  int64 partial_responses = 3;
+}
+
+// RPC Requests/Responses
+message CreateFormRequest {
+  string title = 1;
+  string description = 2;
+  FormTheme theme = 3;
+  repeated Question questions = 4;
+  google.protobuf.Struct settings = 5;
+}
+
+message CreateFormResponse {
+  Form form = 1;
+}
+
+message GetFormRequest {
+  string id = 1;
+  bool include_questions = 2;
+}
+
+message GetFormResponse {
+  Form form = 1;
+}
+
+message GetFormBySlugRequest {
+  string slug = 1;
+}
+
+message GetFormBySlugResponse {
+  Form form = 1;
+}
+
+message UpdateFormRequest {
+  string id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional FormTheme theme = 4;
+  optional bool is_published = 5;
+  optional bool is_accepting_responses = 6;
+  optional bool require_login = 7;
+  optional bool allow_multiple_submissions = 8;
+  optional bool show_progress_bar = 9;
+  optional string custom_thank_you_message = 10;
+  optional string redirect_url = 11;
+  optional google.protobuf.Struct settings = 12;
+}
+
+message UpdateFormResponse {
+  Form form = 1;
+}
+
+message DeleteFormRequest {
+  string id = 1;
+}
+
+message DeleteFormResponse {
+  bool success = 1;
+}
+
+message ListFormsRequest {
+  PaginationRequest pagination = 1;
+  optional string search_query = 2;
+  optional bool published_only = 3;
+}
+
+message ListFormsResponse {
+  repeated Form forms = 1;
+  PaginationResponse pagination = 2;
+}
+
+message PublishFormRequest {
+  string id = 1;
+}
+
+message PublishFormResponse {
+  Form form = 1;
+}
+
+message GetFormStatsRequest {
+  string form_id = 1;
+}
+
+message GetFormStatsResponse {
+  FormStats stats = 1;
+}
+
+// Question RPCs
+message CreateQuestionRequest {
+  string form_id = 1;
+  QuestionType type = 2;
+  string label = 3;
+  string description = 4;
+  string placeholder = 5;
+  bool required = 6;
+  int32 order_index = 7;
+  google.protobuf.Struct options = 8;
+  google.protobuf.Struct validation_rules = 9;
+}
+
+message CreateQuestionResponse {
+  Question question = 1;
+}
+
+message UpdateQuestionRequest {
+  string id = 1;
+  optional QuestionType type = 2;
+  optional string label = 3;
+  optional string description = 4;
+  optional string placeholder = 5;
+  optional bool required = 6;
+  optional int32 order_index = 7;
+  optional google.protobuf.Struct options = 8;
+  optional google.protobuf.Struct validation_rules = 9;
+}
+
+message UpdateQuestionResponse {
+  Question question = 1;
+}
+
+message DeleteQuestionRequest {
+  string id = 1;
+}
+
+message DeleteQuestionResponse {
+  bool success = 1;
+}
+
+message ReorderQuestionsRequest {
+  string form_id = 1;
+  repeated string question_ids = 2;
+}
+
+message ReorderQuestionsResponse {
+  bool success = 1;
+}
+
+// Form Service
+service FormService {
+  rpc CreateForm(CreateFormRequest) returns (CreateFormResponse);
+  rpc GetForm(GetFormRequest) returns (GetFormResponse);
+  rpc GetFormBySlug(GetFormBySlugRequest) returns (GetFormBySlugResponse);
+  rpc UpdateForm(UpdateFormRequest) returns (UpdateFormResponse);
+  rpc DeleteForm(DeleteFormRequest) returns (DeleteFormResponse);
+  rpc ListForms(ListFormsRequest) returns (ListFormsResponse);
+  rpc PublishForm(PublishFormRequest) returns (PublishFormResponse);
+  rpc GetFormStats(GetFormStatsRequest) returns (GetFormStatsResponse);
+
+  // Question management
+  rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse);
+  rpc UpdateQuestion(UpdateQuestionRequest) returns (UpdateQuestionResponse);
+  rpc DeleteQuestion(DeleteQuestionRequest) returns (DeleteQuestionResponse);
+  rpc ReorderQuestions(ReorderQuestionsRequest) returns (ReorderQuestionsResponse);
+}

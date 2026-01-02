@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package weladee.form.v1;
+
+option go_package = "github.com/weladee/weladee-form/proto/pb";
+
+import "google/protobuf/timestamp.proto";
+
+// Messages
+message FileMetadata {
+  string form_id = 1;
+  string question_id = 2;
+  string response_id = 3;
+  string filename = 4;
+  string mime_type = 5;
+  int64 file_size = 6;
+}
+
+message UploadFileRequest {
+  oneof data {
+    FileMetadata metadata = 1;
+    bytes chunk = 2;
+  }
+}
+
+message UploadFileResponse {
+  string file_id = 1;
+  string file_url = 2;
+  string s3_key = 3;
+}
+
+message GetFileUrlRequest {
+  string file_id = 1;
+  optional int32 expires_in_seconds = 2;
+}
+
+message GetFileUrlResponse {
+  string url = 1;
+  google.protobuf.Timestamp expires_at = 2;
+}
+
+// File Service
+service FileService {
+  rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse);
+  rpc GetFileUrl(GetFileUrlRequest) returns (GetFileUrlResponse);
+}

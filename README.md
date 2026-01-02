@@ -2,7 +2,7 @@
 
 A beautiful, open-source TypeForm alternative. Create engaging forms with a one-question-at-a-time experience.
 
-![Weladee Form Logo](weladee-logo.png)
+![Weladee Form Logo](logo.png)
 
 ## Features
 
@@ -35,132 +35,75 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 ## Tech stack
 
 - **Framework**: Next.js 16 (App Router)
-- **Database**: Supabase (PostgreSQL)
-- **Auth**: Supabase Auth (Google OAuth + Magic Link)
+- **Backend**: Go (gRPC)
+- **Database**: PostgreSQL
+- **Auth**: Google OAuth + Magic Link
 - **i18n**: next-intl
 - **Styling**: Tailwind CSS 4 + shadcn/ui
 - **Animations**: Framer Motion
-- **File storage**: Cloudflare R2 (optional)
+- **File storage**: S3 (MinIO / AWS)
 
 ## Getting started
 
 ### Prerequisites
 
 - Node.js 18+
-- A Supabase account
-- (Optional) Cloudflare account for file uploads
+- Go 1.22+
+- PostgreSQL
+- S3-compatible storage (e.g., MinIO, AWS S3)
 
 ### 1. Clone and install
 
 ```bash
 git clone https://github.com/yourusername/weladee-form.git
 cd weladee-form
+```
+
+### 2. Set up Database
+
+1. Create a PostgreSQL database.
+2. Run the schema migration:
+   ```bash
+   psql -d your_database -f sql/schema/form_schema.sql
+   ```
+
+### 3. Configure Environment
+
+Configure your environment variables for Database, S3, and Auth.
+
+### 4. Run the application
+
+**Backend:**
+```bash
+go run cmd/server/main.go
+```
+
+**Frontend:**
+```bash
 npm install
-```
-
-### 2. Set up Supabase
-
-1. Create a new project at [supabase.com](https://supabase.com)
-
-2. Run the database schema in SQL Editor:
-   - Copy the contents of `supabase/schema.sql`
-   - Paste and run in Supabase SQL Editor
-
-3. Configure authentication:
-
-   **Enable Google OAuth:**
-   - Go to Authentication, then Providers, then Google
-   - Enable and add your Google OAuth credentials
-   - Get credentials from [Google Cloud Console](https://console.cloud.google.com)
-   - Set redirect URI: `https://YOUR_PROJECT.supabase.co/auth/v1/callback`
-
-   **Configure URLs:**
-   - Go to Authentication, then URL Configuration
-   - Site URL: `http://localhost:3000`
-   - Add redirect URL: `http://localhost:3000/auth/callback`
-
-4. Get your API keys:
-   - Go to Settings, then API
-   - Copy "Project URL" and "anon public" key
-
-### 3. Configure environment variables
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local` with your Supabase credentials:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
-
-### 4. Run the development server
-
-```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see your app.
-
-## File uploads (optional)
-
-To enable file uploads, configure Cloudflare R2:
-
-1. Create an R2 bucket in your Cloudflare dashboard
-2. Create an API token with R2 read/write permissions
-3. Add the credentials to `.env.local`:
-
-```env
-R2_ACCOUNT_ID=your-account-id
-R2_ACCESS_KEY_ID=your-access-key
-R2_SECRET_ACCESS_KEY=your-secret-key
-R2_BUCKET_NAME=weladee-form-uploads
-R2_PUBLIC_URL=https://your-bucket.r2.dev
-```
-
-## Deployment
-
-### Vercel (recommended)
-
-1. Push your code to GitHub
-2. Import the repository in Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy
-
-Remember to update your Supabase URL Configuration with your production URL.
 
 ## Project structure
 
 ```
 weladee-form/
 ├── app/
-│   ├── (auth)/           # Auth pages (login)
-│   ├── (dashboard)/      # Protected dashboard pages
-│   │   ├── dashboard/    # Forms list
-│   │   ├── forms/        # Form builder and responses
-│   │   └── settings/     # User settings
-│   ├── api/              # API routes
-│   ├── auth/             # Auth callback
-│   └── f/[slug]/         # Public form pages
-├── components/
-│   ├── dashboard/        # Dashboard components
-│   ├── form-builder/     # Form builder components
-│   ├── form-player/      # Form player components
-│   ├── responses/        # Response dashboard
-│   └── ui/               # shadcn/ui components
-├── lib/
-│   ├── supabase/         # Supabase clients
-│   ├── database.types.ts # TypeScript types
-│   ├── questions.ts      # Question type definitions
-│   └── themes.ts         # Theme configurations
-├── src/
-│   ├── i18n/             # i18n configuration
-│   └── messages/         # Translation files (en, th)
-└── supabase/
-    └── schema.sql        # Database schema
+│   ├── (main)/           # Main application routes (localized)
+│   ├── (form-player)/    # Public form player routes
+│   └── api/              # API routes
+├── cmd/                  # Go application entrypoints
+├── internal/             # Private application code
+├── sql/                  # SQL queries and schemas
+├── proto/                # gRPC protocol buffers
+├── components/           # React components
+├── lib/                  # Shared libraries
+├── i18n/                 # Internationalization config
+└── messages/             # Translation files
 ```
+
 ## License
 
 MIT License - feel free to use this for any project.

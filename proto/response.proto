@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package weladee.form.v1;
+
+option go_package = "github.com/weladee/weladee-form/proto/pb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "proto/common.proto";
+
+// Messages
+message Answer {
+  string id = 1;
+  string response_id = 2;
+  string question_id = 3;
+  optional string answer_text = 4;
+  optional double answer_number = 5;
+  optional string answer_date = 6;
+  optional string answer_time = 7;
+  optional google.protobuf.Struct answer_choices = 8;
+  optional string answer_file_url = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+message Response {
+  string id = 1;
+  string form_id = 2;
+  optional string respondent_user_id = 3;
+  optional string respondent_email = 4;
+  optional string respondent_name = 5;
+  bool completed = 7;
+  google.protobuf.Timestamp submitted_at = 8;
+  repeated Answer answers = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+message AnswerInput {
+  string question_id = 1;
+  optional string answer_text = 2;
+  optional double answer_number = 3;
+  optional string answer_date = 4;
+  optional string answer_time = 5;
+  optional google.protobuf.Struct answer_choices = 6;
+  optional string answer_file_url = 7;
+}
+
+// RPC Requests/Responses
+message SubmitResponseRequest {
+  string form_id = 1;
+  optional string respondent_email = 2;
+  optional string respondent_name = 3;
+  repeated AnswerInput answers = 4;
+  bool complete = 5;
+}
+
+message SubmitResponseResponse {
+  Response response = 1;
+}
+
+message GetResponseRequest {
+  string id = 1;
+}
+
+message GetResponseResponse {
+  Response response = 1;
+}
+
+message ListResponsesRequest {
+  string form_id = 1;
+  PaginationRequest pagination = 2;
+  optional bool completed_only = 3;
+}
+
+message ListResponsesResponse {
+  repeated Response responses = 1;
+  PaginationResponse pagination = 2;
+}
+
+message DeleteResponseRequest {
+  string id = 1;
+}
+
+message DeleteResponseResponse {
+  bool success = 1;
+}
+
+message ExportResponsesRequest {
+  string form_id = 1;
+  string format = 2;
+}
+
+message ExportResponsesResponse {
+  bytes data = 1;
+  string filename = 2;
+  string mime_type = 3;
+}
+
+// Response Service
+service ResponseService {
+  rpc SubmitResponse(SubmitResponseRequest) returns (SubmitResponseResponse);
+  rpc GetResponse(GetResponseRequest) returns (GetResponseResponse);
+  rpc ListResponses(ListResponsesRequest) returns (ListResponsesResponse);
+  rpc DeleteResponse(DeleteResponseRequest) returns (DeleteResponseResponse);
+  rpc ExportResponses(ExportResponsesRequest) returns (ExportResponsesResponse);
+}

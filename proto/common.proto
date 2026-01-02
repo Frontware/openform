@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package weladee.form.v1;
+
+option go_package = "github.com/weladee/weladee-form/proto/pb";
+
+// Pagination request
+message PaginationRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+// Pagination response
+message PaginationResponse {
+  int32 total = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  int32 total_pages = 4;
+}

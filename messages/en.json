@@ -1,11 +1,248 @@
 {
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "draft": "Draft",
+    "published": "Published",
+    "closed": "Closed",
+    "unsavedChanges": "Unsaved changes",
+    "or": "or",
+    "and": "and",
+    "required": "Required",
+    "optional": "Optional",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "forms": "My Forms",
-    "create": "Create Form"
+    "create": "Create Form",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "signIn": "Sign in",
+    "getStarted": "Get Started"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account",
+      "googleLogin": "Continue with Google",
+      "magicLink": "Sign in with email",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "sendMagicLink": "Send magic link",
+      "sending": "Sending...",
+      "checkEmail": "Check your email",
+      "magicLinkSent": "We've sent a magic link to",
+      "magicLinkInstructions": "Click the link in your email to sign in. You can close this tab.",
+      "differentEmail": "Use a different email",
+      "termsPrivacy": "By continuing, you agree to our Terms of Service and Privacy Policy",
+      "createAccount": "Don't have an account? Sign up",
+      "forgotPassword": "Forgot your password?"
+    }
+  },
+  "marketing": {
+    "home": {
+      "hero": {
+        "badge": "Free & Open Source",
+        "title": "Forms that feel",
+        "titleHighlight": "human",
+        "subtitle": "Create beautiful, engaging forms that people actually want to fill out. One question at a time, just like a conversation.",
+        "startFree": "Start creating for free",
+        "seeHow": "See how it works"
+      },
+      "features": {
+        "title": "Everything you need to create amazing forms",
+        "subtitle": "Powerful features that make form building a breeze",
+        "oneAtTime": {
+          "title": "One at a Time",
+          "description": "Questions appear one by one, creating a focused, distraction-free experience for respondents."
+        },
+        "beautifulThemes": {
+          "title": "Beautiful Themes",
+          "description": "Choose from stunning preset themes that make your forms look professional and on-brand."
+        },
+        "privacyFirst": {
+          "title": "Privacy First",
+          "description": "Your data stays yours. Export responses anytime, delete when you want."
+        }
+      },
+      "questionTypes": {
+        "title": "13 question types to choose from",
+        "subtitle": "From simple text to file uploads, we've got you covered",
+        "types": [
+          "Short Text", "Long Text", "Dropdown", "Checkboxes",
+          "Email", "Phone", "Number", "Date", "Rating", "Opinion Scale",
+          "Yes/No", "File Upload", "Website URL"
+        ]
+      },
+      "cta": {
+        "title": "Ready to create your first form?",
+        "subtitle": "Join thousands of people using Weladee Form to collect responses.",
+        "getStarted": "Get started for free"
+      },
+      "footer": {
+        "copyright": "© 2026 Weladee Form. Open source and free forever.",
+        "github": "GitHub",
+        "privacy": "Privacy",
+        "terms": "Terms"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "My Forms",
+    "subtitle": "Create and manage your forms",
+    "createFirst": {
+      "title": "Create your first form",
+      "description": "Build beautiful, engaging forms that people actually want to fill out. One question at a time.",
+      "button": "Create your first form"
+    },
+    "empty": {
+      "title": "No forms yet",
+      "description": "Create your first form to get started"
+    },
+    "actions": {
+      "edit": "Edit",
+      "view": "View form",
+      "responses": "Responses",
+      "copyLink": "Copy link",
+      "more": "More"
+    },
+    "status": {
+      "responses": "responses",
+      "updated": "Updated"
+    }
   },
   "form": {
     "title": "Form Title",
-    "submit": "Submit"
+    "untitled": "Untitled Form",
+    "description": "Description",
+    "descriptionPlaceholder": "Optional form description...",
+    "thankYouMessage": "Thank You Message",
+    "thankYouPlaceholder": "Thank you for your response!",
+    "url": "Form URL",
+    "urlPrefix": "/f/",
+    "urlPlaceholder": "my-form",
+    "settings": "Settings",
+    "design": "Design",
+    "questions": "Questions",
+    "addQuestion": "Add Question",
+    "addQuestionTitle": "Add Question",
+    "addQuestionDescription": "Choose a question type to add to your form",
+    "noQuestions": "No questions yet",
+    "noQuestionsDescription": "Add your first question to get started",
+    "editQuestion": "Edit Question",
+    "theme": "Theme",
+    "status": {
+      "published": "Published",
+      "draft": "Draft",
+      "closed": "Closed"
+    },
+    "actions": {
+      "save": "Save",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "copyLink": "Copy link",
+      "view": "View"
+    },
+    "publishDialog": {
+      "title": "Publish form?",
+      "titleUnpublish": "Unpublish form?",
+      "description": "Your form will be accessible at:",
+      "descriptionUnpublish": "This will make your form inaccessible to respondents. Existing responses will be kept.",
+      "cancel": "Cancel"
+    },
+    "questionTypes": {
+      "short_text": "Short Text",
+      "long_text": "Long Text",
+      "dropdown": "Dropdown",
+      "checkboxes": "Checkboxes",
+      "email": "Email",
+      "phone": "Phone",
+      "number": "Number",
+      "date": "Date",
+      "rating": "Rating",
+      "opinion_scale": "Opinion Scale",
+      "yes_no": "Yes/No",
+      "file_upload": "File Upload",
+      "url": "Website URL"
+    }
+  },
+  "formPlayer": {
+    "emptyForm": "This form has no questions yet.",
+    "submitting": "Submitting...",
+    "responseRecorded": "Your response has been recorded.",
+    "madeWith": "Made with",
+    "poweredBy": "Powered by",
+    "pressEnter": "press",
+    "validation": {
+      "required": "This field is required",
+      "selectAtLeastOne": "Please select at least one option",
+      "validEmail": "Please enter a valid email address",
+      "validUrl": "Please enter a valid URL",
+      "validPhone": "Please enter a valid phone number"
+    }
+  },
+  "responses": {
+    "title": "Responses",
+    "subtitle": "View and manage form responses",
+    "totalResponses": "Total responses",
+    "exportCsv": "Export CSV",
+    "noResponses": "No responses yet",
+    "searchPlaceholder": "Search responses...",
+    "filterPlaceholder": "Filter by date...",
+    "columns": "Columns",
+    "showAll": "Show all",
+    "hideAll": "Hide all"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account settings",
+    "account": "Account",
+    "emailLabel": "Email",
+    "emailCannotChange": "Your email cannot be changed",
+    "nameLabel": "Name",
+    "accountCreated": "Account created",
+    "profile": "Profile"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "validation": "Please check your input and try again.",
+    "saveFailed": "Failed to save. Please try again.",
+    "deleteFailed": "Failed to delete. Please try again.",
+    "loadFailed": "Failed to load data. Please refresh the page.",
+    "submitFailed": "Failed to submit response",
+    "signOutFailed": "Failed to sign out",
+    "publishFailed": "Failed to update form status"
+  },
+  "validation": {
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "nameRequired": "Name is required",
+    "formTitleRequired": "Form title is required",
+    "slugRequired": "Form URL is required",
+    "slugInvalid": "Form URL can only contain letters, numbers, and hyphens",
+    "questionRequired": "Please add at least one question",
+    "atLeastOneQuestion": "Add at least one question before publishing"
   }
 }

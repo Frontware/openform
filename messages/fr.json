@@ -1,11 +1,248 @@
 {
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "create": "Créer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "draft": "Brouillon",
+    "published": "Publié",
+    "closed": "Fermé",
+    "unsavedChanges": "Modifications non enregistrées",
+    "or": "ou",
+    "and": "et",
+    "required": "Obligatoire",
+    "optional": "Optionnel",
+    "name": "Nom",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK"
+  },
   "nav": {
     "dashboard": "Tableau de bord",
     "forms": "Mes formulaires",
-    "create": "Créer un formulaire"
+    "create": "Créer un formulaire",
+    "settings": "Paramètres",
+    "signOut": "Se déconnecter",
+    "signIn": "Se connecter",
+    "getStarted": "Commencer"
+  },
+  "auth": {
+    "login": {
+      "title": "Bon retour",
+      "subtitle": "Connectez-vous à votre compte",
+      "googleLogin": "Continuer avec Google",
+      "magicLink": "Se connecter avec e-mail",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "sendMagicLink": "Envoyer le lien magique",
+      "sending": "Envoi en cours...",
+      "checkEmail": "Vérifiez votre e-mail",
+      "magicLinkSent": "Nous avons envoyé un lien magique à",
+      "magicLinkInstructions": "Cliquez sur le lien dans votre e-mail pour vous connecter. Vous pouvez fermer cet onglet.",
+      "differentEmail": "Utiliser un autre e-mail",
+      "termsPrivacy": "En continuant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité",
+      "createAccount": "Pas de compte ? S'inscrire",
+      "forgotPassword": "Mot de passe oublié ?"
+    }
+  },
+  "marketing": {
+    "home": {
+      "hero": {
+        "badge": "Gratuit et Open Source",
+        "title": "Des formulaires qui donnent une impression",
+        "titleHighlight": "humaine",
+        "subtitle": "Créez de beaux formulaires engageants que les gens ont vraiment envie de remplir. Une question à la fois, comme une conversation.",
+        "startFree": "Commencer à créer gratuitement",
+        "seeHow": "Voir comment ça marche"
+      },
+      "features": {
+        "title": "Tout ce dont vous avez besoin pour créer des formulaires incroyables",
+        "subtitle": "Des fonctionnalités puissantes qui rendent la création de formulaires facile",
+        "oneAtTime": {
+          "title": "Une à la fois",
+          "description": "Les questions apparaissent une par une, créant une expérience concentrée et sans distraction pour les répondants."
+        },
+        "beautifulThemes": {
+          "title": "Thèmes Magnifiques",
+          "description": "Choisissez parmi de superbes thèmes prédéfinis qui donnent à vos formulaires un aspect professionnel et cohérent avec votre marque."
+        },
+        "privacyFirst": {
+          "title": "La Confidentialité d'Abord",
+          "description": "Vos données restent vôtres. Exportez les réponses à tout moment, supprimez quand vous voulez."
+        }
+      },
+      "questionTypes": {
+        "title": "13 types de questions au choix",
+        "subtitle": "Du simple texte aux téléchargements de fichiers, nous avons tout prévu",
+        "types": [
+          "Texte Court", "Texte Long", "Menu Déroulant", "Cases à Cocher",
+          "E-mail", "Téléphone", "Nombre", "Date", "Évaluation", "Échelle d'Opinion",
+          "Oui/Non", "Téléchargement de Fichier", "URL de Site Web"
+        ]
+      },
+      "cta": {
+        "title": "Prêt à créer votre premier formulaire ?",
+        "subtitle": "Rejoignez des milliers de personnes qui utilisent Weladee Form pour collecter des réponses.",
+        "getStarted": "Commencer gratuitement"
+      },
+      "footer": {
+        "copyright": "© 2026 Weladee Form. Open source et gratuit pour toujours.",
+        "github": "GitHub",
+        "privacy": "Confidentialité",
+        "terms": "Conditions"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Mes formulaires",
+    "subtitle": "Créez et gérez vos formulaires",
+    "createFirst": {
+      "title": "Créez votre premier formulaire",
+      "description": "Construisez de beaux formulaires engageants que les gens ont vraiment envie de remplir. Une question à la fois.",
+      "button": "Créer votre premier formulaire"
+    },
+    "empty": {
+      "title": "Aucun formulaire pour le moment",
+      "description": "Créez votre premier formulaire pour commencer"
+    },
+    "actions": {
+      "edit": "Modifier",
+      "view": "Voir le formulaire",
+      "responses": "Réponses",
+      "copyLink": "Copier le lien",
+      "more": "Plus"
+    },
+    "status": {
+      "responses": "réponses",
+      "updated": "Mis à jour"
+    }
   },
   "form": {
     "title": "Titre du formulaire",
-    "submit": "Soumettre"
+    "untitled": "Formulaire sans titre",
+    "description": "Description",
+    "descriptionPlaceholder": "Description optionnelle du formulaire...",
+    "thankYouMessage": "Message de Remerciement",
+    "thankYouPlaceholder": "Merci pour votre réponse !",
+    "url": "URL du formulaire",
+    "urlPrefix": "/f/",
+    "urlPlaceholder": "mon-formulaire",
+    "settings": "Paramètres",
+    "design": "Design",
+    "questions": "Questions",
+    "addQuestion": "Ajouter une question",
+    "addQuestionTitle": "Ajouter une question",
+    "addQuestionDescription": "Choisissez un type de question à ajouter à votre formulaire",
+    "noQuestions": "Aucune question pour le moment",
+    "noQuestionsDescription": "Ajoutez votre première question pour commencer",
+    "editQuestion": "Modifier la question",
+    "theme": "Thème",
+    "status": {
+      "published": "Publié",
+      "draft": "Brouillon",
+      "closed": "Fermé"
+    },
+    "actions": {
+      "save": "Enregistrer",
+      "publish": "Publier",
+      "unpublish": "Dépublier",
+      "copyLink": "Copier le lien",
+      "view": "Voir"
+    },
+    "publishDialog": {
+      "title": "Publier le formulaire ?",
+      "titleUnpublish": "Dépublier le formulaire ?",
+      "description": "Votre formulaire sera accessible à :",
+      "descriptionUnpublish": "Cela rendra votre formulaire inaccessible aux répondants. Les réponses existantes seront conservées.",
+      "cancel": "Annuler"
+    },
+    "questionTypes": {
+      "short_text": "Texte Court",
+      "long_text": "Texte Long",
+      "dropdown": "Menu Déroulant",
+      "checkboxes": "Cases à Cocher",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "number": "Nombre",
+      "date": "Date",
+      "rating": "Évaluation",
+      "opinion_scale": "Échelle d'Opinion",
+      "yes_no": "Oui/Non",
+      "file_upload": "Téléchargement de Fichier",
+      "url": "URL de Site Web"
+    }
+  },
+  "formPlayer": {
+    "emptyForm": "Ce formulaire n'a pas encore de questions.",
+    "submitting": "Soumission en cours...",
+    "responseRecorded": "Votre réponse a été enregistrée.",
+    "madeWith": "Fait avec",
+    "poweredBy": "Propulsé par",
+    "pressEnter": "appuyez sur",
+    "validation": {
+      "required": "Ce champ est obligatoire",
+      "selectAtLeastOne": "Veuillez sélectionner au moins une option",
+      "validEmail": "Veuillez saisir une adresse e-mail valide",
+      "validUrl": "Veuillez saisir une URL valide",
+      "validPhone": "Veuillez saisir un numéro de téléphone valide"
+    }
+  },
+  "responses": {
+    "title": "Réponses",
+    "subtitle": "Voir et gérer les réponses des formulaires",
+    "totalResponses": "Total des réponses",
+    "exportCsv": "Exporter CSV",
+    "noResponses": "Aucune réponse pour le moment",
+    "searchPlaceholder": "Rechercher des réponses...",
+    "filterPlaceholder": "Filtrer par date...",
+    "columns": "Colonnes",
+    "showAll": "Tout afficher",
+    "hideAll": "Tout masquer"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérer les paramètres de votre compte",
+    "account": "Compte",
+    "emailLabel": "E-mail",
+    "emailCannotChange": "Votre e-mail ne peut pas être modifié",
+    "nameLabel": "Nom",
+    "accountCreated": "Compte créé",
+    "profile": "Profil"
+  },
+  "errors": {
+    "generic": "Quelque chose s'est mal passé. Veuillez réessayer.",
+    "network": "Erreur réseau. Veuillez vérifier votre connexion.",
+    "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
+    "notFound": "La ressource demandée n'a pas été trouvée.",
+    "validation": "Veuillez vérifier votre saisie et réessayer.",
+    "saveFailed": "Échec de l'enregistrement. Veuillez réessayer.",
+    "deleteFailed": "Échec de la suppression. Veuillez réessayer.",
+    "loadFailed": "Échec du chargement des données. Veuillez rafraîchir la page.",
+    "submitFailed": "Échec de la soumission de la réponse",
+    "signOutFailed": "Échec de la déconnexion",
+    "publishFailed": "Échec de la mise à jour du statut du formulaire"
+  },
+  "validation": {
+    "emailRequired": "L'e-mail est requis",
+    "emailInvalid": "Veuillez saisir une adresse e-mail valide",
+    "passwordRequired": "Le mot de passe est requis",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères",
+    "nameRequired": "Le nom est requis",
+    "formTitleRequired": "Le titre du formulaire est requis",
+    "slugRequired": "L'URL du formulaire est requise",
+    "slugInvalid": "L'URL du formulaire ne peut contenir que des lettres, des chiffres et des tirets",
+    "questionRequired": "Veuillez ajouter au moins une question",
+    "atLeastOneQuestion": "Ajoutez au moins une question avant de publier"
   }
 }
