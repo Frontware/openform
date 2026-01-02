@@ -72,11 +72,73 @@ func (fs *FileSystem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
+		// Special handling for dynamic form IDs (/[locale]/forms/[id]/edit or /responses)
+		// Try to serve a generic template for these routes
+		if strings.Count(filePath, "/") == 3 { // e.g., "en/forms/xxx/edit" or "en/forms/xxx/responses"
+			parts := strings.Split(filePath, "/")
+			if len(parts) == 4 && (parts[2] != "new") { // Skip /forms/new which is handled separately
+				locale, _, _, page := parts[0], parts[1], parts[2], parts[3]
+
+				// Try to serve a generic template for this page type
+				genericTemplate := fmt.Sprintf("%s/forms/%s-%s.html", locale, page, "template")
+				if fGeneric, errGeneric := fs.root.Open(genericTemplate); errGeneric == nil {
+					fGeneric.Close()
+					// Template exists, but we need to serve the actual page
+					// For now, serve the first available pre-generated page as a template
+					// Try to find any pre-generated edit page
+					templatePath := fmt.Sprintf("%s/forms/00000000-0000-0000-0000-000000000001/%s", locale, page)
+					if fTemplate, errTemplate := fs.root.Open(templatePath); errTemplate == nil {
+						fTemplate.Close()
+						// Serve the template file
+						f, err = fs.root.Open(templatePath + ".html")
+						if err == nil {
+							filePath = templatePath + ".html"
+							defer f.Close()
+							goto serveFile
+						}
+					}
+				}
+
+				// Fallback: try to serve any edit.html as template
+				templatePath := fmt.Sprintf("%s/forms/00000000-0000-0000-0000-000000000001/%s.html", locale, page)
+				if fTemplate, errTemplate := fs.root.Open(templatePath); errTemplate == nil {
+					fTemplate.Close()
+					f, err = fs.root.Open(templatePath)
+					if err == nil {
+						filePath = templatePath
+						defer f.Close()
+						goto serveFile
+					}
+				}
+			}
+		}
+
+		// Special handling for /f/[slug] URLs (public forms)
+		// Try to serve the form.html template for unknown slugs
+		if strings.Count(filePath, "/") == 1 && strings.HasPrefix(filePath, "f/") {
+			slug := strings.TrimPrefix(filePath, "f/")
+			// If it looks like a UUID (or the word "form"), serve the form.html template
+			if len(slug) == 36 || slug == "form" { // UUID length is 36 chars
+				templatePath := "f/form.html"
+				if fTemplate, errTemplate := fs.root.Open(templatePath); errTemplate == nil {
+					fTemplate.Close()
+					f, err = fs.root.Open(templatePath)
+					if err == nil {
+						filePath = templatePath
+						defer f.Close()
+						goto serveFile
+					}
+				}
+			}
+		}
+
 		// If file doesn't exist, serve index.html for SPA routing
 		fs.serveIndex(w, r)
 		return
 	}
 	defer f.Close()
+
+serveFile:
 
 	// Check if it's a directory
 	stat, err := f.Stat()

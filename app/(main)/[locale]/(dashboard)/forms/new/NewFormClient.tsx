@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { formClient } from '@/lib/grpc-client'
 import { FormTheme } from '@/lib/proto/proto/form_pb'
 
-export function NewFormClient() {
+export function NewFormClient({ locale }: { locale: string }) {
   const router = useRouter()
   const creatingRef = useRef(false)
 
@@ -25,19 +25,19 @@ export function NewFormClient() {
         })
 
         if (response.form) {
-          router.replace(`/forms/${response.form.id}/edit`)
+          router.replace(`/${locale}/forms/${response.form.id}/edit`)
         } else {
           console.error('No form returned from createForm')
-          router.replace('/dashboard')
+          router.replace(`/${locale}/dashboard`)
         }
       } catch (error) {
         console.error('Error creating form:', error)
-        router.replace('/dashboard')
+        router.replace(`/${locale}/dashboard`)
       }
     }
 
     createForm()
-  }, [router])
+  }, [router, locale])
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">

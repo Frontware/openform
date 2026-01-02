@@ -435,3 +435,16 @@ watch: ## Watch for file changes and rebuild (requires entr)
 		echo "entr not found. Please install it or run 'make dev' instead"; \
 		exit 1; \
 	fi
+
+
+
+# Deployment target
+.PHONY: deploy
+deploy: build-linux ## Deploy Linux binary to remote server
+	@echo \"Deploying \$(BINARY_NAME)-linux to frontware@192.168.1.28/media/data/grpc...\"
+	@if [ ! -f \"\$(BINARY_DIR)/\$(BINARY_NAME)-linux\" ]; then \\
+		echo \"Linux binary not found. Run 'make build-linux' first\"; \\
+		exit 1; \\
+	fi
+	scp \$(BINARY_DIR)/\$(BINARY_NAME)-linux frontware@192.168.1.28:/media/data/grpc/
+	@echo \"Deployment completed successfully!\""

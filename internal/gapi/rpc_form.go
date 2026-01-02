@@ -207,6 +207,33 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 		return nil, err
 	}
 
+	// Mock mode: create a new form in memory
+	if s.mockMode {
+		newFormID := uuid.New()
+		newForm := &pb.Form{
+			Id:                     newFormID.String(),
+			UserId:                 user.ID.String(),
+			Title:                  req.Title,
+			Description:            req.Description,
+			Theme:                  req.Theme,
+			IsPublished:            false,
+			IsAcceptingResponses:   true,
+			RequireLogin:           false,
+			AllowMultipleSubmissions: false,
+			ShowProgressBar:        true,
+			CustomThankYouMessage:  "",
+			Settings:               req.Settings,
+			Questions:              req.Questions,
+			CreatedAt:              timestamppb.Now(),
+			UpdatedAt:              timestamppb.Now(),
+		}
+
+		// Add to mock forms
+		mockForms[newFormID] = newForm
+
+		return &pb.CreateFormResponse{Form: newForm}, nil
+	}
+
 	err = s.db.ExecTx(ctx, func(q *sqlc.Queries) error {
 		description := ""
 		if req.Description != "" {

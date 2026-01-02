@@ -6,8 +6,15 @@ interface FormPageProps {
   params: Promise<{ slug: string }>
 }
 
+// Mock form IDs for static export
+const MOCK_FORM_SLUGS = [
+  'form',
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000002',
+]
+
 export function generateStaticParams() {
-  return [{ slug: 'form' }]
+  return MOCK_FORM_SLUGS.map(slug => ({ slug }))
 }
 
 export async function generateMetadata({ params }: FormPageProps) {
