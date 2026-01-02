@@ -1,6 +1,7 @@
 package gapi
 
 import (
+	"github.com/redis/go-redis/v9"
 	"github.com/weladee/weladee-form/internal/db"
 	"github.com/weladee/weladee-form/internal/storage"
 	pb "github.com/weladee/weladee-form/proto/pb"
@@ -19,6 +20,11 @@ type ResponseServer struct {
 // FileServer wrapper - embeds FileServerImpl which already embeds UnimplementedFileServiceServer
 type FileServer struct {
 	*FileServerImpl
+}
+
+// AuthServer wrapper - embeds AuthServer which already embeds UnimplementedAuthServiceServer
+type AuthServerWrapper struct {
+	*AuthServer
 }
 
 // Constructor functions
@@ -46,5 +52,11 @@ func NewFileServer(database *db.Database, storage *storage.S3Storage) pb.FileSer
 			db:      database,
 			storage: storage,
 		},
+	}
+}
+
+func NewAuthService(database *db.Database, redisClient *redis.Client, config *Config) pb.AuthServiceServer {
+	return &AuthServerWrapper{
+		AuthServer: NewAuthServer(database, redisClient, config),
 	}
 }

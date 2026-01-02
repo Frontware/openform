@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package weladee.form.v1;
+
+option go_package = "github.com/weladee/weladee-form/proto/pb";
+
+import "google/protobuf/timestamp.proto";
+
+// Auth Service - handles user authentication and authorization
+
+// Messages
+message SendMagicLinkRequest {
+  string email = 1;
+}
+
+message SendMagicLinkResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message HandleOAuthCallbackRequest {
+  string provider = 1;
+  string code = 2;
+  string state = 3;
+}
+
+message HandleOAuthCallbackResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_at = 3;
+  UserProfile user = 4;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  UserProfile user = 2;
+  int64 expires_at = 3;
+}
+
+message GetUserSessionRequest {
+  string token = 1;
+}
+
+message GetUserSessionResponse {
+  bool valid = 1;
+  UserProfile user = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+  int64 expires_at = 5;
+}
+
+message UserProfile {
+  int32 id = 1;
+  string email = 2;
+  string display_name = 3;
+  string avatar_url = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// Auth Service
+service AuthService {
+  rpc SendMagicLink(SendMagicLinkRequest) returns (SendMagicLinkResponse);
+  rpc HandleOAuthCallback(HandleOAuthCallbackRequest) returns (HandleOAuthCallbackResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc GetUserSession(GetUserSessionRequest) returns (GetUserSessionResponse);
+}

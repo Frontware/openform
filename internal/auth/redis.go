@@ -6,16 +6,47 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 )
 
-// WeladeeUserClaims represents the user claims stored in Redis
+// WeladeeUserClaims represents the user claims stored in Redis and implements jwt.Claims
 type WeladeeUserClaims struct {
 	UserID      int    `json:"user_id"`
 	Email       string `json:"email"`
 	DisplayName string `json:"display_name"`
 	Role        string `json:"role"`
 	ExpiresAt   int64  `json:"exp"`
+}
+
+// GetExpirationTime implements jwt.Claims
+func (c *WeladeeUserClaims) GetExpirationTime() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(c.ExpiresAt, 0)), nil
+}
+
+// GetIssuedAt implements jwt.Claims
+func (c *WeladeeUserClaims) GetIssuedAt() (*jwt.NumericDate, error) {
+	return nil, nil // Not implemented
+}
+
+// GetNotBefore implements jwt.Claims
+func (c *WeladeeUserClaims) GetNotBefore() (*jwt.NumericDate, error) {
+	return nil, nil // Not implemented
+}
+
+// GetIssuer implements jwt.Claims
+func (c *WeladeeUserClaims) GetIssuer() (string, error) {
+	return "weladee-form", nil
+}
+
+// GetSubject implements jwt.Claims
+func (c *WeladeeUserClaims) GetSubject() (string, error) {
+	return fmt.Sprintf("%d", c.UserID), nil
+}
+
+// GetAudience implements jwt.Claims
+func (c *WeladeeUserClaims) GetAudience() (jwt.ClaimStrings, error) {
+	return []string{"weladee-form"}, nil
 }
 
 // RedisTokenValidator validates tokens against Weladee Redis
