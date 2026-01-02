@@ -190,6 +190,30 @@ proto-check: ## Check if protobuf code is up to date
 	fi
 
 # Database targets
+.PHONY: db-setup
+db-setup: ## Set up database schema (requires DATABASE_URL or config.yaml)
+	@echo "Setting up database schema..."
+	@if [ -z "$$DATABASE_URL" ]; then \
+		if [ -f "config.yaml" ]; then \
+			export DATABASE_URL=$$(grep database_url config.yaml | awk '{print $$2}'); \
+		fi; \
+	fi
+	@if [ -z "$$DATABASE_URL" ]; then \
+		echo "DATABASE_URL environment variable is required"; \
+		echo "Usage: make db-setup DATABASE_URL=postgresql://user:pass@host/db"; \
+		exit 1; \
+	fi
+	@echo "Running schema: sql/schema/form_schema.sql"
+	@psql $$DATABASE_URL -f sql/schema/form_schema.sql || { \
+		echo "Failed to run schema. Please ensure:"; \
+		echo "  1. PostgreSQL is running"; \
+		echo "  2. DATABASE_URL is correct"; \
+		echo "  3. Database exists"; \
+		echo "  4. psql client is installed"; \
+		exit 1; \
+	}
+	@echo "Database schema created successfully!"
+
 .PHONY: db-migrate
 db-migrate: ## Run database migrations (requires DATABASE_URL)
 	@echo "Running database migrations..."
@@ -200,7 +224,7 @@ db-migrate: ## Run database migrations (requires DATABASE_URL)
 	@if [ -d "sql/migrations" ]; then \
 		migrate -path sql/migrations -database $$DATABASE_URL up; \
 	else \
-		echo "No migrations directory found"; \
+		echo "No migrations directory found. Use 'make db-setup' instead."; \
 	fi
 
 .PHONY: db-rollback
