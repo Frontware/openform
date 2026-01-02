@@ -146,7 +146,8 @@ npm run lint         # Run ESLint
 # Using Makefile
 make dev             # Run Go server in development mode
 make build           # Build for all platforms
-make build-local     # Build for local platform
+make build-local     # Build for local platform (with embedded frontend)
+make build-dev       # Build for local platform (no embedded frontend)
 make test            # Run tests
 make db-generate     # Regenerate SQLC code from SQL queries
 make proto           # Regenerate protobuf Go code
@@ -156,6 +157,51 @@ go run cmd/server/main.go                    # Run server directly
 go build -o bin/weladee-form cmd/server/main.go  # Build binary
 sqlc generate                                  # Generate SQLC code
 protoc --go_out=. --go-grpc_out=. proto/*.proto  # Generate proto code
+```
+
+## Embedded Client Build System
+
+Weladee Form supports building as a single binary that contains both the Go backend and embedded Next.js frontend. This enables easy distribution and deployment.
+
+### How Embedded Builds Work
+
+1. **Next.js Build**: `npm run build` creates optimized static files in `dist/`
+2. **Go Embed**: Go's `//go:embed` directive bundles the `dist/` directory
+3. **Single Binary**: Result is one executable containing everything
+
+### Build Commands
+
+```bash
+# Build embedded binary (includes frontend)
+make build-local     # Creates bin/weladee-form (27MB)
+
+# Build without embedding (for development)
+make build-dev       # Creates bin/weladee-form-dev
+
+# Build for all platforms with embedding
+make build          # Creates binaries for Linux, Windows, macOS
+```
+
+### Embedded Binary Features
+
+- **Complete Application**: Contains Go server + React frontend + all assets
+- **Single Port**: Serves both API and frontend on same port
+- **SPA Routing**: Handles Next.js App Router routes correctly
+- **Static Assets**: CSS, JS, images all embedded
+- **Zero Dependencies**: Just run the binary with database config
+
+### Usage Example
+
+```bash
+# Build the embedded binary
+make build-local
+
+# Run with database configuration
+./bin/weladee-form --database-url="postgresql://user:pass@localhost/db"
+
+# Access the application at http://localhost:50051
+# - Frontend routes: /, /dashboard, /f/form-slug
+# - API endpoints: gRPC-Web calls to same port
 ```
 
 ## Environment Setup

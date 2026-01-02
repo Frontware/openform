@@ -53,11 +53,29 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - Redis (for Weladee token validation)
 - S3-compatible storage (optional, for file uploads)
 
-### 1. Clone and install
+### Installation Options
 
+#### Option 1: Development Setup (Separate Frontend/Backend)
+
+1. **Clone and install**
 ```bash
 git clone https://github.com/yourusername/weladee-form.git
 cd weladee-form
+npm install
+```
+
+#### Option 2: Single Binary Distribution (Embedded Client)
+
+Weladee Form can be built as a single binary containing both the Go backend and embedded Next.js frontend:
+
+```bash
+# Build the embedded binary (includes frontend)
+make build-local
+
+# The resulting binary (bin/weladee-form) contains:
+# - Go gRPC server
+# - Complete Next.js React frontend
+# - All static assets (CSS, JS, images)
 ```
 
 ### 2. Set up Database

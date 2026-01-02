@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 
 const nextConfig: NextConfig = {
   /* config options here */
+  distDir: 'dist',
 };
 
 export default withNextIntl(nextConfig);

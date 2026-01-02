@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateFormRequest, CreateFormResponse, CreateQuestionRequest, CreateQuestionResponse, DeleteFormRequest, DeleteFormResponse, DeleteQuestionRequest, DeleteQuestionResponse, GetFormBySlugRequest, GetFormBySlugResponse, GetFormRequest, GetFormResponse, GetFormStatsRequest, GetFormStatsResponse, ListFormsRequest, ListFormsResponse, PublishFormRequest, PublishFormResponse, ReorderQuestionsRequest, ReorderQuestionsResponse, UpdateFormRequest, UpdateFormResponse, UpdateQuestionRequest, UpdateQuestionResponse } from "./form_pb.js";
+import { CreateFormRequest, CreateFormResponse, CreateQuestionRequest, CreateQuestionResponse, DeleteFormRequest, DeleteFormResponse, DeleteQuestionRequest, DeleteQuestionResponse, GetFormBySlugRequest, GetFormBySlugResponse, GetFormRequest, GetFormResponse, GetFormStatsRequest, GetFormStatsResponse, ListFormsRequest, ListFormsResponse, PublishFormRequest, PublishFormResponse, ReorderQuestionsRequest, ReorderQuestionsResponse, UpdateFormRequest, UpdateFormResponse, UpdateQuestionRequest, UpdateQuestionResponse } from "./form_pb.ts";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**

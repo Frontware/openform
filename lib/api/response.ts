@@ -1,4 +1,6 @@
 import { responseClient } from "../grpc-client";
+import { SubmitResponseRequest, GetResponseRequest, ListResponsesRequest, DeleteResponseRequest, ExportResponsesRequest } from "../proto/proto/response_pb";
+import { PaginationRequest } from "../proto/proto/common_pb";
 import type { Response, Answer, PaginationParams, PaginationResponse } from "../types";
 
 // Convert proto Response to app Response type
@@ -65,16 +67,21 @@ export async function listResponses(
 ): Promise<{ responses: Response[] } & PaginationResponse> {
   const request = new ListResponsesRequest();
   request.formId = formId;
-  if (params.page) request.pagination = { page: params.page, pageSize: params.pageSize || 20 };
+  if (params.page) {
+    request.pagination = new PaginationRequest({
+      page: params.page,
+      pageSize: params.pageSize || 20
+    });
+  }
   if (params.completedOnly !== undefined) request.completedOnly = params.completedOnly;
 
   const response = await responseClient.listResponses(request);
   return {
     responses: response.responses.map(fromProtoResponse),
-    total: response.pagination!.total,
-    page: response.pagination!.page,
-    pageSize: response.pagination!.pageSize,
-    totalPages: response.pagination!.totalPages,
+    total: Number(response.pagination!.total),
+    page: Number(response.pagination!.page),
+    pageSize: Number(response.pagination!.pageSize),
+    totalPages: Number(response.pagination!.totalPages),
   };
 }
 
@@ -89,7 +96,7 @@ export async function exportResponses(formId: string, format: "csv" | "json" = "
 
   const response = await responseClient.exportResponses(request);
   return {
-    data: response.data,
+    data: response.data.buffer.slice(response.data.byteOffset, response.data.byteOffset + response.data.byteLength),
     filename: response.filename,
     mimeType: response.mimeType,
   };

@@ -1,4 +1,5 @@
 import { fileClient } from "../grpc-client";
+import { GetFileUrlRequest } from "../proto/proto/file_pb";
 
 // File API functions
 
@@ -40,7 +41,7 @@ export async function uploadFile(
 
 export async function getFileUrl(fileId: string): Promise<string> {
   const request = new GetFileUrlRequest();
-  request.id = fileId;
+  request.fileId = fileId;
 
   const response = await fileClient.getFileUrl(request);
   return response.url;

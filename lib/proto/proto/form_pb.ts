@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64, Struct, Timestamp } from "@bufbuild/protobuf";
-import { PaginationRequest, PaginationResponse } from "./common_pb.js";
+import { PaginationRequest, PaginationResponse } from "./common_pb.ts";
 
 /**
  * Enums
@@ -1577,4 +1577,3 @@ export class ReorderQuestionsResponse extends Message<ReorderQuestionsResponse> 
     return proto3.util.equals(ReorderQuestionsResponse, a, b);
   }
 }
-

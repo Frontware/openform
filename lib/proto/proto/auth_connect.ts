@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { GetUserSessionRequest, GetUserSessionResponse, HandleOAuthCallbackRequest, HandleOAuthCallbackResponse, SendMagicLinkRequest, SendMagicLinkResponse, ValidateTokenRequest, ValidateTokenResponse } from "./auth_pb.js";
+import { GetUserSessionRequest, GetUserSessionResponse, HandleOAuthCallbackRequest, HandleOAuthCallbackResponse, SendMagicLinkRequest, SendMagicLinkResponse, ValidateTokenRequest, ValidateTokenResponse } from "./auth_pb.ts";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**

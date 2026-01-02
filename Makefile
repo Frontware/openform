@@ -42,33 +42,54 @@ run: ## Run the compiled binary
 	@echo "Running $(BINARY_NAME)..."
 	./$(BINARY_DIR)/$(BINARY_NAME)
 
+# Client build targets
+.PHONY: build-client
+build-client: ## Build Next.js client for embedding
+	@echo "Building Next.js client..."
+	@if command -v npm >/dev/null 2>&1; then \
+		npm run build; \
+	else \
+		echo "npm not found. Please install Node.js and npm"; \
+		exit 1; \
+	fi
+
+.PHONY: build-frontend
+build-frontend: build-client ## Build both client and server
+	@echo "Building frontend (client + server)..."
+
 # Build targets
 .PHONY: build
 build: clean build-linux build-windows build-darwin ## Build binaries for all platforms
 
 .PHONY: build-linux
-build-linux: ## Build for Linux
+build-linux: build-frontend ## Build for Linux with embedded client
 	@echo "Building for Linux..."
 	@mkdir -p $(BINARY_DIR)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-linux $(MAIN_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -tags=embed -o $(BINARY_DIR)/$(BINARY_NAME)-linux $(MAIN_PATH)
 
 .PHONY: build-windows
-build-windows: ## Build for Windows
+build-windows: build-frontend ## Build for Windows with embedded client
 	@echo "Building for Windows..."
 	@mkdir -p $(BINARY_DIR)
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-windows.exe $(MAIN_PATH)
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -tags=embed -o $(BINARY_DIR)/$(BINARY_NAME)-windows.exe $(MAIN_PATH)
 
 .PHONY: build-darwin
-build-darwin: ## Build for macOS
+build-darwin: build-frontend ## Build for macOS with embedded client
 	@echo "Building for macOS..."
 	@mkdir -p $(BINARY_DIR)
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-darwin $(MAIN_PATH)
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -tags=embed -o $(BINARY_DIR)/$(BINARY_NAME)-darwin $(MAIN_PATH)
 
 .PHONY: build-local
-build-local: ## Build for local development
+build-local: build-frontend ## Build for local development with embedded client
 	@echo "Building for local development..."
 	@mkdir -p $(BINARY_DIR)
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME) $(MAIN_PATH)
+	$(GOBUILD) $(LDFLAGS) -tags=embed -o $(BINARY_DIR)/$(BINARY_NAME) $(MAIN_PATH)
+
+.PHONY: build-dev
+build-dev: ## Build for local development without embedded client
+	@echo "Building for local development (no embedded client)..."
+	@mkdir -p $(BINARY_DIR)
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-dev $(MAIN_PATH)
 
 # Clean targets
 .PHONY: clean

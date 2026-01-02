@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { GetFileUrlRequest, GetFileUrlResponse, UploadFileRequest, UploadFileResponse } from "./file_pb.js";
+import { GetFileUrlRequest, GetFileUrlResponse, UploadFileRequest, UploadFileResponse } from "./file_pb.ts";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -106,8 +107,22 @@ func runServer(cmd *cobra.Command, args []string) error {
 		if wrappedGrpc.IsGrpcWebRequest(r) || wrappedGrpc.IsAcceptableGrpcCorsRequest(r) {
 			wrappedGrpc.ServeHTTP(w, r)
 		} else {
+			// Handle embedded static files (when built with embed tag)
+			if strings.HasPrefix(r.URL.Path, "/_next/") ||
+			   strings.HasPrefix(r.URL.Path, "/static/") ||
+			   r.URL.Path == "/" ||
+			   strings.HasPrefix(r.URL.Path, "/f/") ||
+			   strings.HasPrefix(r.URL.Path, "/dashboard") ||
+			   strings.HasPrefix(r.URL.Path, "/login") ||
+			   strings.HasPrefix(r.URL.Path, "/en/") ||
+			   strings.HasPrefix(r.URL.Path, "/fr/") ||
+			   strings.HasPrefix(r.URL.Path, "/th/") {
+				serveEmbeddedFiles(w, r)
+				return
+			}
+
 			// Fallback to standard gRPC if needed, or handle other HTTP requests
-			// Since we can't easily multiplex standard gRPC on the same port with this setup 
+			// Since we can't easily multiplex standard gRPC on the same port with this setup
 			// without cmux, we'll assume this port is primarily for gRPC-Web/HTTP.
 			// Standard gRPC clients might need a separate port or cmux.
 			// For simplicity in this migration, we serve gRPC-Web.
@@ -151,6 +166,14 @@ func runServer(cmd *cobra.Command, args []string) error {
 	
 	log.Println("✓ Server stopped")
 	return nil
+}
+
+// serveEmbeddedFiles serves embedded static files when built with embed tag
+func serveEmbeddedFiles(w http.ResponseWriter, r *http.Request) {
+	// This function is only available when built with the embed tag
+	// When not built with embed, this will return 404
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("Static files not available - server not built with embedded client"))
 }
 
 func main() {

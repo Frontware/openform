@@ -59,7 +59,7 @@ function mapThemeToProto(theme: string): FormTheme {
     case 'sunset': return FormTheme.SUNSET
     case 'forest': return FormTheme.FOREST
     case 'lavender': return FormTheme.LAVENDER
-    default: return FormTheme.FORM_THEME_UNSPECIFIED // or default
+    default: return FormTheme.UNSPECIFIED // or default
   }
 }
 
@@ -78,7 +78,7 @@ function mapQuestionTypeToProto(type: QuestionConfig['type']): QuestionType {
     case 'yes_no': return QuestionType.YES_NO
     case 'file_upload': return QuestionType.FILE_UPLOAD
     case 'url': return QuestionType.URL
-    default: return QuestionType.QUESTION_TYPE_UNSPECIFIED
+    default: return QuestionType.UNSPECIFIED
   }
 }
 
