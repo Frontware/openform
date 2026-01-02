@@ -28,6 +28,9 @@ import (
 	pb "github.com/weladee/weladee-form/proto/pb"
 )
 
+// embeddedFS will be set by embed.go when built with embed tag
+var embeddedFS interface{}
+
 func runServer(cmd *cobra.Command, args []string) error {
 	cfg, err := config.LoadConfig(cmd)
 	if err != nil {
@@ -217,7 +220,17 @@ func runServer(cmd *cobra.Command, args []string) error {
 
 // serveEmbeddedFiles serves embedded static files when built with embed tag
 func serveEmbeddedFiles(w http.ResponseWriter, r *http.Request) {
-	// This function is only available when built with the embed tag
+	// Check if embedded filesystem is available (set when built with embed tag)
+	if embeddedFS != nil {
+		// Use embedded filesystem - this will work when embed.go is included
+		// The embed.go file will override this function when built with embed tag
+		// For now, assume it's available and try to call ServeHTTP
+		if handler, ok := embeddedFS.(http.Handler); ok {
+			handler.ServeHTTP(w, r)
+			return
+		}
+	}
+
 	// When not built with embed, this will return 404
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("Static files not available - server not built with embedded client"))
