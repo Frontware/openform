@@ -5,7 +5,12 @@ import { Logo } from '@/components/ui/logo'
 import { ArrowRight, Palette, Shield, Sparkles, Zap } from 'lucide-react'
 import Link from 'next/link'
 
-export default async function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
@@ -40,7 +45,7 @@ export default async function HomePage() {
         <div className="relative max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           <Logo href="/" />
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
+            <Link href={`/${locale}/dashboard`}>
               <Button className="bg-[#13a89e] hover:bg-[#0f8a82] shadow-lg shadow-[#13a89e]/20 transition-all hover:shadow-[#13a89e]/30 hover:-translate-y-0.5">
                 Dashboard
                 <ArrowRight className="ml-2 w-4 h-4" />
@@ -71,7 +76,7 @@ export default async function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard">
+            <Link href={`/${locale}/dashboard`}>
               <Button size="lg" className="h-14 px-8 text-lg bg-[#13a89e] hover:bg-[#0f8a82] shadow-xl shadow-[#13a89e]/25 transition-all hover:shadow-[#13a89e]/35 hover:-translate-y-0.5">
                 Start creating
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -212,7 +217,7 @@ export default async function HomePage() {
             <p className="text-lg text-blue-100 mb-8 relative">
               Join thousands of people using Weladee Form to collect responses.
             </p>
-            <Link href="/dashboard">
+            <Link href={`/${locale}/dashboard`}>
               <Button size="lg" className="h-14 px-8 text-lg bg-white text-[#13a89e] hover:bg-teal-50 shadow-xl shadow-teal-900/20 relative transition-all hover:-translate-y-0.5">
                 Go to dashboard
                 <ArrowRight className="ml-2 w-5 h-5" />

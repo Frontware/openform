@@ -7,6 +7,9 @@ const PROTECTED_ROUTES = ['/dashboard', '/forms', '/settings']
 // Public routes that don't require auth
 const PUBLIC_ROUTES = ['/', '/f']
 
+// Supported locales
+const LOCALES = ['en', 'fr', 'th']
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -20,8 +23,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Extract locale from pathname if present
+  const localeMatch = pathname.match(/^\/([a-z]{2})(\/|$)/)
+  const locale = localeMatch ? localeMatch[1] : null
+  const pathWithoutLocale = locale ? pathname.substring(3) || '/' : pathname
+
   // Check if accessing a public route
-  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname === route || pathname.startsWith(route))
+  const isPublicRoute = PUBLIC_ROUTES.some(route => pathWithoutLocale === route || pathWithoutLocale.startsWith(route))
 
   if (isPublicRoute) {
     return NextResponse.next()
@@ -29,10 +37,7 @@ export function middleware(request: NextRequest) {
 
   // Check if accessing a protected route (handle locale prefix)
   const isProtectedRoute = PROTECTED_ROUTES.some(route => {
-    // Check with and without locale prefix (e.g., /dashboard or /en/dashboard)
-    return pathname === route ||
-           pathname.startsWith(`${route}/`) ||
-           pathname.match(/^\/[a-z]{2}(\/)${route}/) // Matches /en/dashboard, /fr/dashboard, etc.
+    return pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
   })
 
   if (isProtectedRoute) {
@@ -40,8 +45,9 @@ export function middleware(request: NextRequest) {
     const token = request.cookies.get('weladee_token')
 
     if (!token) {
-      // No token - redirect to home with a hint
-      const url = new URL('/', request.url)
+      // No token - redirect to home with same locale
+      const redirectLocale = locale || 'en' // default to 'en'
+      const url = new URL(`/${redirectLocale}`, request.url)
       url.searchParams.set('auth', 'required')
       return NextResponse.redirect(url)
     }
