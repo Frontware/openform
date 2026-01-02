@@ -106,11 +106,10 @@ func runServe(cmd *cobra.Command, args []string) error {
 		grpc.MaxRecvMsgSize(10*1024*1024), // 10MB for file uploads
 	)
 
-	// Register services (use mock mode to skip database)
-	const mockMode = true
-	formServer := gapi.NewFormServer(database, s3Storage, mockMode)
-	responseServer := gapi.NewResponseServer(database, mockMode)
-	fileServer := gapi.NewFileServer(database, s3Storage, mockMode)
+	// Register services (database mode)
+	formServer := gapi.NewFormServer(database, s3Storage)
+	responseServer := gapi.NewResponseServer(database)
+	fileServer := gapi.NewFileServer(database, s3Storage)
 
 	// Register services with the gRPC server
 	pb.RegisterFormServiceServer(grpcServer, formServer)

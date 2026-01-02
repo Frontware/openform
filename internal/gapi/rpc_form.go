@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -21,80 +22,8 @@ import (
 type FormServerImpl struct {
 	pb.UnimplementedFormServiceServer
 	db      *db.Database
-	storage *storage.S3Storage // not used here, but kept for consistency
-	mockMode bool              // if true, use mock data instead of database
+	storage *storage.S3Storage
 }
-
-// Mock data for testing without database
-var (
-	mockFormID1 = uuid.MustParse("00000000-0000-0000-0000-000000000001")
-	mockFormID2 = uuid.MustParse("00000000-0000-0000-0000-000000000002")
-	mockQuestionID1 = uuid.MustParse("00000000-0000-0000-0000-000000000011")
-	mockQuestionID2 = uuid.MustParse("00000000-0000-0000-0000-000000000012")
-
-	mockForms = map[uuid.UUID]*pb.Form{
-		mockFormID1: {
-			Id:                     mockFormID1.String(),
-			UserId:                 "1", // Test user ID
-			Title:                  "Customer Feedback Survey",
-			Description:            "Help us improve our services",
-			Theme:                  pb.FormTheme_FORM_THEME_MINIMAL,
-			IsPublished:            true,
-			IsAcceptingResponses:   true,
-			RequireLogin:           false,
-			AllowMultipleSubmissions: false,
-			ShowProgressBar:        true,
-			CustomThankYouMessage:  "Thank you for your feedback!",
-			Settings:               &structpb.Struct{},
-			Questions: []*pb.Question{
-				{
-					Id:          mockQuestionID1.String(),
-					FormId:      mockFormID1.String(),
-					Type:        pb.QuestionType_QUESTION_TYPE_SHORT_TEXT,
-					Label:       "What is your name?",
-					Required:    true,
-					OrderIndex:  0,
-					Options:    &structpb.Struct{},
-					ValidationRules: &structpb.Struct{},
-					Settings:   &structpb.Struct{},
-					CreatedAt:  timestamppb.Now(),
-					UpdatedAt:  timestamppb.Now(),
-				},
-				{
-					Id:          mockQuestionID2.String(),
-					FormId:      mockFormID1.String(),
-					Type:        pb.QuestionType_QUESTION_TYPE_LONG_TEXT,
-					Label:       "How can we improve?",
-					Required:    false,
-					OrderIndex:  1,
-					Options:    &structpb.Struct{},
-					ValidationRules: &structpb.Struct{},
-					Settings:   &structpb.Struct{},
-					CreatedAt:  timestamppb.Now(),
-					UpdatedAt:  timestamppb.Now(),
-				},
-			},
-			CreatedAt: timestamppb.Now(),
-			UpdatedAt: timestamppb.Now(),
-		},
-		mockFormID2: {
-			Id:                     mockFormID2.String(),
-			UserId:                 "1",
-			Title:                  "Event Registration",
-			Description:            "Register for our upcoming event",
-			Theme:                  pb.FormTheme_FORM_THEME_OCEAN,
-			IsPublished:            true,
-			IsAcceptingResponses:   true,
-			RequireLogin:           false,
-			AllowMultipleSubmissions: false,
-			ShowProgressBar:        true,
-			Settings:               &structpb.Struct{},
-			Questions:              []*pb.Question{},
-			CreatedAt:              timestamppb.Now(),
-			UpdatedAt:              timestamppb.Now(),
-		},
-	}
-)
 
 // Helper: get authenticated user and ensure form user record exists
 func (s *FormServerImpl) getAuthenticatedFormUser(ctx context.Context) (sqlc.FormUser, error) {
@@ -207,33 +136,6 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 		return nil, err
 	}
 
-	// Mock mode: create a new form in memory
-	if s.mockMode {
-		newFormID := uuid.New()
-		newForm := &pb.Form{
-			Id:                     newFormID.String(),
-			UserId:                 user.ID.String(),
-			Title:                  req.Title,
-			Description:            req.Description,
-			Theme:                  req.Theme,
-			IsPublished:            false,
-			IsAcceptingResponses:   true,
-			RequireLogin:           false,
-			AllowMultipleSubmissions: false,
-			ShowProgressBar:        true,
-			CustomThankYouMessage:  "",
-			Settings:               req.Settings,
-			Questions:              req.Questions,
-			CreatedAt:              timestamppb.Now(),
-			UpdatedAt:              timestamppb.Now(),
-		}
-
-		// Add to mock forms
-		mockForms[newFormID] = newForm
-
-		return &pb.CreateFormResponse{Form: newForm}, nil
-	}
-
 	err = s.db.ExecTx(ctx, func(q *sqlc.Queries) error {
 		description := ""
 		if req.Description != "" {
@@ -314,14 +216,6 @@ func (s *FormServerImpl) GetForm(ctx context.Context, req *pb.GetFormRequest) (*
 	formID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid form ID")
-	}
-
-	// Mock mode: return mock data
-	if s.mockMode {
-		if form, ok := mockForms[formID]; ok {
-			return &pb.GetFormResponse{Form: form}, nil
-		}
-		return nil, status.Errorf(codes.NotFound, "form not found")
 	}
 
 	form, err := s.db.Queries.GetForm(ctx, formID)
@@ -430,31 +324,6 @@ func (s *FormServerImpl) DeleteForm(ctx context.Context, req *pb.DeleteFormReque
 }
 
 func (s *FormServerImpl) ListForms(ctx context.Context, req *pb.ListFormsRequest) (*pb.ListFormsResponse, error) {
-	_, err := auth.GetUserClaims(ctx)
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "authentication required: %v", err)
-	}
-
-	// Mock mode: return mock data
-	if s.mockMode {
-		var formList []*pb.Form
-		for _, form := range mockForms {
-			// Only return forms for authenticated user (user ID "1" for TEST_TOKEN)
-			formList = append(formList, form)
-		}
-
-		return &pb.ListFormsResponse{
-			Forms: formList,
-			Pagination: &pb.PaginationResponse{
-				Total:      int32(len(formList)),
-				Page:       1,
-				PageSize:   20,
-				TotalPages: 1,
-			},
-		}, nil
-	}
-
-	// Original database code
 	user, err := s.getAuthenticatedFormUser(ctx)
 	if err != nil {
 		return nil, err
@@ -611,4 +480,217 @@ func (s *FormServerImpl) CreateQuestion(ctx context.Context, req *pb.CreateQuest
 	}
 
 	return &pb.CreateQuestionResponse{Question: pbQ}, nil
+}
+
+func (s *FormServerImpl) GetFormBySlug(ctx context.Context, req *pb.GetFormBySlugRequest) (*pb.GetFormBySlugResponse, error) {
+	form, err := s.db.Queries.GetFormBySlug(ctx, req.Slug)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "form not found")
+	}
+
+	questions, _ := s.db.Queries.ListFormQuestions(ctx, form.ID)
+	pbForm, err := s.convertFormWithQuestions(form, questions)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "conversion error: %v", err)
+	}
+
+	return &pb.GetFormBySlugResponse{Form: pbForm}, nil
+}
+
+func (s *FormServerImpl) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestionRequest) (*pb.UpdateQuestionResponse, error) {
+	user, err := s.getAuthenticatedFormUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	questionID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid question ID")
+	}
+
+	// Get question to verify form ownership
+	question, err := s.db.Queries.GetQuestion(ctx, questionID)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "question not found")
+	}
+
+	form, err := s.db.Queries.GetForm(ctx, question.FormID)
+	if err != nil || form.UserID != user.ID {
+		return nil, status.Errorf(codes.PermissionDenied, "not form owner")
+	}
+
+	// Build update params with current values as defaults
+	params := sqlc.UpdateQuestionParams{
+		ID:              questionID,
+		Type:            question.Type,
+		Label:           question.Label,
+		Description:     question.Description.String,
+		Placeholder:     question.Placeholder.String,
+		Required:        question.Required,
+		OrderIndex:      question.OrderIndex,
+		Options:         question.Options,
+		ValidationRules: question.ValidationRules,
+		Settings:        question.Settings,
+	}
+
+	// Override with provided values
+	if req.Type != nil {
+		params.Type = strings.ToLower(req.Type.String()[13:])
+	}
+	if req.Label != nil {
+		params.Label = *req.Label
+	}
+	if req.Description != nil {
+		params.Description = *req.Description
+	}
+	if req.Placeholder != nil {
+		params.Placeholder = *req.Placeholder
+	}
+	if req.Required != nil {
+		params.Required = *req.Required
+	}
+	if req.OrderIndex != nil {
+		params.OrderIndex = *req.OrderIndex
+	}
+	if req.Options != nil {
+		if opts, err := structpb.NewStruct(req.Options.AsMap()); err == nil {
+			if optsBytes, err := proto.Marshal(opts); err == nil {
+				params.Options = optsBytes
+			}
+		}
+	}
+	if req.ValidationRules != nil {
+		if rules, err := structpb.NewStruct(req.ValidationRules.AsMap()); err == nil {
+			if rulesBytes, err := proto.Marshal(rules); err == nil {
+				params.ValidationRules = rulesBytes
+			}
+		}
+	}
+
+	updated, err := s.db.Queries.UpdateQuestion(ctx, params)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update question: %v", err)
+	}
+
+	pbQ := s.convertQuestionToProto(updated)
+	return &pb.UpdateQuestionResponse{Question: pbQ}, nil
+}
+
+func (s *FormServerImpl) DeleteQuestion(ctx context.Context, req *pb.DeleteQuestionRequest) (*pb.DeleteQuestionResponse, error) {
+	user, err := s.getAuthenticatedFormUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	questionID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid question ID")
+	}
+
+	// Get question to verify form ownership
+	question, err := s.db.Queries.GetQuestion(ctx, questionID)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "question not found")
+	}
+
+	form, err := s.db.Queries.GetForm(ctx, question.FormID)
+	if err != nil || form.UserID != user.ID {
+		return nil, status.Errorf(codes.PermissionDenied, "not form owner")
+	}
+
+	err = s.db.Queries.DeleteQuestion(ctx, questionID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to delete question: %v", err)
+	}
+
+	return &pb.DeleteQuestionResponse{Success: true}, nil
+}
+
+func (s *FormServerImpl) ReorderQuestions(ctx context.Context, req *pb.ReorderQuestionsRequest) (*pb.ReorderQuestionsResponse, error) {
+	user, err := s.getAuthenticatedFormUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	formID, err := uuid.Parse(req.FormId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid form ID")
+	}
+
+	// Verify form ownership
+	form, err := s.db.Queries.GetForm(ctx, formID)
+	if err != nil || form.UserID != user.ID {
+		return nil, status.Errorf(codes.PermissionDenied, "not form owner")
+	}
+
+	// Execute in transaction
+	err = s.db.ExecTx(ctx, func(q *sqlc.Queries) error {
+		for i, questionIDStr := range req.QuestionIds {
+			questionID, err := uuid.Parse(questionIDStr)
+			if err != nil {
+				return status.Errorf(codes.InvalidArgument, "invalid question ID: %s", questionIDStr)
+			}
+
+			err = q.ReorderQuestions(ctx, sqlc.ReorderQuestionsParams{
+				ID:         questionID,
+				OrderIndex: int32(i),
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to reorder questions: %v", err)
+	}
+
+	return &pb.ReorderQuestionsResponse{Success: true}, nil
+}
+
+// convertQuestionToProto converts a SQLC question to protobuf
+func (s *FormServerImpl) convertQuestionToProto(q sqlc.FormQuestion) *pb.Question {
+	pbQ := &pb.Question{
+		Id:             q.ID.String(),
+		FormId:         q.FormID.String(),
+		Type:           pb.QuestionType(pb.QuestionType_value["QUESTION_TYPE_"+strings.ToUpper(q.Type)]),
+		Label:          q.Label,
+		Description:    q.Description.String,
+		Placeholder:    q.Placeholder.String,
+		Required:       q.Required,
+		OrderIndex:     q.OrderIndex,
+		Options:        &structpb.Struct{},
+		ValidationRules: &structpb.Struct{},
+		Settings:       &structpb.Struct{},
+		CreatedAt:      timestamppb.New(q.CreatedAt),
+		UpdatedAt:      timestamppb.New(q.UpdatedAt),
+	}
+
+	if len(q.Options) > 0 {
+		var optsMap map[string]interface{}
+		if err := json.Unmarshal(q.Options, &optsMap); err == nil {
+			if opts, err := structpb.NewStruct(optsMap); err == nil {
+				pbQ.Options = opts
+			}
+		}
+	}
+	if len(q.ValidationRules) > 0 {
+		var rulesMap map[string]interface{}
+		if err := json.Unmarshal(q.ValidationRules, &rulesMap); err == nil {
+			if rules, err := structpb.NewStruct(rulesMap); err == nil {
+				pbQ.ValidationRules = rules
+			}
+		}
+	}
+	if len(q.Settings) > 0 {
+		var setMap map[string]interface{}
+		if err := json.Unmarshal(q.Settings, &setMap); err == nil {
+			if set, err := structpb.NewStruct(setMap); err == nil {
+				pbQ.Settings = set
+			}
+		}
+	}
+
+	return pbQ
 }

@@ -23,31 +23,28 @@ type FileServer struct {
 
 // Constructor functions
 
-func NewFormServer(database *db.Database, storage *storage.S3Storage, mockMode bool) pb.FormServiceServer {
+func NewFormServer(database *db.Database, storage *storage.S3Storage) pb.FormServiceServer {
 	return &FormServer{
 		FormServerImpl: &FormServerImpl{
-			db:       database,
-			storage:  storage,
-			mockMode: mockMode,
+			db:      database,
+			storage: storage,
 		},
 	}
 }
 
-func NewResponseServer(database *db.Database, mockMode bool) pb.ResponseServiceServer {
+func NewResponseServer(database *db.Database) pb.ResponseServiceServer {
 	return &ResponseServer{
 		ResponseServerImpl: &ResponseServerImpl{
-			db:       database,
-			mockMode: mockMode,
+			db: database,
 		},
 	}
 }
 
-func NewFileServer(database *db.Database, storage *storage.S3Storage, mockMode bool) pb.FileServiceServer {
+func NewFileServer(database *db.Database, storage *storage.S3Storage) pb.FileServiceServer {
 	return &FileServer{
 		FileServerImpl: &FileServerImpl{
-			db:       database,
-			storage:  storage,
-			mockMode: mockMode,
+			db:      database,
+			storage: storage,
 		},
 	}
 }

@@ -21,9 +21,8 @@ import (
 
 type FileServerImpl struct {
 	pb.UnimplementedFileServiceServer
-	db       *db.Database
-	storage  *storage.S3Storage
-	mockMode bool
+	db      *db.Database
+	storage *storage.S3Storage
 }
 
 // UploadFile handles streaming upload: first metadata, then chunks

@@ -1,23 +1,14 @@
 import { routing } from '@/i18n/routing'
 import { ResponsesClient } from './ResponsesClient'
 
-// Mock form IDs for static export
-const MOCK_FORM_IDS = [
-  '00000000-0000-0000-0000-000000000001',
-  '00000000-0000-0000-0000-000000000002',
-]
-
+// No static generation for form IDs - Go server handles dynamic routes via template fallback
+// But we still need to generate static params for locales
 export function generateStaticParams() {
-  const paths: { locale: string; id: string }[] = []
-  routing.locales.forEach((locale) => {
-    MOCK_FORM_IDS.forEach((id) => {
-      paths.push({ locale, id })
-    })
-  })
-  return paths
+  // Return empty array for form IDs - Go server handles all dynamic form IDs
+  return routing.locales.map((locale) => ({ locale, id: '00000000-0000-0000-0000-000000000001' }))
 }
 
-export default async function ResponsesPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ResponsesPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { id } = await params
   return <ResponsesClient id={id} />
 }

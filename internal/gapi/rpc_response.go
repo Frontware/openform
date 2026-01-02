@@ -24,8 +24,7 @@ import (
 
 type ResponseServerImpl struct {
 	pb.UnimplementedResponseServiceServer
-	db       *db.Database
-	mockMode bool
+	db *db.Database
 }
 
 // Helper: get form and check access
