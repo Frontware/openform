@@ -150,6 +150,8 @@ make proto           # Regenerate protobuf Go code
 
 # Direct Go commands
 go run cmd/server/main.go                    # Run server directly
+./bin/weladee-form serve                     # Run server
+./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"  # Generate JWT token
 go build -o bin/weladee-form cmd/server/main.go  # Build binary
 sqlc generate                                  # Generate SQLC code
 protoc --go_out=. --go-grpc_out=. proto/*.proto  # Generate proto code

@@ -178,7 +178,24 @@ s3_endpoint: "https://your-endpoint.com"
 
 **Note:** The application will automatically load `config.yaml` from the current directory or `./config/` directory if it exists.
 
-### 4. Run the application
+### 4. Generate JWT Tokens (for testing/debugging)
+
+For testing and debugging purposes, you can generate JWT tokens using the built-in CLI:
+
+```bash
+# Generate JWT token with command line flags
+./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"
+
+# Generate JWT token interactively (will prompt for name and email)
+./bin/weladee-form create-jwt
+
+# Use custom JWT secret (defaults to built-in secret)
+JWT_SECRET="your-custom-secret" ./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"
+```
+
+The generated token will be valid for 2 hours and can be used for authentication with the backend API.
+
+### 5. Run the application
 
 **Backend:**
 ```bash
@@ -306,7 +323,8 @@ make vet             # Run go vet
 make help            # Show all available commands
 
 # Direct Go commands
-go run cmd/server/main.go                    # Run server directly
+./bin/weladee-form serve                       # Run server
+./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"  # Generate JWT token
 go build -o bin/weladee-form cmd/server/main.go  # Build binary
 sqlc generate                                  # Generate SQLC code
 ```

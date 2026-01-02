@@ -74,3 +74,4 @@ The backend supports configuration via flags, env vars, or `config.yaml`.
 - **Frontend Dev:** `npm run dev`
 - **Frontend Build:** `npm run build`
 - **Generate Proto:** `make proto` (requires `protoc` and plugins)
+- **Generate JWT:** `./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"`
