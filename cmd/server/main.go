@@ -38,7 +38,7 @@ func main() {
 	var serveCmd = &cobra.Command{
 		Use:   "serve",
 		Short: "Start the Weladee Form server",
-		RunE: runServe,
+		RunE:  runServe,
 	}
 
 	config.AddFlags(serveCmd)
@@ -48,7 +48,7 @@ func main() {
 	var createJWTCmd = &cobra.Command{
 		Use:   "create-jwt",
 		Short: "Create a JWT token for testing/debugging",
-		RunE: runCreateJWT,
+		RunE:  runCreateJWT,
 	}
 	createJWTCmd.Flags().String("name", "", "User display name")
 	createJWTCmd.Flags().String("email", "", "User email address")
@@ -219,7 +219,6 @@ func runServe(cmd *cobra.Command, args []string) error {
 				r.URL.Path == "/" ||
 				strings.HasPrefix(r.URL.Path, "/f/") ||
 				strings.HasPrefix(r.URL.Path, "/dashboard") ||
-				strings.HasPrefix(r.URL.Path, "/login") ||
 				strings.HasPrefix(r.URL.Path, "/en/") ||
 				strings.HasPrefix(r.URL.Path, "/fr/") ||
 				strings.HasPrefix(r.URL.Path, "/th/") ||

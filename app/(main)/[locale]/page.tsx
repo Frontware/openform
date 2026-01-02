@@ -5,13 +5,7 @@ import { ArrowRight, Sparkles, Zap, Shield, Palette } from 'lucide-react'
 import { TokenHandler } from '@/components/auth/token-handler'
 import { AuthMessage } from '@/components/auth/auth-message'
 
-async function getUser() {
-  // Authentication is now handled via URL token and client-side storage
-  return null
-}
-
 export default async function HomePage() {
-  const user = await getUser()
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
@@ -218,9 +212,9 @@ export default async function HomePage() {
             <p className="text-lg text-blue-100 mb-8 relative">
               Join thousands of people using Weladee Form to collect responses.
             </p>
-            <Link href="/login">
+            <Link href="/dashboard">
               <Button size="lg" className="h-14 px-8 text-lg bg-white text-[#13a89e] hover:bg-teal-50 shadow-xl shadow-teal-900/20 relative transition-all hover:-translate-y-0.5">
-                Get started for free
+                Go to dashboard
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
