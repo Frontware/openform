@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useLocale } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Plus, FileText, Loader2 } from 'lucide-react'
@@ -40,6 +41,7 @@ function mapPbFormToDBForm(pbForm: PbForm): DBForm {
 }
 
 export function DashboardClient() {
+  const locale = useLocale()
   const [forms, setForms] = useState<DBForm[]>([])
   const [loading, setLoading] = useState(true)
   const [responseCounts, setResponseCounts] = useState<Map<string, number>>(new Map())
@@ -74,7 +76,7 @@ export function DashboardClient() {
           <h1 className="text-2xl font-bold text-slate-900">My Forms</h1>
           <p className="text-slate-600 mt-1">Create and manage your forms</p>
         </div>
-        <Link href="/forms/new">
+        <Link href={`/${locale}/forms/new`}>
           <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
             <Plus className="w-4 h-4 mr-2" />
             Create Form
@@ -91,7 +93,7 @@ export function DashboardClient() {
           <p className="text-slate-600 mb-8 max-w-md mx-auto leading-relaxed">
             Build beautiful, engaging forms that people actually want to fill out. One question at a time.
           </p>
-          <Link href="/forms/new">
+          <Link href={`/${locale}/forms/new`}>
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/25 transition-all hover:shadow-blue-600/35 hover:-translate-y-0.5">
               <Plus className="w-5 h-5 mr-2" />
               Create your first form

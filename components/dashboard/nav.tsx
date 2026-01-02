@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 // import { createClient } from '@/lib/supabase/client' // TODO: Migrate to Go backend
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
@@ -33,6 +34,7 @@ interface DashboardNavProps {
 
 export function DashboardNav({ user }: DashboardNavProps) {
   const router = useRouter()
+  const locale = useLocale()
   // const supabase = createClient() // TODO: Migrate to Go backend
 
   const handleSignOut = async () => {
@@ -53,10 +55,10 @@ export function DashboardNav({ user }: DashboardNavProps) {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Logo href="/dashboard" />
+          <Logo href={`/${locale}/dashboard`} />
           <div className="hidden md:flex items-center gap-6">
             <Link 
-              href="/dashboard" 
+              href={`/${locale}/dashboard`}
               className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
             >
               My Forms
@@ -65,7 +67,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link href="/forms/new">
+          <Link href={`/${locale}/forms/new`}>
             <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
               Create Form
             </Button>
@@ -96,13 +98,13 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard" className="cursor-pointer">
+                  <Link href={`/${locale}/dashboard`} className="cursor-pointer">
                     <UserIcon className="mr-2 h-4 w-4" />
                     My Forms
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/settings" className="cursor-pointer">
+                  <Link href={`/${locale}/settings`} className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useLocale } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -58,6 +59,7 @@ function getStatusColor(status: FormStatus) {
 }
 
 export function FormCard({ form, responseCount }: FormCardProps) {
+  const locale = useLocale()
   const copyFormLink = () => {
     const link = `${window.location.origin}/f/${form.slug}`
     navigator.clipboard.writeText(link)
@@ -72,7 +74,7 @@ export function FormCard({ form, responseCount }: FormCardProps) {
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
           <Link 
-            href={`/forms/${form.id}/edit`}
+            href={`/${locale}/forms/${form.id}/edit`}
             className="text-lg font-semibold text-slate-900 hover:text-blue-600 truncate block transition-colors"
           >
             {form.title || 'Untitled Form'}
@@ -89,7 +91,7 @@ export function FormCard({ form, responseCount }: FormCardProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={`/forms/${form.id}/edit`} className="cursor-pointer">
+              <Link href={`/${locale}/forms/${form.id}/edit`} className="cursor-pointer">
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </Link>
@@ -103,7 +105,7 @@ export function FormCard({ form, responseCount }: FormCardProps) {
               </DropdownMenuItem>
             )}
             <DropdownMenuItem asChild>
-              <Link href={`/forms/${form.id}/responses`} className="cursor-pointer">
+              <Link href={`/${locale}/forms/${form.id}/responses`} className="cursor-pointer">
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Responses
               </Link>
@@ -130,13 +132,13 @@ export function FormCard({ form, responseCount }: FormCardProps) {
       </div>
 
       <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2">
-        <Link href={`/forms/${form.id}/edit`} className="flex-1">
+        <Link href={`/${locale}/forms/${form.id}/edit`} className="flex-1">
           <Button variant="outline" size="sm" className="w-full hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors">
             <Pencil className="w-3 h-3 mr-2" />
             Edit
           </Button>
         </Link>
-        <Link href={`/forms/${form.id}/responses`} className="flex-1">
+        <Link href={`/${locale}/forms/${form.id}/responses`} className="flex-1">
           <Button variant="outline" size="sm" className="w-full hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition-colors">
             <BarChart3 className="w-3 h-3 mr-2" />
             Responses
