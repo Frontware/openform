@@ -37,6 +37,10 @@ export const metadata: Metadata = {
   description: "Build stunning forms with Weladee Form. Free and open source.",
 };
 
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
 export default async function RootLayout({
   children,
   params,

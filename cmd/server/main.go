@@ -17,6 +17,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/weladee/weladee-form/config"
@@ -105,6 +106,17 @@ func runServer(cmd *cobra.Command, args []string) error {
 	// Create HTTP handler
 	httpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if wrappedGrpc.IsGrpcWebRequest(r) || wrappedGrpc.IsAcceptableGrpcCorsRequest(r) {
+			// Check for JWT token in URL parameters and add to metadata
+			if token := r.URL.Query().Get("token"); token != "" {
+				// Add token to gRPC metadata for authentication
+				md := metadata.MD{}
+				if existingMd, ok := metadata.FromIncomingContext(r.Context()); ok {
+					md = existingMd.Copy()
+				}
+				md.Set("authorization", "Bearer "+token)
+				ctx := metadata.NewIncomingContext(r.Context(), md)
+				r = r.WithContext(ctx)
+			}
 			wrappedGrpc.ServeHTTP(w, r)
 		} else {
 			// Handle embedded static files (when built with embed tag)
@@ -136,7 +148,9 @@ func runServer(cmd *cobra.Command, args []string) error {
 		Handler: corsHandler.Handler(httpHandler),
 	}
 
-	log.Printf("🚀 Weladee Form gRPC-Web server starting on port %s", cfg.GRPCPort)
+	log.Printf("🚀 Weladee Form server starting on port %s", cfg.GRPCPort)
+	log.Printf("🔗 Client application: http://localhost:%s", cfg.GRPCPort)
+	log.Printf("📡 gRPC-Web API: http://localhost:%s", cfg.GRPCPort)
 
 	// Graceful shutdown
 	go func() {

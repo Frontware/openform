@@ -8,7 +8,7 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 - **Themes:** Customizable themes (Midnight, Ocean, Sunset, Weladee, etc.).
 - **Form Player:** "TypeForm-style" navigation.
 - **Responses:** Dashboard to view, filter, and export form responses.
-- **Authentication:** Weladee Redis token validation (JWT-based).
+- **Authentication:** JWT token validation.
 - **Backend:** Go gRPC server with gRPC-Web support.
 - **Database:** PostgreSQL with SQLC.
 - **Storage:** S3-compatible (AWS/R2/MinIO) for file uploads.
@@ -17,7 +17,7 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 ## Tech Stack
 - **Frontend:** Next.js 16 (App Router), React 19, TypeScript
 - **Backend:** Go 1.21+, gRPC, ConnectRPC (Web)
-- **Database:** PostgreSQL, Redis
+- **Database:** PostgreSQL
 - **Styling:** Tailwind CSS 4, shadcn/ui
 - **Animations:** Framer Motion
 - **Communication:** gRPC-Web (Connect)
@@ -36,7 +36,6 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 - Node.js 18+
 - Go 1.21+
 - PostgreSQL
-- Redis
 
 ### Two Build Options
 
@@ -66,7 +65,6 @@ The backend supports configuration via flags, env vars, or `config.yaml`.
 
 **Key Environment Variables:**
 - `DATABASE_URL`: PostgreSQL connection string.
-- `REDIS_URL`: Redis connection string.
 - `GRPC_PORT`: Port for gRPC server (default 50051).
 
 ### Commands

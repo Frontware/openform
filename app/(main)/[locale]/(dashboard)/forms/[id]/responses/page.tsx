@@ -1,49 +1,15 @@
-import { notFound, redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { ResponsesDashboard } from '@/components/responses/responses-dashboard'
-import { Form, Response } from '@/lib/database.types'
+import { routing } from '@/i18n/routing'
+import { ResponsesClient } from './ResponsesClient'
 
-export const dynamic = 'force-dynamic'
-
-interface ResponsesPageProps {
-  params: Promise<{ id: string }>
+export function generateStaticParams() {
+  const paths: { locale: string; id: string }[] = []
+  routing.locales.forEach((locale) => {
+    paths.push({ locale, id: 'id' })
+  })
+  return paths
 }
 
-export default async function ResponsesPage({ params }: ResponsesPageProps) {
+export default async function ResponsesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: formData, error: formError } = await supabase
-    .from('forms')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
-  const form = formData as Form | null
-
-  if (formError || !form) {
-    notFound()
-  }
-
-  const { data: responsesData } = await supabase
-    .from('responses')
-    .select('*')
-    .eq('form_id', id)
-    .order('submitted_at', { ascending: false })
-
-  const responses = (responsesData || []) as Response[]
-
-  return (
-    <ResponsesDashboard 
-      form={form} 
-      responses={responses} 
-    />
-  )
+  return <ResponsesClient id={id} />
 }
-

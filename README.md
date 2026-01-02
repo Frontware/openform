@@ -9,7 +9,7 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - **7 beautiful themes** - Midnight, Ocean, Sunset, Forest, Lavender, Weladee, Minimal
 - **Keyboard navigation** - Navigate with Enter, arrow keys, and scroll wheel
 - **Mobile-first forms** - Responsive form-taking experience
-- **Secure authentication** - Weladee Redis token validation
+- **Secure authentication** - JWT token validation
 - **Response dashboard** - View, search, filter, and export to CSV/JSON
 - **13 question types** - Text, multiple choice, rating, file upload, and more
 - **Internationalization** - Support for English and Thai
@@ -37,7 +37,7 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - **Frontend**: Next.js 16 (App Router) + React 19
 - **Backend**: Go 1.21+ with gRPC
 - **Database**: PostgreSQL with SQLC for type-safe queries
-- **Auth**: Weladee Redis token validation
+- **Auth**: JWT token validation
 - **i18n**: next-intl
 - **Styling**: Tailwind CSS 4 + shadcn/ui
 - **Animations**: Framer Motion
@@ -50,7 +50,6 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - Node.js 18+
 - Go 1.21+
 - PostgreSQL
-- Redis (for Weladee token validation)
 - S3-compatible storage (optional, for file uploads)
 
 ### Installation Options
@@ -141,8 +140,6 @@ Weladee Form supports three methods for configuration, in order of priority:
 Available flags:
 - `-p, --grpc-port`: gRPC server port (default: 50051)
 - `-d, --database-url`: PostgreSQL database URL (required)
-- `-r, --redis-url`: Redis server URL (default: redis://localhost:6379)
-- `--redis-prefix`: Redis key prefix (default: weladee:auth:token)
 - `--s3-region`: S3 region (default: auto)
 - `--s3-bucket`: S3 bucket name
 - `--s3-access-key`: S3 access key
@@ -153,8 +150,6 @@ Available flags:
 ```bash
 export DATABASE_URL="postgresql://user:pass@localhost/db"
 export GRPC_PORT="50051"
-export REDIS_URL="redis://localhost:6379"
-export REDIS_KEY_PREFIX="weladee:auth:token"
 # ... other variables
 
 ./bin/weladee-form
@@ -172,8 +167,6 @@ Example `config.yaml`:
 ```yaml
 grpc_port: "50051"
 database_url: "postgresql://user:pass@localhost/db"
-redis_url: "redis://localhost:6379"
-redis_prefix: "weladee:auth:token"
 
 # Optional S3 configuration
 s3_region: "auto"
@@ -220,7 +213,7 @@ weladee-form/
 │   └── server/
 │       └── main.go       # gRPC server entry point
 ├── internal/             # Private Go application code
-│   ├── auth/             # Authentication (Redis token validation)
+│   ├── auth/             # Authentication (JWT token validation)
 │   ├── db/               # Database layer (SQLC)
 │   ├── gapi/             # gRPC service implementations
 │   ├── storage/          # S3 storage client
@@ -280,10 +273,10 @@ The database layer uses [SQLC](https://sqlc.dev/) for type-safe SQL queries:
 
 ### Authentication
 
-Authentication uses Weladee Redis token validation:
-- Frontend obtains Weladee token (from external auth service)
-- Token passed in gRPC metadata: `authorization: Bearer <token>`
-- Auth interceptor validates token against Weladee Redis
+Authentication uses JWT token validation:
+- JWT tokens can be passed in Authorization header: `authorization: Bearer <token>`
+- JWT tokens can also be passed in URL parameters: `?token=<jwt_token>`
+- Auth interceptor validates JWT tokens directly using configured secret
 - User claims extracted and added to request context
 
 ## Development

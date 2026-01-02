@@ -8,7 +8,7 @@ Weladee Form is an open-source TypeForm alternative built with:
 - **Frontend**: Next.js 16 (App Router) with React 19
 - **Backend**: Go 1.21+ with gRPC
 - **Database**: PostgreSQL with SQLC for type-safe queries
-- **Auth**: Weladee Redis token validation
+- **Auth**: JWT token validation
 
 Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
 
@@ -17,7 +17,7 @@ Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 qu
 - **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (app/(form-player)/f/[slug])
 - **Response Dashboard** - View, search, filter, and export responses to CSV/JSON (app/(main)/dashboard/forms/[id]/responses)
 - **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
-- **Authentication** - Weladee Redis token validation
+- **Authentication** - JWT token validation
 
 ## Backend Architecture
 
@@ -64,15 +64,15 @@ The database layer uses SQLC for type-safe SQL queries:
 
 ### Authentication Flow
 
-**Weladee Token Validation**:
-1. Frontend obtains Weladee token (from external auth service)
-2. Token passed in gRPC metadata: `authorization: Bearer <token>`
-3. Auth interceptor validates token against Weladee Redis
+**JWT Token Validation**:
+1. JWT tokens can be passed in Authorization header: `authorization: Bearer <token>`
+2. JWT tokens can also be passed in URL parameters: `?token=<jwt_token>`
+3. Auth interceptor validates JWT tokens directly using configured secret
 4. User claims (UserID, Email, DisplayName) extracted and added to context
 5. Public endpoints (like GetFormBySlug, SubmitResponse for public forms) bypass auth
 
 **Auth Files**:
-- `internal/auth/redis.go` - RedisTokenValidator for token validation
+- `internal/auth/jwt.go` - JWT token validation
 - `internal/auth/interceptor.go` - gRPC auth interceptor with public method whitelist
 
 ### Storage Layer
@@ -95,8 +95,6 @@ The Go backend supports three configuration methods with the following priority:
 |---------|----------|---------------------|---------|----------|
 | gRPC Port | `-p, --grpc-port` | `GRPC_PORT` | `50051` | No |
 | Database URL | `-d, --database-url` | `DATABASE_URL` | - | **Yes** |
-| Redis URL | `-r, --redis-url` | `REDIS_URL` | `redis://localhost:6379` | No |
-| Redis Prefix | `--redis-prefix` | `REDIS_KEY_PREFIX` | `weladee:auth:token` | No |
 | S3 Region | `--s3-region` | `S3_REGION` | `auto` | No |
 | S3 Bucket | `--s3-bucket` | `S3_BUCKET` | - | No |
 | S3 Access Key | `--s3-access-key` | `S3_ACCESS_KEY` | - | No |
@@ -122,8 +120,6 @@ export GRPC_PORT="8080"
 ```yaml
 grpc_port: "8080"
 database_url: "postgresql://user:pass@localhost/db"
-redis_url: "redis://localhost:6379"
-redis_prefix: "weladee:auth:token"
 s3_region: "auto"
 s3_bucket: "your-bucket"
 s3_access_key: "your-key"
@@ -244,7 +240,6 @@ protoc --go_out=. --go_opt=paths=source_relative \
 Set required environment variables:
 ```bash
 export DATABASE_URL="postgresql://user:pass@localhost/db"
-export REDIS_URL="redis://localhost:6379"
 ```
 
 Optional (for file uploads):
@@ -297,7 +292,7 @@ Backend:
   - `database.go` - Database connection wrapper
   - `sqlc/` - SQLC generated code
 - `internal/auth/` - Authentication
-  - `redis.go` - Redis token validation
+  - `jwt.go` - JWT token validation
   - `interceptor.go` - gRPC auth interceptor
 - `internal/storage/s3.go` - S3 storage client
 - `internal/utils/export.go` - CSV/JSON export utilities
@@ -518,7 +513,7 @@ Frontend types are generated from protobuf definitions (to be implemented):
 - **gRPC** - RPC framework
 - **PostgreSQL** - Database with pgx/v5 driver
 - **SQLC** - Type-safe SQL generation
-- **Redis** - Token validation (Weladee auth)
+- **JWT** - Token validation
 - **AWS SDK v2** - S3 storage
 
 ### Frontend

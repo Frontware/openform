@@ -6,6 +6,10 @@ interface FormPageProps {
   params: Promise<{ slug: string }>
 }
 
+export function generateStaticParams() {
+  return [{ slug: 'form' }]
+}
+
 export async function generateMetadata({ params }: FormPageProps) {
   // Metadata generation skipped for migration as it requires server-side fetching via gRPC-Web
   return {

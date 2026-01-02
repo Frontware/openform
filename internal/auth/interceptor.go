@@ -95,23 +95,26 @@ func (i *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 
 // authenticate extracts and validates the token from context
 func (i *AuthInterceptor) authenticate(ctx context.Context) (*WeladeeUserClaims, error) {
+	// First try to get token from Authorization header
 	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, fmt.Errorf("no metadata found")
+	if ok {
+		values := md.Get("authorization")
+		if len(values) > 0 {
+			authHeader := values[0]
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				token := strings.TrimPrefix(authHeader, "Bearer ")
+				return i.validator.ValidateToken(token)
+			}
+		}
 	}
 
-	values := md.Get("authorization")
-	if len(values) == 0 {
-		return nil, fmt.Errorf("no authorization header")
-	}
+	// If no token in header, try to get from URL parameters
+	// This allows JWT tokens to be passed in URLs like ?token=eyJ...
+	// Note: This requires the token to be passed via metadata or context
+	// For URL parameters, we would need to extract them at the HTTP level
+	// and add them to metadata before reaching here
 
-	authHeader := values[0]
-	if !strings.HasPrefix(authHeader, "Bearer ") {
-		return nil, fmt.Errorf("invalid authorization header format")
-	}
-
-	token := strings.TrimPrefix(authHeader, "Bearer ")
-	return i.validator.ValidateToken(token)
+	return nil, fmt.Errorf("no valid authorization token found")
 }
 
 // GetUserClaims extracts user claims from context

@@ -312,7 +312,6 @@ env-check: ## Check environment variables
 	@echo "  GRPC_PORT - Port for gRPC server (default: 50051)"
 	@echo ""
 	@echo "Optional environment variables:"
-	@echo "  REDIS_URL - Redis connection string (default: redis://localhost:6379)"
 	@echo "  S3_REGION - S3 region (default: auto)"
 	@echo "  S3_BUCKET - S3 bucket name"
 	@echo "  S3_ACCESS_KEY - S3 access key"
