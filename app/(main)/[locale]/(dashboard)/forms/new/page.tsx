@@ -1,48 +1,48 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { v4 as uuidv4 } from 'uuid'
-import { FormInsert } from '@/lib/database.types'
+'use client'
 
-export const dynamic = 'force-dynamic'
+import { useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
+import { formClient } from '@/lib/grpc-client'
+import { FormTheme } from '@/lib/proto/proto/form_pb'
 
-function generateSlug(): string {
-  // Generate a short random slug
-  return Math.random().toString(36).substring(2, 10)
+export default function NewFormPage() {
+  const router = useRouter()
+  const creatingRef = useRef(false)
+
+  useEffect(() => {
+    async function createForm() {
+      if (creatingRef.current) return
+      creatingRef.current = true
+
+      try {
+        const response = await formClient.createForm({
+          title: 'Untitled Form',
+          description: '',
+          theme: FormTheme.MINIMAL,
+          questions: [],
+          settings: {},
+        })
+
+        if (response.form) {
+          router.replace(`/forms/${response.form.id}/edit`)
+        } else {
+          console.error('No form returned from createForm')
+          router.replace('/dashboard')
+        }
+      } catch (error) {
+        console.error('Error creating form:', error)
+        router.replace('/dashboard')
+      }
+    }
+
+    createForm()
+  }, [router])
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-4" />
+      <p className="text-slate-600">Creating your new form...</p>
+    </div>
+  )
 }
-
-export default async function NewFormPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Create a new form
-  const formId = uuidv4()
-  const slug = generateSlug()
-
-  const newForm: FormInsert = {
-    id: formId,
-    user_id: user.id,
-    title: 'Untitled Form',
-    slug: slug,
-    status: 'draft',
-    theme: 'minimal',
-    questions: [],
-    thank_you_message: 'Thank you for your response!',
-  }
-
-  const { error } = await supabase
-    .from('forms')
-    .insert(newForm as never)
-
-  if (error) {
-    console.error('Error creating form:', error)
-    redirect('/dashboard')
-  }
-
-  // Redirect to the form editor
-  redirect(`/forms/${formId}/edit`)
-}
-

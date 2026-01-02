@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Form, QuestionConfig, ThemePreset, FormStatus } from '@/lib/database.types'
 import { questionTypes, createDefaultQuestion } from '@/lib/questions'
 import { themes, themeList } from '@/lib/themes'
@@ -43,19 +42,78 @@ import {
 import Link from 'next/link'
 import { QuestionEditor } from './question-editor'
 import { FormPreview } from './form-preview'
+import { formClient } from '@/lib/grpc-client'
+import { FormTheme, QuestionType } from '@/lib/proto/proto/form_pb'
+import { Struct, Value } from '@bufbuild/protobuf'
 
 interface FormBuilderProps {
   form: Form
 }
 
+// Helpers to map UI types to Proto types
+function mapThemeToProto(theme: string): FormTheme {
+  switch (theme) {
+    case 'minimal': return FormTheme.MINIMAL
+    case 'midnight': return FormTheme.MIDNIGHT
+    case 'ocean': return FormTheme.OCEAN
+    case 'sunset': return FormTheme.SUNSET
+    case 'forest': return FormTheme.FOREST
+    case 'lavender': return FormTheme.LAVENDER
+    default: return FormTheme.FORM_THEME_UNSPECIFIED // or default
+  }
+}
+
+function mapQuestionTypeToProto(type: QuestionConfig['type']): QuestionType {
+  switch (type) {
+    case 'short_text': return QuestionType.SHORT_TEXT
+    case 'long_text': return QuestionType.LONG_TEXT
+    case 'dropdown': return QuestionType.DROPDOWN
+    case 'checkboxes': return QuestionType.CHECKBOXES
+    case 'email': return QuestionType.EMAIL
+    case 'phone': return QuestionType.PHONE
+    case 'number': return QuestionType.NUMBER
+    case 'date': return QuestionType.DATE
+    case 'rating': return QuestionType.RATING
+    case 'opinion_scale': return QuestionType.OPINION_SCALE
+    case 'yes_no': return QuestionType.YES_NO
+    case 'file_upload': return QuestionType.FILE_UPLOAD
+    case 'url': return QuestionType.URL
+    default: return QuestionType.QUESTION_TYPE_UNSPECIFIED
+  }
+}
+
+// Helper to construct validation rules struct
+function buildValidationRules(q: QuestionConfig): Struct {
+  const rules: Record<string, any> = {}
+  if (q.minValue !== undefined) rules['minValue'] = q.minValue
+  if (q.maxValue !== undefined) rules['maxValue'] = q.maxValue
+  if (q.maxFileSize !== undefined) rules['maxFileSize'] = q.maxFileSize
+  if (q.allowedFileTypes) rules['allowedFileTypes'] = q.allowedFileTypes
+  return Struct.fromJson(rules)
+}
+
+// Helper to construct options struct
+function buildOptions(q: QuestionConfig): Struct {
+  const opts: Record<string, any> = {}
+  if (q.options) {
+      opts['items'] = q.options
+  }
+  return Struct.fromJson(opts)
+}
+
+
 export function FormBuilder({ form: initialForm }: FormBuilderProps) {
   const router = useRouter()
-  const supabase = createClient()
   
   const [form, setForm] = useState(initialForm)
   const [questions, setQuestions] = useState<QuestionConfig[]>(
     (initialForm.questions as QuestionConfig[]) || []
   )
+  const [originalQuestions, setOriginalQuestions] = useState<QuestionConfig[]>(
+    (initialForm.questions as QuestionConfig[]) || []
+  )
+  const [deletedQuestionIds, setDeletedQuestionIds] = useState<Set<string>>(new Set())
+
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [showPublishDialog, setShowPublishDialog] = useState(false)
@@ -67,27 +125,80 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
   const handleSave = useCallback(async () => {
     setIsSaving(true)
-    const updateData = {
-      title: form.title,
-      description: form.description,
-      slug: form.slug,
-      theme: form.theme,
-      questions: questions,
-      thank_you_message: form.thank_you_message,
-    }
-    const { error } = await supabase
-      .from('forms')
-      .update(updateData as never)
-      .eq('id', form.id)
+    try {
+      // 1. Update Form Metadata
+      await formClient.updateForm({
+        id: form.id,
+        title: form.title,
+        description: form.description || undefined,
+        theme: mapThemeToProto(form.theme),
+        customThankYouMessage: form.thank_you_message,
+      })
 
-    if (error) {
-      toast.error('Failed to save form')
-    } else {
+      // 2. Delete removed questions
+      for (const id of deletedQuestionIds) {
+          try {
+              await formClient.deleteQuestion({ id })
+          } catch (e) {
+              console.error("Failed to delete question", id, e)
+          }
+      }
+      setDeletedQuestionIds(new Set())
+
+      // 3. Update or Create questions
+      const newQuestionsState: QuestionConfig[] = []
+      
+      for (const [index, q] of questions.entries()) {
+        const isExisting = originalQuestions.some(oq => oq.id === q.id)
+        
+        if (isExisting) {
+            // Update
+            await formClient.updateQuestion({
+                id: q.id,
+                type: mapQuestionTypeToProto(q.type),
+                label: q.title,
+                description: q.description,
+                placeholder: q.placeholder,
+                required: q.required,
+                orderIndex: index,
+                options: buildOptions(q),
+                validationRules: buildValidationRules(q)
+            })
+            newQuestionsState.push(q)
+        } else {
+            // Create
+            const res = await formClient.createQuestion({
+                formId: form.id,
+                type: mapQuestionTypeToProto(q.type),
+                label: q.title,
+                description: q.description,
+                placeholder: q.placeholder,
+                required: q.required,
+                orderIndex: index,
+                options: buildOptions(q),
+                validationRules: buildValidationRules(q)
+            })
+            // Update ID to the real server ID
+            if (res.question) {
+                newQuestionsState.push({ ...q, id: res.question.id })
+            } else {
+                newQuestionsState.push(q) // Fallback if failed?
+            }
+        }
+      }
+
+      setQuestions(newQuestionsState)
+      setOriginalQuestions(newQuestionsState) // Sync baseline
+      
       toast.success('Form saved')
       setHasUnsavedChanges(false)
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to save form')
+    } finally {
+      setIsSaving(false)
     }
-    setIsSaving(false)
-  }, [supabase, form, questions])
+  }, [form, questions, deletedQuestionIds, originalQuestions])
 
   const handlePublish = async () => {
     if (questions.length === 0) {
@@ -96,31 +207,25 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
     }
 
     setIsSaving(true)
-    const newStatus: FormStatus = form.status === 'published' ? 'closed' : 'published'
-    
-    const updateData = {
-      status: newStatus,
-      questions: questions,
-      title: form.title,
-      description: form.description,
-      slug: form.slug,
-      theme: form.theme,
-      thank_you_message: form.thank_you_message,
+    try {
+        if (form.status === 'published') {
+            await formClient.updateForm({
+                id: form.id,
+                isPublished: false
+            })
+            setForm({ ...form, status: 'draft' })
+            toast.success('Form unpublished')
+        } else {
+            await formClient.publishForm({ id: form.id })
+            setForm({ ...form, status: 'published' })
+            toast.success('Form published!')
+        }
+        setShowPublishDialog(false)
+    } catch (error) {
+        toast.error('Failed to update status')
+    } finally {
+        setIsSaving(false)
     }
-    const { error } = await supabase
-      .from('forms')
-      .update(updateData as never)
-      .eq('id', form.id)
-
-    if (error) {
-      toast.error('Failed to update form status')
-    } else {
-      setForm({ ...form, status: newStatus })
-      toast.success(newStatus === 'published' ? 'Form published!' : 'Form unpublished')
-      setShowPublishDialog(false)
-      setHasUnsavedChanges(false)
-    }
-    setIsSaving(false)
   }
 
   const addQuestion = (type: QuestionConfig['type']) => {
@@ -140,6 +245,11 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
   const deleteQuestion = (id: string) => {
     setQuestions(questions.filter(q => q.id !== id))
+    // Track if it was a server-persisted question
+    if (originalQuestions.some(oq => oq.id === id)) {
+        setDeletedQuestionIds(prev => new Set(prev).add(id))
+    }
+    
     if (selectedQuestionId === id) {
       setSelectedQuestionId(null)
     }
@@ -219,7 +329,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
             disabled={isSaving}
           >
             <Save className="w-4 h-4 mr-2" />
-            Save
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
           <Button
             size="sm"
@@ -390,6 +500,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
                       }}
                       className="flex-1"
                       placeholder="my-form"
+                      disabled // Disabled because backend doesn't support slug update yet
                     />
                   </div>
                 </div>

@@ -1,71 +1,29 @@
-import { createPromiseClient } from "@bufbuild/connect-web";
+import { createPromiseClient } from "@bufbuild/connect";
+import { createGrpcWebTransport } from "@bufbuild/connect-web";
 import { FormService } from "./proto/proto/form_connect";
 import { ResponseService } from "./proto/proto/response_connect";
 import { FileService } from "./proto/proto/file_connect";
 
-// The base URL for the gRPC-Web server
-const baseUrl = process.env.NEXT_PUBLIC_GRPC_URL || "http://localhost:50051";
+// The base URL for the gRPC-Web server (Envoy or gRPC server if it supports web)
+// For now, assuming the Go server listens on a port that supports gRPC-Web or we use a proxy.
+const baseUrl = process.env.NEXT_PUBLIC_GRPC_URL || "http://localhost:8080";
 
-// Create transport with auth interceptor
-const transport = createPromiseClient(async (req) => {
-  // Add auth token to all requests if available
-  const token = typeof window !== "undefined" ? localStorage.getItem("weladee_token") : null;
-  if (token) {
-    req.header.set("Authorization", `Bearer ${token}`);
-  }
-  // For gRPC-web, we need to use a transport that can handle the protocol
-  // For development, we'll use a simple fetch-based implementation
-  const response = await fetch(`${baseUrl}${req.method.name}`, {
-    method: "POST",
-    headers: req.header.toJSON() as HeadersInit,
-    body: req.toBinary(),
-  });
-  return response.arrayBuffer();
+const transport = createGrpcWebTransport({
+  baseUrl,
+  interceptors: [
+    (next) => async (req) => {
+      // Add auth token to all requests if available
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("weladee_token");
+        if (token) {
+          req.header.set("Authorization", `Bearer ${token}`);
+        }
+      }
+      return await next(req);
+    },
+  ],
 });
 
-// Create clients using connect-web's createPromiseClient
-// Note: This is a simplified version - you may need to adjust based on your actual gRPC-web setup
-export const createFormClient = () => {
-  return createPromiseClient(FormService, {
-    baseUrl,
-  });
-};
-
-export const createResponseClient = () => {
-  return createPromiseClient(ResponseService, {
-    baseUrl,
-  });
-};
-
-export const createFileClient = () => {
-  return createPromiseClient(FileService, {
-    baseUrl,
-  });
-};
-
-// Singleton clients
-export const formClient = createFormClient();
-export const responseClient = createResponseClient();
-export const fileClient = createFileClient();
-
-// Helper to set auth token
-export const setAuthToken = (token: string) => {
-  if (typeof window !== "undefined") {
-    localStorage.setItem("weladee_token", token);
-  }
-};
-
-// Helper to get auth token
-export const getAuthToken = (): string | null => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("weladee_token");
-  }
-  return null;
-};
-
-// Helper to clear auth token
-export const clearAuthToken = () => {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("weladee_token");
-  }
-};
+export const formClient = createPromiseClient(FormService, transport);
+export const responseClient = createPromiseClient(ResponseService, transport);
+export const fileClient = createPromiseClient(FileService, transport);

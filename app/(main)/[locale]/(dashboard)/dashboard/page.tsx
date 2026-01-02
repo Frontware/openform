@@ -1,39 +1,77 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, FileText } from 'lucide-react'
-import { Form } from '@/lib/database.types'
+import { Plus, FileText, Loader2 } from 'lucide-react'
 import { FormCard } from '@/components/dashboard/form-card'
+import { formClient } from '@/lib/grpc-client'
+import { Form as PbForm, FormTheme } from '@/lib/proto/proto/form_pb'
+import { Form as DBForm, ThemePreset } from '@/lib/database.types'
 
-export const dynamic = 'force-dynamic'
+// Mapper function to convert gRPC Form to UI Form
+function mapPbFormToDBForm(pbForm: PbForm): DBForm {
+  // Map theme enum to string
+  let theme: ThemePreset = 'weladee'
+  switch (pbForm.theme) {
+    case FormTheme.MINIMAL: theme = 'minimal'; break;
+    case FormTheme.MIDNIGHT: theme = 'midnight'; break;
+    case FormTheme.OCEAN: theme = 'ocean'; break;
+    case FormTheme.SUNSET: theme = 'sunset'; break;
+    case FormTheme.FOREST: theme = 'forest'; break;
+    case FormTheme.LAVENDER: theme = 'lavender'; break;
+    default: theme = 'weladee';
+  }
 
-export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  const { data: formsData } = await supabase
-    .from('forms')
-    .select('*')
-    .eq('user_id', user!.id)
-    .order('updated_at', { ascending: false })
+  return {
+    id: pbForm.id,
+    user_id: pbForm.userId,
+    title: pbForm.title,
+    description: pbForm.description,
+    slug: pbForm.id, // Using ID as slug for now since migration dropped slug column
+    status: pbForm.isPublished ? 'published' : 'draft',
+    theme: theme,
+    questions: [], // We don't need questions for the card view
+    thank_you_message: pbForm.customThankYouMessage,
+    created_at: pbForm.createdAt?.toDate().toISOString() || new Date().toISOString(),
+    updated_at: pbForm.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+  }
+}
 
-  const forms = (formsData || []) as Form[]
+export default function DashboardPage() {
+  const [forms, setForms] = useState<DBForm[]>([])
+  const [loading, setLoading] = useState(true)
+  // responseCounts not yet implemented in gRPC ListForms response (it only returns Form objects)
+  // We might need to fetch stats separately or update the API.
+  // For now, hardcode 0 to unblock.
+  const [responseCounts, setResponseCounts] = useState<Map<string, number>>(new Map())
 
-  // Get response counts for each form
-  const formIds = forms.map(f => f.id)
-  const { data: responseCounts } = formIds.length > 0 
-    ? await supabase
-        .from('responses')
-        .select('form_id')
-        .in('form_id', formIds)
-    : { data: [] }
+  useEffect(() => {
+    async function fetchForms() {
+      try {
+        const response = await formClient.listForms({})
+        const mappedForms = response.forms.map(mapPbFormToDBForm)
+        setForms(mappedForms)
+        
+        // Optionally fetch stats for each form (could be slow N+1, ideally backend should include it)
+        // For MVP/Migration, we can skip or fetch one by one.
+      } catch (error) {
+        console.error('Failed to fetch forms:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchForms()
+  }, [])
 
-  const responseCountMap = new Map<string, number>()
-  responseCounts?.forEach((r: { form_id: string }) => {
-    const count = responseCountMap.get(r.form_id) || 0
-    responseCountMap.set(r.form_id, count + 1)
-  })
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -72,7 +110,7 @@ export default async function DashboardPage() {
             <FormCard 
               key={form.id} 
               form={form} 
-              responseCount={responseCountMap.get(form.id) || 0} 
+              responseCount={responseCounts.get(form.id) || 0} 
             />
           ))}
         </div>

@@ -50,6 +50,7 @@ export async function updateSession(request: NextRequest, response?: NextRespons
   )
 
   // Redirect to login if accessing protected route without auth
+  /* MIGRATION: Bypassing Supabase Auth
   if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone()
     // Keep the locale if present, or default to en?
@@ -64,6 +65,7 @@ export async function updateSession(request: NextRequest, response?: NextRespons
     url.searchParams.set('redirect', path)
     return NextResponse.redirect(url)
   }
+  */
 
   // Redirect to dashboard if already logged in and accessing login page
   // /login or /en/login -> /en/dashboard

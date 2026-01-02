@@ -2,20 +2,11 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { ArrowRight, Sparkles, Zap, Shield, Palette } from 'lucide-react'
+import { TokenHandler } from '@/components/auth/token-handler'
 
 async function getUser() {
-  try {
-    // Only import and use Supabase if env vars are set
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      return null
-    }
-    const { createClient } = await import('@/lib/supabase/server')
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    return user
-  } catch {
-    return null
-  }
+  // Authentication is now handled via URL token and client-side storage
+  return null
 }
 
 export default async function HomePage() {
@@ -23,6 +14,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
+      <TokenHandler />
       {/* Sophisticated Blue Gradient Background */}
       <div
         className="absolute inset-0 z-0"
@@ -52,28 +44,12 @@ export default async function HomePage() {
         <div className="relative max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           <Logo href="/" />
           <div className="flex items-center gap-4">
-            {user ? (
-              <Link href="/dashboard">
-                <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
-                  Dashboard
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost" className="text-slate-600 hover:text-slate-900">
-                    Sign in
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
-                    Get Started
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </Link>
-              </>
-            )}
+            <Link href="/dashboard">
+              <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
+                Dashboard
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -99,9 +75,9 @@ export default async function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/login">
+            <Link href="/dashboard">
               <Button size="lg" className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/25 transition-all hover:shadow-blue-600/35 hover:-translate-y-0.5">
-                Start creating for free
+                Start creating
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
