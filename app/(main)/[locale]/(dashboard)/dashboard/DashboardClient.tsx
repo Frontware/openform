@@ -100,6 +100,21 @@ export function DashboardClient() {
       })
       const mappedForms = response.forms.map(mapPbFormToDBForm)
       setForms(mappedForms)
+
+      // Fetch response counts for each form
+      const countsMap = new Map<string, number>()
+      await Promise.all(
+        mappedForms.map(async (form) => {
+          try {
+            const statsRes = await formClient.getFormStats({ formId: form.id })
+            countsMap.set(form.id, Number(statsRes.stats?.totalResponses || 0))
+          } catch (error) {
+            console.error(`Failed to fetch stats for form ${form.id}:`, error)
+            countsMap.set(form.id, 0)
+          }
+        })
+      )
+      setResponseCounts(countsMap)
     } catch (error) {
       console.error('Failed to fetch forms:', error)
     } finally {

@@ -102,10 +102,14 @@ export function ResponsesClient({ id }: { id: string }) {
             const respRes = await responseClient.listResponses({ formId: id, pagination: { page: 1, pageSize: 100 } })
             setResponses(respRes.responses.map(mapPbResponseToDBResponse))
         } else {
-            // handle not found
+            notFound()
         }
       } catch (error) {
         console.error('Failed to load responses:', error)
+        // Check if it's a not found error
+        if (error instanceof Error && error.message.includes('NotFound')) {
+          notFound()
+        }
       } finally {
         setLoading(false)
       }
@@ -121,7 +125,7 @@ export function ResponsesClient({ id }: { id: string }) {
       )
   }
 
-  if (!form) return <div>Form not found</div>
+  if (!form) notFound()
 
   return (
     <ResponsesDashboard 
