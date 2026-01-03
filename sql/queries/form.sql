@@ -34,6 +34,7 @@ SET
     show_progress_bar = COALESCE(@show_progress_bar::boolean, show_progress_bar),
     custom_thank_you_message = COALESCE(@custom_thank_you_message::text, custom_thank_you_message),
     redirect_url = COALESCE(@redirect_url::text, redirect_url),
+    force_captcha = COALESCE(@force_captcha::boolean, force_captcha),
     settings = COALESCE(@settings::jsonb, settings)
 WHERE id = @id::uuid AND user_id = @user_id::uuid
 RETURNING *;
