@@ -61,7 +61,6 @@ func (s *FormServerImpl) convertFormWithQuestions(form sqlc.FormForm, questions 
 		UserId:                form.UserID.String(),
 		Title:                 form.Title,
 		Description:           form.Description.String,
-		Slug:                  form.Slug.String,
 		Theme:                 pb.FormTheme(pb.FormTheme_value["FORM_THEME_"+strings.ToUpper(form.Theme)]),
 		IsPublished:           form.IsPublished,
 		IsAcceptingResponses:  form.IsAcceptingResponses,

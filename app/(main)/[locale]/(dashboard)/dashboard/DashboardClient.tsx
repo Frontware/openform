@@ -30,7 +30,7 @@ function mapPbFormToDBForm(pbForm: PbForm): DBForm {
     user_id: pbForm.userId,
     title: pbForm.title,
     description: pbForm.description,
-    slug: pbForm.id,
+    slug: pbForm.id,  // Use form ID as slug for now (friendly URLs can be added later)
     status: pbForm.isPublished ? 'published' : 'draft',
     theme: theme,
     questions: [],
