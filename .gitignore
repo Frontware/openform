@@ -47,6 +47,9 @@ config.yaml
 next-env.d.ts
 /server
 
+# Generated TypeScript proto files
+lib/proto/proto/
+
 # Go build artifacts
 bin/
 /weladee-form

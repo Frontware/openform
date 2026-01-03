@@ -189,10 +189,16 @@ deps-check: ## Check for dependency updates
 
 # Protobuf generation
 .PHONY: proto
-proto: ## Generate protobuf Go code
-	@echo "Generating protobuf code..."
+proto: ## Generate protobuf Go and TypeScript code
+	@echo "Generating protobuf Go code..."
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+		proto/*.proto
+	@echo "Generating protobuf TypeScript code..."
+	@mkdir -p lib/proto/proto
+	protoc --plugin=protoc-gen-connect-es=node_modules/.bin/protoc-gen-connect-es \
+		--connect-es_out=lib/proto/proto \
+		--connect-es_opt=target=ts \
 		proto/*.proto
 
 .PHONY: proto-check
