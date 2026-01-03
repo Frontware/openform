@@ -19,6 +19,7 @@ Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 qu
 - **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
 - **Authentication** - JWT token validation
 - **Smart Menu States** - Menu items automatically disable for draft forms (Responses, Copy Link) with visual feedback
+- **Language Switcher** - User can change language (English, Thai, French) from the user dropdown menu with flag icons and persistent cookie storage
 
 ## Backend Architecture
 

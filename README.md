@@ -12,7 +12,7 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - **Secure authentication** - JWT token validation
 - **Response dashboard** - View, search, filter, and export to CSV/JSON
 - **13 question types** - Text, multiple choice, rating, file upload, and more
-- **Internationalization** - Support for English and Thai
+- **Internationalization** - Support for English, Thai, and French with in-app language switcher
 
 ## Question types
 

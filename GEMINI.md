@@ -12,7 +12,7 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 - **Backend:** Go gRPC server with gRPC-Web support.
 - **Database:** PostgreSQL with SQLC.
 - **Storage:** S3-compatible (AWS/R2/MinIO) for file uploads.
-- **i18n:** Multi-language support (English, Thai, French).
+- **i18n:** Multi-language support (English, Thai, French) with language switcher in user menu.
 - **Smart UI:** Menu items automatically disable for draft forms (Responses, Copy Link) with visual feedback
 
 ## Tech Stack
