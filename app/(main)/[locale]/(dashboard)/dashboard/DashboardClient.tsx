@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useLocale } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Plus, FileText, Loader2 } from 'lucide-react'
 import { FormCard } from '@/components/dashboard/form-card'
+import { FilterBar } from '@/components/dashboard/filter-bar'
 import { formClient } from '@/lib/grpc-client'
-import { Form as PbForm, FormTheme } from '@/lib/proto/proto/form_pb'
+import { Form as PbForm, FormTheme, FormSortBy, FormSortOrder, FormStatusFilter } from '@/lib/proto/proto/form_pb'
 import { Form as DBForm, ThemePreset } from '@/lib/database.types'
 
 // Mapper function to convert gRPC Form to UI Form
@@ -46,9 +47,57 @@ export function DashboardClient() {
   const [loading, setLoading] = useState(true)
   const [responseCounts, setResponseCounts] = useState<Map<string, number>>(new Map())
 
-  const fetchForms = async () => {
+  // Filter and sort state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'closed'>('all')
+  const [sortBy, setSortBy] = useState('updated_at_desc')
+
+  const fetchForms = useCallback(async () => {
     try {
-      const response = await formClient.listForms({})
+      // Map frontend values to proto enums
+      let statusFilterEnum: FormStatusFilter | undefined
+      switch (statusFilter) {
+        case 'draft':
+          statusFilterEnum = FormStatusFilter.DRAFT
+          break
+        case 'published':
+          statusFilterEnum = FormStatusFilter.PUBLISHED
+          break
+        case 'closed':
+          statusFilterEnum = FormStatusFilter.CLOSED
+          break
+        default: // 'all'
+          statusFilterEnum = undefined
+      }
+
+      // Map sort string to proto enums
+      let sortByEnum: FormSortBy | undefined
+      let sortOrderEnum: FormSortOrder | undefined
+      if (sortBy) {
+        const [field, order] = sortBy.split('_')
+        switch (field) {
+          case 'updated_at':
+            sortByEnum = FormSortBy.UPDATED_AT
+            break
+          case 'created_at':
+            sortByEnum = FormSortBy.CREATED_AT
+            break
+          case 'title':
+            sortByEnum = FormSortBy.TITLE
+            break
+          case 'response_count':
+            sortByEnum = FormSortBy.RESPONSE_COUNT
+            break
+        }
+        sortOrderEnum = order === 'asc' ? FormSortOrder.ASC : FormSortOrder.DESC
+      }
+
+      const response = await formClient.listForms({
+        searchQuery: searchQuery || undefined,
+        statusFilter: statusFilterEnum,
+        sortBy: sortByEnum,
+        sortOrder: sortOrderEnum,
+      })
       const mappedForms = response.forms.map(mapPbFormToDBForm)
       setForms(mappedForms)
     } catch (error) {
@@ -56,11 +105,11 @@ export function DashboardClient() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchQuery, statusFilter, sortBy])
 
   useEffect(() => {
     fetchForms()
-  }, [])
+  }, [fetchForms])
 
   const handleDeleteForm = (formId: string) => {
     // Remove the form from state immediately for better UX
@@ -89,6 +138,17 @@ export function DashboardClient() {
           </Button>
         </Link>
       </div>
+
+      {/* Filter Bar */}
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        resultCount={forms.length}
+      />
 
       {forms.length === 0 ? (
         <Card className="p-16 text-center border-dashed border-2 border-blue-200/60 bg-gradient-to-br from-white via-blue-50/30 to-sky-50/30">

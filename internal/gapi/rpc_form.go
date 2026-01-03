@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/google/uuid"
@@ -363,19 +364,85 @@ func (s *FormServerImpl) ListForms(ctx context.Context, req *pb.ListFormsRequest
 		offset = (page - 1) * limit
 	}
 
+	// Extract filter and sort parameters with defaults
+	statusFilter := int32(0) // Default: all forms
+	if req.StatusFilter != nil {
+		statusFilter = int32(*req.StatusFilter)
+	}
+
+	searchQuery := ""
+	if req.SearchQuery != nil {
+		searchQuery = *req.SearchQuery
+	}
+
+	sortBy := pb.FormSortBy_FORM_SORT_BY_UPDATED_AT // Default
+	if req.SortBy != nil {
+		sortBy = *req.SortBy
+	}
+
+	sortOrder := pb.FormSortOrder_FORM_SORT_ORDER_DESC // Default
+	if req.SortOrder != nil {
+		sortOrder = *req.SortOrder
+	}
+
 	forms, err := s.db.Queries.ListUserForms(ctx, sqlc.ListUserFormsParams{
-		UserID:      user.ID,
-		LimitCount:  limit,
-		OffsetCount: offset,
+		UserID:       user.ID,
+		LimitCount:   limit,
+		OffsetCount:  offset,
+		StatusFilter: statusFilter,
+		SearchQuery:  searchQuery,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to list forms: %v", err)
 	}
 
-	var pbForms []*pb.Form
+	// Sort forms in Go (since SQLC doesn't support complex ORDER BY)
+	// Convert to slice for sorting
+	type formWithMeta struct {
+		form          sqlc.FormForm
+		responseCount int64
+	}
+	formsWithMeta := make([]formWithMeta, 0, len(forms))
+
 	for _, f := range forms {
-		questions, _ := s.db.Queries.ListFormQuestions(ctx, f.ID)
-		pbF, _ := s.convertFormWithQuestions(f, questions)
+		// Get response count for sorting
+		count, _ := s.db.Queries.CountFormResponses(ctx, f.ID)
+		formsWithMeta = append(formsWithMeta, formWithMeta{
+			form:          f,
+			responseCount: int64(count),
+		})
+	}
+
+	// Apply sorting
+	sort.Slice(formsWithMeta, func(i, j int) bool {
+		fi := formsWithMeta[i]
+		fj := formsWithMeta[j]
+
+		// Determine sort field
+		var less bool
+		ascending := sortOrder == pb.FormSortOrder_FORM_SORT_ORDER_ASC
+
+		switch sortBy {
+		case pb.FormSortBy_FORM_SORT_BY_TITLE:
+			less = fi.form.Title < fj.form.Title
+		case pb.FormSortBy_FORM_SORT_BY_CREATED_AT:
+			less = fi.form.CreatedAt.Before(fj.form.CreatedAt)
+		case pb.FormSortBy_FORM_SORT_BY_RESPONSE_COUNT:
+			less = fi.responseCount < fj.responseCount
+		default: // UPDATED_AT
+			less = fi.form.UpdatedAt.Before(fj.form.UpdatedAt)
+		}
+
+		if ascending {
+			return less
+		}
+		return !less
+	})
+
+	var pbForms []*pb.Form
+	for _, fm := range formsWithMeta {
+		questions, _ := s.db.Queries.ListFormQuestions(ctx, fm.form.ID)
+		pbF, _ := s.convertFormWithQuestions(fm.form, questions)
 		pbForms = append(pbForms, pbF)
 	}
 

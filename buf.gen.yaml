@@ -1,8 +1,8 @@
 version: v1
 plugins:
   - plugin: es
-    opt: target=ts
+    opt: target=ts,js_import_extension=none
     out: lib/proto
   - plugin: connect-es
-    opt: target=ts
+    opt: target=ts,js_import_extension=none
     out: lib/proto

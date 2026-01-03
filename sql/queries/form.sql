@@ -57,10 +57,29 @@ SET is_published = true
 WHERE id = @id::uuid AND user_id = @user_id::uuid
 RETURNING *;
 
+/**
+ * List the forms owned by a user.
+ *
+ * @param user_id The id of the user who owns the forms.
+ * @param status_filter The status of the forms to filter by.
+ *   - 0: all forms
+ *   - 1: all unpublished forms
+ *   - 2: all published forms
+ *   - 3: all unpublished forms
+ * @param search_query The search query to filter the forms by.
+ * @param limit_count The number of forms to return.
+ * @param offset_count The offset of the forms to return.
+ * @return The list of forms that match the filter criteria.
+ */
 -- name: ListUserForms :many
-SELECT * FROM form.forms
-WHERE user_id = @user_id::uuid
-ORDER BY updated_at DESC
+SELECT f.* FROM form.forms f
+WHERE f.user_id = @user_id::uuid
+  AND (@status_filter::int = 0 OR
+       (@status_filter::int = 1 AND f.is_published = false) OR
+       (@status_filter::int = 2 AND f.is_published = true) OR
+       (@status_filter::int = 3 AND f.is_published = false))
+  AND (@search_query::text = '' OR f.title ILIKE '%' || @search_query::text || '%')
+ORDER BY f.updated_at DESC
 LIMIT @limit_count::int OFFSET @offset_count::int;
 
 -- name: GetFormWithQuestions :one

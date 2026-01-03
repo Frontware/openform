@@ -55,6 +55,7 @@ export const themes: Record<ThemePreset, ThemeConfig> = {
     accentColor: '#E74C3C',
     fontFamily: "'DM Sans', sans-serif",
   },
+  
   minimal: {
     id: 'minimal',
     name: 'Minimal',

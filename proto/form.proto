@@ -142,10 +142,35 @@ message DeleteFormResponse {
   bool success = 1;
 }
 
+// Sort options for ListForms
+enum FormSortBy {
+  FORM_SORT_BY_UNSPECIFIED = 0;
+  FORM_SORT_BY_UPDATED_AT = 1;
+  FORM_SORT_BY_CREATED_AT = 2;
+  FORM_SORT_BY_TITLE = 3;
+  FORM_SORT_BY_RESPONSE_COUNT = 4;
+}
+
+enum FormSortOrder {
+  FORM_SORT_ORDER_UNSPECIFIED = 0;
+  FORM_SORT_ORDER_ASC = 1;
+  FORM_SORT_ORDER_DESC = 2;
+}
+
+enum FormStatusFilter {
+  FORM_STATUS_FILTER_UNSPECIFIED = 0;
+  FORM_STATUS_FILTER_DRAFT = 1;
+  FORM_STATUS_FILTER_PUBLISHED = 2;
+  FORM_STATUS_FILTER_CLOSED = 3;
+}
+
 message ListFormsRequest {
   PaginationRequest pagination = 1;
   optional string search_query = 2;
   optional bool published_only = 3;
+  optional FormSortBy sort_by = 4;
+  optional FormSortOrder sort_order = 5;
+  optional FormStatusFilter status_filter = 6;
 }
 
 message ListFormsResponse {

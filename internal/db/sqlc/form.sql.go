@@ -356,20 +356,33 @@ func (q *Queries) ListFormQuestions(ctx context.Context, formID uuid.UUID) ([]Fo
 }
 
 const listUserForms = `-- name: ListUserForms :many
-SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
-WHERE user_id = $1::uuid
-ORDER BY updated_at DESC
-LIMIT $3::int OFFSET $2::int
+SELECT f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.settings, f.created_at, f.updated_at FROM form.forms f
+WHERE f.user_id = $1::uuid
+  AND ($2::int = 0 OR
+       ($2::int = 1 AND f.is_published = false) OR
+       ($2::int = 2 AND f.is_published = true) OR
+       ($2::int = 3 AND f.is_published = false))
+  AND ($3::text = '' OR f.title ILIKE '%' || $3::text || '%')
+ORDER BY f.updated_at DESC
+LIMIT $5::int OFFSET $4::int
 `
 
 type ListUserFormsParams struct {
-	UserID      uuid.UUID `db:"user_id" json:"userId"`
-	OffsetCount int32     `db:"offset_count" json:"offsetCount"`
-	LimitCount  int32     `db:"limit_count" json:"limitCount"`
+	UserID       uuid.UUID `db:"user_id" json:"userId"`
+	StatusFilter int32     `db:"status_filter" json:"statusFilter"`
+	SearchQuery  string    `db:"search_query" json:"searchQuery"`
+	OffsetCount  int32     `db:"offset_count" json:"offsetCount"`
+	LimitCount   int32     `db:"limit_count" json:"limitCount"`
 }
 
 func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([]FormForm, error) {
-	rows, err := q.db.Query(ctx, listUserForms, arg.UserID, arg.OffsetCount, arg.LimitCount)
+	rows, err := q.db.Query(ctx, listUserForms,
+		arg.UserID,
+		arg.StatusFilter,
+		arg.SearchQuery,
+		arg.OffsetCount,
+		arg.LimitCount,
+	)
 	if err != nil {
 		return nil, err
 	}

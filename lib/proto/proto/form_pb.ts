@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64, Struct, Timestamp } from "@bufbuild/protobuf";
-import { PaginationRequest, PaginationResponse } from "./common_pb.ts";
+import { PaginationRequest, PaginationResponse } from "./common_pb";
 
 /**
  * Enums
@@ -181,6 +181,104 @@ proto3.util.setEnumType(QuestionType, "weladee.form.v1.QuestionType", [
   { no: 11, name: "QUESTION_TYPE_YES_NO" },
   { no: 12, name: "QUESTION_TYPE_FILE_UPLOAD" },
   { no: 13, name: "QUESTION_TYPE_URL" },
+]);
+
+/**
+ * Sort options for ListForms
+ *
+ * @generated from enum weladee.form.v1.FormSortBy
+ */
+export enum FormSortBy {
+  /**
+   * @generated from enum value: FORM_SORT_BY_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: FORM_SORT_BY_UPDATED_AT = 1;
+   */
+  UPDATED_AT = 1,
+
+  /**
+   * @generated from enum value: FORM_SORT_BY_CREATED_AT = 2;
+   */
+  CREATED_AT = 2,
+
+  /**
+   * @generated from enum value: FORM_SORT_BY_TITLE = 3;
+   */
+  TITLE = 3,
+
+  /**
+   * @generated from enum value: FORM_SORT_BY_RESPONSE_COUNT = 4;
+   */
+  RESPONSE_COUNT = 4,
+}
+// Retrieve enum metadata with: proto3.getEnumType(FormSortBy)
+proto3.util.setEnumType(FormSortBy, "weladee.form.v1.FormSortBy", [
+  { no: 0, name: "FORM_SORT_BY_UNSPECIFIED" },
+  { no: 1, name: "FORM_SORT_BY_UPDATED_AT" },
+  { no: 2, name: "FORM_SORT_BY_CREATED_AT" },
+  { no: 3, name: "FORM_SORT_BY_TITLE" },
+  { no: 4, name: "FORM_SORT_BY_RESPONSE_COUNT" },
+]);
+
+/**
+ * @generated from enum weladee.form.v1.FormSortOrder
+ */
+export enum FormSortOrder {
+  /**
+   * @generated from enum value: FORM_SORT_ORDER_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: FORM_SORT_ORDER_ASC = 1;
+   */
+  ASC = 1,
+
+  /**
+   * @generated from enum value: FORM_SORT_ORDER_DESC = 2;
+   */
+  DESC = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(FormSortOrder)
+proto3.util.setEnumType(FormSortOrder, "weladee.form.v1.FormSortOrder", [
+  { no: 0, name: "FORM_SORT_ORDER_UNSPECIFIED" },
+  { no: 1, name: "FORM_SORT_ORDER_ASC" },
+  { no: 2, name: "FORM_SORT_ORDER_DESC" },
+]);
+
+/**
+ * @generated from enum weladee.form.v1.FormStatusFilter
+ */
+export enum FormStatusFilter {
+  /**
+   * @generated from enum value: FORM_STATUS_FILTER_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: FORM_STATUS_FILTER_DRAFT = 1;
+   */
+  DRAFT = 1,
+
+  /**
+   * @generated from enum value: FORM_STATUS_FILTER_PUBLISHED = 2;
+   */
+  PUBLISHED = 2,
+
+  /**
+   * @generated from enum value: FORM_STATUS_FILTER_CLOSED = 3;
+   */
+  CLOSED = 3,
+}
+// Retrieve enum metadata with: proto3.getEnumType(FormStatusFilter)
+proto3.util.setEnumType(FormStatusFilter, "weladee.form.v1.FormStatusFilter", [
+  { no: 0, name: "FORM_STATUS_FILTER_UNSPECIFIED" },
+  { no: 1, name: "FORM_STATUS_FILTER_DRAFT" },
+  { no: 2, name: "FORM_STATUS_FILTER_PUBLISHED" },
+  { no: 3, name: "FORM_STATUS_FILTER_CLOSED" },
 ]);
 
 /**
@@ -957,6 +1055,21 @@ export class ListFormsRequest extends Message<ListFormsRequest> {
    */
   publishedOnly?: boolean;
 
+  /**
+   * @generated from field: optional weladee.form.v1.FormSortBy sort_by = 4;
+   */
+  sortBy?: FormSortBy;
+
+  /**
+   * @generated from field: optional weladee.form.v1.FormSortOrder sort_order = 5;
+   */
+  sortOrder?: FormSortOrder;
+
+  /**
+   * @generated from field: optional weladee.form.v1.FormStatusFilter status_filter = 6;
+   */
+  statusFilter?: FormStatusFilter;
+
   constructor(data?: PartialMessage<ListFormsRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -968,6 +1081,9 @@ export class ListFormsRequest extends Message<ListFormsRequest> {
     { no: 1, name: "pagination", kind: "message", T: PaginationRequest },
     { no: 2, name: "search_query", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 3, name: "published_only", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 4, name: "sort_by", kind: "enum", T: proto3.getEnumType(FormSortBy), opt: true },
+    { no: 5, name: "sort_order", kind: "enum", T: proto3.getEnumType(FormSortOrder), opt: true },
+    { no: 6, name: "status_filter", kind: "enum", T: proto3.getEnumType(FormStatusFilter), opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListFormsRequest {
@@ -1577,3 +1693,4 @@ export class ReorderQuestionsResponse extends Message<ReorderQuestionsResponse> 
     return proto3.util.equals(ReorderQuestionsResponse, a, b);
   }
 }
+
