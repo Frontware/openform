@@ -29,6 +29,26 @@ type ResponseServerImpl struct {
 
 // Helper: get form and check access
 func (s *ResponseServerImpl) getFormForResponse(ctx context.Context, formID uuid.UUID, requireOwner bool) (sqlc.FormForm, *sqlc.FormUser, error) {
+	// Special case: when formID is Nil (used for auth-only checks in ListResponses/GetResponse)
+	// Just verify authentication without validating a specific form
+	if formID == uuid.Nil {
+		var user *sqlc.FormUser
+		if requireOwner {
+			claims, err := auth.GetUserClaims(ctx)
+			if err != nil {
+				return sqlc.FormForm{}, nil, status.Errorf(codes.Unauthenticated, "authentication required")
+			}
+
+			formUser, err := s.db.Queries.GetFormUserByWeladeeID(ctx, int32(claims.UserID))
+			if err != nil {
+				return sqlc.FormForm{}, nil, status.Errorf(codes.Internal, "failed to get user")
+			}
+			user = &formUser
+		}
+		// Return empty form with authenticated user (no form validation needed)
+		return sqlc.FormForm{}, user, nil
+	}
+
 	form, err := s.db.Queries.GetForm(ctx, formID)
 	if err != nil {
 		return sqlc.FormForm{}, nil, status.Errorf(codes.NotFound, "form not found")

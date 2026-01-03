@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { LogOut, Settings, User as UserIcon } from 'lucide-react'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { toast } from 'sonner'
 import { signOut as authSignOut } from '@/lib/auth/weladee'
 
@@ -101,6 +102,10 @@ export function DashboardNav({ user }: DashboardNavProps) {
                     Settings
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <div className="px-1 py-1">
+                  <LanguageSwitcher />
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />

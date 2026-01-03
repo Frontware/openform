@@ -124,7 +124,11 @@ export function ResponsesClient() {
 
         if (formRes.form) {
             setForm(mapPbFormToDBForm(formRes.form))
+            console.log('[ResponsesClient] Form loaded, fetching responses for formId:', id)
             const respRes = await responseClient.listResponses({ formId: id, pagination: { page: 1, pageSize: 100 } })
+            console.log('[ResponsesClient] ListResponses result:', respRes)
+            console.log('[ResponsesClient] Number of responses:', respRes.responses.length)
+            console.log('[ResponsesClient] Responses:', respRes.responses)
             setResponses(respRes.responses.map(mapPbResponseToDBResponse))
         } else {
             notFound()

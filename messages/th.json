@@ -35,7 +35,9 @@
     "settings": "การตั้งค่า",
     "signOut": "ออกจากระบบ",
     "signIn": "เข้าสู่ระบบ",
-    "getStarted": "เริ่มต้นใช้งาน"
+    "getStarted": "เริ่มต้นใช้งาน",
+    "language": "ภาษา",
+    "changeLanguage": "เปลี่ยนภาษา"
   },
   "auth": {
     "login": {

@@ -35,7 +35,9 @@
     "settings": "Settings",
     "signOut": "Sign out",
     "signIn": "Sign in",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "language": "Language",
+    "changeLanguage": "Change Language"
   },
   "auth": {
     "login": {

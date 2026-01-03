@@ -35,7 +35,9 @@
     "settings": "Paramètres",
     "signOut": "Se déconnecter",
     "signIn": "Se connecter",
-    "getStarted": "Commencer"
+    "getStarted": "Commencer",
+    "language": "Langue",
+    "changeLanguage": "Changer de langue"
   },
   "auth": {
     "login": {
