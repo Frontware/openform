@@ -86,18 +86,26 @@ const (
 	FormTheme_FORM_THEME_SUNSET      FormTheme = 4
 	FormTheme_FORM_THEME_FOREST      FormTheme = 5
 	FormTheme_FORM_THEME_LAVENDER    FormTheme = 6
+	FormTheme_FORM_THEME_WELADEE     FormTheme = 7
+	FormTheme_FORM_THEME_AURORA      FormTheme = 8
+	FormTheme_FORM_THEME_CYBERPUNK   FormTheme = 9
+	FormTheme_FORM_THEME_DESERT      FormTheme = 10
 )
 
 // Enum value maps for FormTheme.
 var (
 	FormTheme_name = map[int32]string{
-		0: "FORM_THEME_UNSPECIFIED",
-		1: "FORM_THEME_MINIMAL",
-		2: "FORM_THEME_MIDNIGHT",
-		3: "FORM_THEME_OCEAN",
-		4: "FORM_THEME_SUNSET",
-		5: "FORM_THEME_FOREST",
-		6: "FORM_THEME_LAVENDER",
+		0:  "FORM_THEME_UNSPECIFIED",
+		1:  "FORM_THEME_MINIMAL",
+		2:  "FORM_THEME_MIDNIGHT",
+		3:  "FORM_THEME_OCEAN",
+		4:  "FORM_THEME_SUNSET",
+		5:  "FORM_THEME_FOREST",
+		6:  "FORM_THEME_LAVENDER",
+		7:  "FORM_THEME_WELADEE",
+		8:  "FORM_THEME_AURORA",
+		9:  "FORM_THEME_CYBERPUNK",
+		10: "FORM_THEME_DESERT",
 	}
 	FormTheme_value = map[string]int32{
 		"FORM_THEME_UNSPECIFIED": 0,
@@ -107,6 +115,10 @@ var (
 		"FORM_THEME_SUNSET":      4,
 		"FORM_THEME_FOREST":      5,
 		"FORM_THEME_LAVENDER":    6,
+		"FORM_THEME_WELADEE":     7,
+		"FORM_THEME_AURORA":      8,
+		"FORM_THEME_CYBERPUNK":   9,
+		"FORM_THEME_DESERT":      10,
 	}
 )
 
@@ -2285,7 +2297,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x17FORM_STATUS_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11FORM_STATUS_DRAFT\x10\x01\x12\x19\n" +
 	"\x15FORM_STATUS_PUBLISHED\x10\x02\x12\x16\n" +
-	"\x12FORM_STATUS_CLOSED\x10\x03*\xb5\x01\n" +
+	"\x12FORM_STATUS_CLOSED\x10\x03*\x95\x02\n" +
 	"\tFormTheme\x12\x1a\n" +
 	"\x16FORM_THEME_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12FORM_THEME_MINIMAL\x10\x01\x12\x17\n" +
@@ -2293,7 +2305,12 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x10FORM_THEME_OCEAN\x10\x03\x12\x15\n" +
 	"\x11FORM_THEME_SUNSET\x10\x04\x12\x15\n" +
 	"\x11FORM_THEME_FOREST\x10\x05\x12\x17\n" +
-	"\x13FORM_THEME_LAVENDER\x10\x06*\x91\x03\n" +
+	"\x13FORM_THEME_LAVENDER\x10\x06\x12\x16\n" +
+	"\x12FORM_THEME_WELADEE\x10\a\x12\x15\n" +
+	"\x11FORM_THEME_AURORA\x10\b\x12\x18\n" +
+	"\x14FORM_THEME_CYBERPUNK\x10\t\x12\x15\n" +
+	"\x11FORM_THEME_DESERT\x10\n" +
+	"*\x91\x03\n" +
 	"\fQuestionType\x12\x1d\n" +
 	"\x19QUESTION_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18QUESTION_TYPE_SHORT_TEXT\x10\x01\x12\x1b\n" +

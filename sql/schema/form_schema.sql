@@ -31,7 +31,7 @@ CREATE TABLE form.forms (
     title VARCHAR(500) NOT NULL DEFAULT 'Untitled Form',
     description TEXT,
     slug VARCHAR(255) UNIQUE,  -- URL-friendly identifier for public forms (e.g., 'customer-feedback')
-    theme VARCHAR(50) NOT NULL DEFAULT 'minimal' CHECK (theme IN ('minimal', 'midnight', 'ocean', 'sunset', 'forest', 'lavender')),
+    theme VARCHAR(50) NOT NULL DEFAULT 'minimal' CHECK (theme IN ('minimal', 'midnight', 'ocean', 'sunset', 'forest', 'lavender', 'weladee', 'aurora', 'cyberpunk', 'desert')),
     is_published BOOLEAN NOT NULL DEFAULT false,  -- Whether form is publicly accessible
     is_accepting_responses BOOLEAN NOT NULL DEFAULT true,  -- Whether form currently accepts submissions
     require_login BOOLEAN NOT NULL DEFAULT false,  -- Whether users must be logged in to submit

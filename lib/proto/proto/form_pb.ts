@@ -79,6 +79,26 @@ export enum FormTheme {
    * @generated from enum value: FORM_THEME_LAVENDER = 6;
    */
   LAVENDER = 6,
+
+  /**
+   * @generated from enum value: FORM_THEME_WELADEE = 7;
+   */
+  WELADEE = 7,
+
+  /**
+   * @generated from enum value: FORM_THEME_AURORA = 8;
+   */
+  AURORA = 8,
+
+  /**
+   * @generated from enum value: FORM_THEME_CYBERPUNK = 9;
+   */
+  CYBERPUNK = 9,
+
+  /**
+   * @generated from enum value: FORM_THEME_DESERT = 10;
+   */
+  DESERT = 10,
 }
 // Retrieve enum metadata with: proto3.getEnumType(FormTheme)
 proto3.util.setEnumType(FormTheme, "weladee.form.v1.FormTheme", [
@@ -89,6 +109,10 @@ proto3.util.setEnumType(FormTheme, "weladee.form.v1.FormTheme", [
   { no: 4, name: "FORM_THEME_SUNSET" },
   { no: 5, name: "FORM_THEME_FOREST" },
   { no: 6, name: "FORM_THEME_LAVENDER" },
+  { no: 7, name: "FORM_THEME_WELADEE" },
+  { no: 8, name: "FORM_THEME_AURORA" },
+  { no: 9, name: "FORM_THEME_CYBERPUNK" },
+  { no: 10, name: "FORM_THEME_DESERT" },
 ]);
 
 /**

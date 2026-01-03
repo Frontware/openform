@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { DeleteResponseRequest, DeleteResponseResponse, ExportResponsesRequest, ExportResponsesResponse, GetResponseRequest, GetResponseResponse, ListResponsesRequest, ListResponsesResponse, SubmitResponseRequest, SubmitResponseResponse } from "./response_pb.ts";
+import { DeleteResponseRequest, DeleteResponseResponse, ExportResponsesRequest, ExportResponsesResponse, GetResponseRequest, GetResponseResponse, ListResponsesRequest, ListResponsesResponse, SubmitResponseRequest, SubmitResponseResponse } from "./response_pb";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**

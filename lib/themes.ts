@@ -65,6 +65,33 @@ export const themes: Record<ThemePreset, ThemeConfig> = {
     accentColor: '#3F3F46',
     fontFamily: "'Inter', sans-serif",
   },
+  aurora: {
+    id: 'aurora',
+    name: 'Aurora',
+    primaryColor: '#7c3aed',
+    backgroundColor: '#0f172a',
+    textColor: '#f1f5f9',
+    accentColor: '#10b981',
+    fontFamily: "'DM Sans', sans-serif",
+  },
+  cyberpunk: {
+    id: 'cyberpunk',
+    name: 'Cyberpunk',
+    primaryColor: '#ff006e',
+    backgroundColor: '#0a0a1f',
+    textColor: '#e0e0ff',
+    accentColor: '#00f5ff',
+    fontFamily: "'Space Grotesk', sans-serif",
+  },
+  desert: {
+    id: 'desert',
+    name: 'Desert',
+    primaryColor: '#ea580c',
+    backgroundColor: '#fefce8',
+    textColor: '#451a03',
+    accentColor: '#f59e0b',
+    fontFamily: "'Outfit', sans-serif",
+  },
 }
 
 export const themeList = Object.values(themes)

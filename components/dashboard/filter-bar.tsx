@@ -1,6 +1,7 @@
 'use client'
 
-import { Search, ChevronDown } from 'lucide-react'
+import { useState } from 'react'
+import { Search, ChevronDown, ChevronUp, X, SortAsc } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,6 +31,8 @@ export function FilterBar({
   onSortChange,
   resultCount,
 }: FilterBarProps) {
+  const [isFilterExpanded, setIsFilterExpanded] = useState(true)
+
   const statusOptions = [
     { value: 'all', label: 'All' },
     { value: 'draft', label: 'Draft' },
@@ -46,57 +49,163 @@ export function FilterBar({
     { value: 'response_count_asc', label: 'Fewest responses' },
   ]
 
+  const activeFilterCount = [searchQuery ? 1 : 0, statusFilter !== 'all' ? 1 : 0].reduce((a, b) => a + b, 0)
+
   return (
-    <div className="space-y-4">
-      {/* Search and Sort Row */}
-      <div className="flex items-center gap-4">
-        {/* Search Input */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input
-            type="text"
-            placeholder="Search forms..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
+    <>
+      {/* Collapsible Filter Section */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6 transition-all">
 
-        {/* Sort Dropdown */}
-        <div className="flex items-center gap-3 ml-auto">
-          <span className="text-sm text-slate-600">{resultCount} form{resultCount !== 1 ? 's' : ''}</span>
-          <Select value={sortBy} onValueChange={onSortChange}>
-            <SelectTrigger className="w-[180px] border-slate-200 hover:border-blue-400 bg-white">
-              <SelectValue placeholder="Sort by..." />
-              <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
-            </SelectTrigger>
-            <SelectContent>
-              {sortOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Collapse Toggle Bar */}
+        <button
+          onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+              {isFilterExpanded ? (
+                <ChevronUp className="w-5 h-5 text-blue-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-blue-600" />
+              )}
+            </div>
+            <div className="text-left">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Filters & Search
+              </h3>
+              <p className="text-xs text-gray-500">
+                {isFilterExpanded ? 'Click to collapse' : 'Click to expand filter options'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Show active filter count */}
+            {activeFilterCount > 0 && (
+              <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                {activeFilterCount} active
+              </span>
+            )}
+            <span className="text-sm text-gray-500">
+              {isFilterExpanded ? 'Collapse' : 'Expand'}
+            </span>
+          </div>
+        </button>
+
+        {/* Expandable Filter Content */}
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            isFilterExpanded
+              ? 'max-h-[500px] opacity-100'
+              : 'max-h-0 opacity-0 overflow-hidden'
+          }`}
+        >
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search Bar */}
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Search forms..."
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-12 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => onSearchChange('')}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {/* Sort Dropdown */}
+                <div className="relative">
+                  <Select value={sortBy} onValueChange={onSortChange}>
+                    <SelectTrigger className="appearance-none pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-gray-100 transition-colors w-[180px]">
+                      <SelectValue placeholder="Sort by..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sortOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <SortAsc className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {/* Status Tabs - Modern segmented control */}
+            <div className="mt-6">
+              <div className="inline-flex bg-gray-100 rounded-xl p-1 gap-1">
+                {statusOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => onStatusChange(option.value as any)}
+                    className={`relative px-6 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                      statusFilter === option.value
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <span>{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Results Summary */}
+          <div className="px-6 py-3 bg-gray-50 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Showing <span className="font-semibold text-gray-900">{resultCount} form{resultCount !== 1 ? 's' : ''}</span>
+            </div>
+            {searchQuery && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Filtered by:</span>
+                <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-gray-200">
+                  <span className="text-sm font-medium text-gray-700">
+                    "{searchQuery}"
+                  </span>
+                  <button
+                    onClick={() => onSearchChange('')}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Status Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
-        {statusOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => onStatusChange(option.value as any)}
-            className={`px-4 py-2 text-sm font-medium transition-all border-b-2 -mb-px ${
-              statusFilter === option.value
-                ? 'text-blue-600 border-blue-600'
-                : 'text-slate-600 border-transparent hover:text-slate-900 hover:border-slate-300'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
+      {/* Quick Summary When Collapsed */}
+      {!isFilterExpanded && (
+        <div className="mb-6 flex items-center gap-4 px-4 py-3 bg-white rounded-xl border border-gray-200">
+          <span className="text-sm text-gray-600">
+            Viewing: <span className="font-semibold text-gray-900">{statusOptions.find(o => o.value === statusFilter)?.label}</span>
+          </span>
+          {searchQuery && (
+            <span className="text-sm text-gray-600">
+              | Search: <span className="font-semibold text-gray-900">"{searchQuery}"</span>
+            </span>
+          )}
+          <span className="text-sm text-gray-600">
+            | Sorted by: <span className="font-semibold text-gray-900">{sortOptions.find(o => o.value === sortBy)?.label}</span>
+          </span>
+          <span className="text-sm text-gray-600">
+            | <span className="font-semibold text-gray-900">{resultCount} form{resultCount !== 1 ? 's' : ''}</span>
+          </span>
+        </div>
+      )}
+    </>
   )
 }
