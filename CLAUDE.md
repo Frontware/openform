@@ -18,6 +18,7 @@ Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 qu
 - **Response Dashboard** - View, search, filter, and export responses to CSV/JSON (app/(main)/dashboard/forms/[id]/responses)
 - **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
 - **Authentication** - JWT token validation
+- **Smart Menu States** - Menu items automatically disable for draft forms (Responses, Copy Link) with visual feedback
 
 ## Backend Architecture
 

@@ -5,7 +5,7 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 
 **Key Features:**
 - **Form Builder:** Create and edit forms with various question types.
-- **Themes:** Customizable themes (Midnight, Ocean, Sunset, Weladee, etc.).
+- **Themes:** Customizable themes (Midnight, Ocean, Sunset, Weladee, Aurora, Cyberpunk, Desert).
 - **Form Player:** "TypeForm-style" navigation.
 - **Responses:** Dashboard to view, filter, and export form responses.
 - **Authentication:** JWT token validation.
@@ -13,6 +13,7 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 - **Database:** PostgreSQL with SQLC.
 - **Storage:** S3-compatible (AWS/R2/MinIO) for file uploads.
 - **i18n:** Multi-language support (English, Thai, French).
+- **Smart UI:** Menu items automatically disable for draft forms (Responses, Copy Link) with visual feedback
 
 ## Tech Stack
 - **Frontend:** Next.js 16 (App Router), React 19, TypeScript
@@ -27,7 +28,7 @@ Weladee Form is an open-source TypeForm alternative built with Next.js 16 (App R
 - `cmd/server/`: Go backend entry point.
 - `internal/`: Private Go code (auth, db, gapi, storage).
 - `proto/`: Protocol Buffer definitions.
-- `sql/`: SQL queries and schema.
+- `sql/`: SQL queries, schema, and migrations.
 - `lib/grpc-client.ts`: gRPC-Web client configuration.
 
 ## Building and Running
@@ -74,4 +75,5 @@ The backend supports configuration via flags, env vars, or `config.yaml`.
 - **Frontend Dev:** `npm run dev`
 - **Frontend Build:** `npm run build`
 - **Generate Proto:** `make proto` (requires `protoc` and plugins)
+- **DB Migrate:** `make db-migrate` (requires `golang-migrate`)
 - **Generate JWT:** `./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"`
