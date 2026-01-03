@@ -20,6 +20,17 @@ type Config struct {
 	S3AccessKey string `mapstructure:"s3_access_key" yaml:"s3_access_key"`
 	S3SecretKey string `mapstructure:"s3_secret_key" yaml:"s3_secret_key"`
 	S3Endpoint  string `mapstructure:"s3_endpoint" yaml:"s3_endpoint"`
+
+	// reCAPTCHA Configuration
+	Recaptcha RecaptchaConfig `mapstructure:"recaptcha" yaml:"recaptcha"`
+}
+
+// RecaptchaConfig holds reCAPTCHA configuration
+type RecaptchaConfig struct {
+	Enabled   bool    `mapstructure:"enabled" yaml:"enabled"`
+	SiteKey   string  `mapstructure:"site_key" yaml:"site_key"`
+	SecretKey string  `mapstructure:"secret_key" yaml:"secret_key"`
+	Threshold float64 `mapstructure:"threshold" yaml:"threshold"`
 }
 
 // LoadConfig loads configuration from config file, environment variables, and command line flags
@@ -35,20 +46,24 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	v.AddConfigPath("./config")
 
 	// Enable reading from environment variables
-	v.SetEnvPrefix("OPENFORM")
+	v.SetEnvPrefix("WeladeeForm")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
 	// Bind environment variables
 	envBindings := map[string]string{
-		"grpc_port":     "GRPC_PORT",
-		"database_url":  "DATABASE_URL",
-		"jwt_secret":    "JWT_SECRET",
-		"s3_region":     "S3_REGION",
-		"s3_bucket":     "S3_BUCKET",
-		"s3_access_key": "S3_ACCESS_KEY",
-		"s3_secret_key": "S3_SECRET_KEY",
-		"s3_endpoint":   "S3_ENDPOINT",
+		"grpc_port":            "GRPC_PORT",
+		"database_url":         "DATABASE_URL",
+		"jwt_secret":           "JWT_SECRET",
+		"s3_region":            "S3_REGION",
+		"s3_bucket":            "S3_BUCKET",
+		"s3_access_key":        "S3_ACCESS_KEY",
+		"s3_secret_key":        "S3_SECRET_KEY",
+		"s3_endpoint":          "S3_ENDPOINT",
+		"recaptcha.enabled":    "RECAPTCHA_ENABLED",
+		"recaptcha.site_key":   "RECAPTCHA_SITE_KEY",
+		"recaptcha.secret_key": "RECAPTCHA_SECRET_KEY",
+		"recaptcha.threshold":  "RECAPTCHA_THRESHOLD",
 	}
 
 	for configKey, envVar := range envBindings {
@@ -69,6 +84,7 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 		flags := []string{
 			"grpc-port", "database-url", "jwt-secret",
 			"s3-region", "s3-bucket", "s3-access-key", "s3-secret-key", "s3-endpoint",
+			"recaptcha-enabled", "recaptcha-site-key", "recaptcha-secret-key", "recaptcha-threshold",
 		}
 		for _, flag := range flags {
 			if err := v.BindPFlag(flag, cmd.Flags().Lookup(flag)); err != nil {
@@ -97,9 +113,11 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 // setDefaults sets default values for configuration
 func setDefaults(v *viper.Viper) {
 	defaults := map[string]interface{}{
-		"grpc_port":    "50051",
-		"jwt_secret":   "weladee-form-secret-change-in-production",
-		"s3_region":    "auto",
+		"grpc_port":           "50051",
+		"jwt_secret":          "weladee-form-secret-change-in-production",
+		"s3_region":           "auto",
+		"recaptcha.enabled":   false,
+		"recaptcha.threshold": 0.5,
 	}
 
 	for key, value := range defaults {
@@ -112,6 +130,20 @@ func validateConfig(config *Config) error {
 	if config.DatabaseURL == "" {
 		return fmt.Errorf("database_url is required")
 	}
+
+	// Validate reCAPTCHA configuration if enabled
+	if config.Recaptcha.Enabled {
+		if config.Recaptcha.SiteKey == "" {
+			return fmt.Errorf("recaptcha.site_key is required when recaptcha.enabled is true")
+		}
+		if config.Recaptcha.SecretKey == "" {
+			return fmt.Errorf("recaptcha.secret_key is required when recaptcha.enabled is true")
+		}
+		if config.Recaptcha.Threshold <= 0 || config.Recaptcha.Threshold > 1 {
+			return fmt.Errorf("recaptcha.threshold must be between 0 and 1")
+		}
+	}
+
 	return nil
 }
 
@@ -131,6 +163,10 @@ func AddFlags(cmd *cobra.Command) {
 		{"s3-access-key", "", "", "S3 access key"},
 		{"s3-secret-key", "", "", "S3 secret key"},
 		{"s3-endpoint", "", "", "S3 endpoint URL"},
+		{"recaptcha-enabled", "", "false", "Enable reCAPTCHA protection"},
+		{"recaptcha-site-key", "", "", "reCAPTCHA site key"},
+		{"recaptcha-secret-key", "", "", "reCAPTCHA secret key"},
+		{"recaptcha-threshold", "", "0.5", "reCAPTCHA score threshold (0.0-1.0)"},
 	}
 
 	for _, flag := range flags {

@@ -484,7 +484,39 @@ const { response } = await client.responseService.submitResponse({
 });
 ```
 
-### Exporting responses (gRPC)
+### Exporting responses
+
+The responses dashboard supports exporting form data in both CSV and JSON formats. The implementation uses a hybrid approach:
+
+- **Client-side generation** for datasets under 1,000 responses (faster, no network latency)
+- **Server-side gRPC** for datasets with 1,000+ responses (better memory handling)
+
+**Frontend (components/responses/responses-dashboard.tsx):**
+- Dropdown menu with "Export as CSV" (FileText icon) and "Export as JSON" (FileJson icon)
+- Loading state with spinner during server-side exports
+- Toast notifications for success/error feedback
+
+**Client-side JSON export structure:**
+```json
+{
+  "form_id": "uuid",
+  "form_title": "Form Name",
+  "exported_at": "2026-01-03T10:30:00.000Z",
+  "total_responses": 2,
+  "questions": [
+    { "id": "q-uuid", "title": "Question?", "type": "short_text", "required": true }
+  ],
+  "responses": [
+    {
+      "id": "r-uuid",
+      "submitted_at": "2026-01-03T10:00:00.000Z",
+      "answers": { "q-uuid": "Answer value" }
+    }
+  ]
+}
+```
+
+**Server-side gRPC export (for large datasets):**
 
 ```typescript
 const { data, filename, mimeType } = await client.responseService.exportResponses({

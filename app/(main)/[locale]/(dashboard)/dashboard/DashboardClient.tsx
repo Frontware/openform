@@ -36,6 +36,7 @@ function mapPbFormToDBForm(pbForm: PbForm): DBForm {
     theme: theme,
     questions: [],
     thank_you_message: pbForm.customThankYouMessage,
+    force_captcha: pbForm.forceCaptcha,
     created_at: pbForm.createdAt?.toDate().toISOString() || new Date().toISOString(),
     updated_at: pbForm.updatedAt?.toDate().toISOString() || new Date().toISOString(),
   }

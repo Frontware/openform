@@ -288,6 +288,7 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 		ShowProgressBar:          currentForm.ShowProgressBar,
 		CustomThankYouMessage:    currentForm.CustomThankYouMessage.String,
 		RedirectUrl:              currentForm.RedirectUrl.String,
+		ForceCaptcha:             currentForm.ForceCaptcha,
 		Settings:                 currentForm.Settings,
 	}
 
@@ -303,6 +304,9 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 	}
 	if req.IsPublished != nil {
 		params.IsPublished = *req.IsPublished
+	}
+	if req.ForceCaptcha != nil {
+		params.ForceCaptcha = *req.ForceCaptcha
 	}
 
 	form, err := s.db.Queries.UpdateForm(ctx, params)

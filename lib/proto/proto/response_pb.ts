@@ -289,6 +289,11 @@ export class SubmitResponseRequest extends Message<SubmitResponseRequest> {
    */
   complete = false;
 
+  /**
+   * @generated from field: optional string recaptcha_token = 6;
+   */
+  recaptchaToken?: string;
+
   constructor(data?: PartialMessage<SubmitResponseRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -302,6 +307,7 @@ export class SubmitResponseRequest extends Message<SubmitResponseRequest> {
     { no: 3, name: "respondent_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 4, name: "answers", kind: "message", T: AnswerInput, repeated: true },
     { no: 5, name: "complete", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "recaptcha_token", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubmitResponseRequest {

@@ -194,12 +194,24 @@ proto: ## Generate protobuf Go and TypeScript code
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		proto/*.proto
+	@echo "Copying generated Go files to proto/pb..."
+	@mkdir -p proto/pb
+	@cp -f proto/*.pb.go proto/pb/ 2>/dev/null || true
 	@echo "Generating protobuf TypeScript code..."
 	@mkdir -p lib/proto/proto
+	protoc --plugin=protoc-gen-es=node_modules/.bin/protoc-gen-es \
+		--es_out=lib/proto/proto \
+		--es_opt=target=ts \
+		proto/*.proto
 	protoc --plugin=protoc-gen-connect-es=node_modules/.bin/protoc-gen-connect-es \
 		--connect-es_out=lib/proto/proto \
 		--connect-es_opt=target=ts \
 		proto/*.proto
+	@echo "Moving generated TypeScript files to correct location..."
+	@if [ -d "lib/proto/proto/proto" ]; then \
+		cp -f lib/proto/proto/proto/*.ts lib/proto/proto/ 2>/dev/null || true; \
+		rm -rf lib/proto/proto/proto; \
+	fi
 
 .PHONY: proto-check
 proto-check: ## Check if protobuf code is up to date

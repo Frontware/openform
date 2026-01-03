@@ -77,10 +77,11 @@ message Form {
   bool show_progress_bar = 10;
   string custom_thank_you_message = 11;
   string redirect_url = 12;
-  google.protobuf.Struct settings = 13;
-  repeated Question questions = 14;
-  google.protobuf.Timestamp created_at = 15;
-  google.protobuf.Timestamp updated_at = 16;
+  bool force_captcha = 13;
+  google.protobuf.Struct settings = 14;
+  repeated Question questions = 15;
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
 }
 
 message FormStats {
@@ -131,7 +132,8 @@ message UpdateFormRequest {
   optional bool show_progress_bar = 9;
   optional string custom_thank_you_message = 10;
   optional string redirect_url = 11;
-  optional google.protobuf.Struct settings = 12;
+  optional bool force_captcha = 12;
+  optional google.protobuf.Struct settings = 13;
 }
 
 message UpdateFormResponse {

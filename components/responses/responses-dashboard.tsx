@@ -47,6 +47,7 @@ import {
   Image as ImageIcon,
   File,
   Eye,
+  FileJson,
 } from 'lucide-react'
 
 interface ResponsesDashboardProps {
@@ -125,6 +126,7 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
   const [responseToDelete, setResponseToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [filePreview, setFilePreview] = useState<FileUpload | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
   // Filter responses based on search query
   const filteredResponses = useMemo(() => {
@@ -191,6 +193,98 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
     URL.revokeObjectURL(link.href)
     
     toast.success('CSV exported successfully')
+  }
+
+  const handleExport = async (format: 'csv' | 'json') => {
+    if (responses.length === 0) {
+      toast.error('No responses to export')
+      return
+    }
+
+    // Client-side for < 1000 responses
+    if (responses.length < 1000) {
+      if (format === 'csv') {
+        exportToCSV()
+      } else {
+        exportToJSON()
+      }
+      return
+    }
+
+    // Server-side for >= 1000 responses
+    setIsExporting(true)
+    try {
+      const result = await responseClient.exportResponses({
+        formId: form.id,
+        format: format
+      })
+
+      const blob = new Blob([result.data], { type: result.mimeType })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = result.filename
+      link.click()
+      URL.revokeObjectURL(link.href)
+
+      toast.success(`${format.toUpperCase()} exported successfully`)
+    } catch (error) {
+      console.error('Failed to export:', error)
+      toast.error(`Failed to export ${format.toUpperCase()}`)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const exportToJSON = () => {
+    if (responses.length === 0) {
+      toast.error('No responses to export')
+      return
+    }
+
+    // Build question metadata
+    const questionMetadata = questions.map(q => ({
+      id: q.id,
+      title: q.title || 'Untitled',
+      type: q.type,
+      required: q.required
+    }))
+
+    // Build responses with answers
+    const formattedResponses = responses.map(response => {
+      const answers = response.answers as Record<string, Json>
+      const formattedAnswers: Record<string, Json> = {}
+
+      questions.forEach(q => {
+        formattedAnswers[q.id] = answers[q.id] || null
+      })
+
+      return {
+        id: response.id,
+        submitted_at: response.submitted_at,
+        answers: formattedAnswers
+      }
+    })
+
+    // Build export payload
+    const exportPayload = {
+      form_id: form.id,
+      form_title: form.title,
+      exported_at: new Date().toISOString(),
+      total_responses: formattedResponses.length,
+      questions: questionMetadata,
+      responses: formattedResponses
+    }
+
+    // Create and download JSON file
+    const jsonContent = JSON.stringify(exportPayload, null, 2)
+    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `${form.title || 'form'}-responses-${new Date().toISOString().split('T')[0]}.json`
+    link.click()
+    URL.revokeObjectURL(link.href)
+
+    toast.success('JSON exported successfully')
   }
 
   const copyFormLink = () => {
@@ -289,10 +383,34 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
                 className="pl-10"
               />
             </div>
-            <Button onClick={exportToCSV} variant="outline">
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={isExporting}>
+                  {isExporting ? (
+                    <>
+                      <span className="w-4 h-4 mr-2 animate-spin">⏳</span>
+                      Exporting...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Export
+                    </>
+                  )}
+                  <span className="sr-only">Export menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleExport('csv')} disabled={isExporting}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Export as CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('json')} disabled={isExporting}>
+                  <FileJson className="w-4 h-4 mr-2" />
+                  Export as JSON
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Table */}

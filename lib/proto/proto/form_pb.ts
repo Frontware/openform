@@ -481,22 +481,27 @@ export class Form extends Message<Form> {
   redirectUrl = "";
 
   /**
-   * @generated from field: google.protobuf.Struct settings = 13;
+   * @generated from field: bool force_captcha = 13;
+   */
+  forceCaptcha = false;
+
+  /**
+   * @generated from field: google.protobuf.Struct settings = 14;
    */
   settings?: Struct;
 
   /**
-   * @generated from field: repeated weladee.form.v1.Question questions = 14;
+   * @generated from field: repeated weladee.form.v1.Question questions = 15;
    */
   questions: Question[] = [];
 
   /**
-   * @generated from field: google.protobuf.Timestamp created_at = 15;
+   * @generated from field: google.protobuf.Timestamp created_at = 16;
    */
   createdAt?: Timestamp;
 
   /**
-   * @generated from field: google.protobuf.Timestamp updated_at = 16;
+   * @generated from field: google.protobuf.Timestamp updated_at = 17;
    */
   updatedAt?: Timestamp;
 
@@ -520,10 +525,11 @@ export class Form extends Message<Form> {
     { no: 10, name: "show_progress_bar", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 11, name: "custom_thank_you_message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 12, name: "redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 13, name: "settings", kind: "message", T: Struct },
-    { no: 14, name: "questions", kind: "message", T: Question, repeated: true },
-    { no: 15, name: "created_at", kind: "message", T: Timestamp },
-    { no: 16, name: "updated_at", kind: "message", T: Timestamp },
+    { no: 13, name: "force_captcha", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: "settings", kind: "message", T: Struct },
+    { no: 15, name: "questions", kind: "message", T: Question, repeated: true },
+    { no: 16, name: "created_at", kind: "message", T: Timestamp },
+    { no: 17, name: "updated_at", kind: "message", T: Timestamp },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Form {
@@ -906,7 +912,12 @@ export class UpdateFormRequest extends Message<UpdateFormRequest> {
   redirectUrl?: string;
 
   /**
-   * @generated from field: optional google.protobuf.Struct settings = 12;
+   * @generated from field: optional bool force_captcha = 12;
+   */
+  forceCaptcha?: boolean;
+
+  /**
+   * @generated from field: optional google.protobuf.Struct settings = 13;
    */
   settings?: Struct;
 
@@ -929,7 +940,8 @@ export class UpdateFormRequest extends Message<UpdateFormRequest> {
     { no: 9, name: "show_progress_bar", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 10, name: "custom_thank_you_message", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 11, name: "redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 12, name: "settings", kind: "message", T: Struct, opt: true },
+    { no: 12, name: "force_captcha", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 13, name: "settings", kind: "message", T: Struct, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateFormRequest {

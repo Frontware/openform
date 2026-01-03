@@ -256,7 +256,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 
 	// Register services (database mode)
 	formServer := gapi.NewFormServer(database, s3Storage)
-	responseServer := gapi.NewResponseServer(database)
+	responseServer := gapi.NewResponseServer(database, cfg.Recaptcha)
 	fileServer := gapi.NewFileServer(database, s3Storage)
 
 	// Register services with the gRPC server
@@ -316,6 +316,18 @@ func runServe(cmd *cobra.Command, args []string) error {
 
 	// Create HTTP handler
 	httpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Handle /api/config/recaptcha
+		if r.Method == http.MethodGet && r.URL.Path == "/api/config/recaptcha" {
+			w.Header().Set("Content-Type", "application/json")
+			if cfg.Recaptcha.Enabled {
+				fmt.Fprintf(w, `{"siteKey": "%s"}`, cfg.Recaptcha.SiteKey)
+			} else {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				fmt.Fprintf(w, `{"error": "reCAPTCHA not configured"}`)
+			}
+			return
+		}
+
 		// Handle /api/upload
 		if r.Method == http.MethodPost && r.URL.Path == "/api/upload" {
 			if s3Storage == nil {

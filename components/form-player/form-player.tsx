@@ -13,7 +13,16 @@ import { responseClient } from '@/lib/grpc-client'
 import { AnswerInput } from '@/lib/proto/proto/response_pb'
 
 interface FormPlayerProps {
-  form: Form
+  form: Form & { force_captcha?: boolean }
+}
+
+// Type for window.grecaptcha
+declare global {
+  interface Window {
+    grecaptcha?: {
+      execute: (siteKey: string, options: { action: string }) => Promise<string>
+    }
+  }
 }
 
 export function FormPlayer({ form }: FormPlayerProps) {
@@ -27,7 +36,11 @@ export function FormPlayer({ form }: FormPlayerProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [direction, setDirection] = useState(0)
-  
+
+  // reCAPTCHA state
+  const [recaptchaSiteKey, setRecaptchaSiteKey] = useState<string | null>(null)
+  const [recaptchaLoaded, setRecaptchaLoaded] = useState(false)
+
   const containerRef = useRef<HTMLDivElement>(null)
   const skipNextValidationRef = useRef(false)
 
@@ -36,17 +49,45 @@ export function FormPlayer({ form }: FormPlayerProps) {
   const isFirstQuestion = currentIndex === 0
   const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0
 
+  // Fetch reCAPTCHA site key when form requires it
+  useEffect(() => {
+    if (form.force_captcha && !recaptchaSiteKey) {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:50051' : '')
+      fetch(`${apiBase}/api/config/recaptcha`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch reCAPTCHA config')
+          }
+          return res.json()
+        })
+        .then(data => {
+          if (data.siteKey) {
+            setRecaptchaSiteKey(data.siteKey)
+            // Load reCAPTCHA script
+            const script = document.createElement('script')
+            script.src = `https://www.google.com/recaptcha/api.js?render=${data.siteKey}`
+            script.async = true
+            script.onload = () => setRecaptchaLoaded(true)
+            document.body.appendChild(script)
+          }
+        })
+        .catch(err => {
+          console.error('Failed to load reCAPTCHA config:', err)
+        })
+    }
+  }, [form.force_captcha, recaptchaSiteKey])
+
   const validateCurrentQuestion = useCallback(() => {
     if (!currentQuestion) return true
-    
+
     const answer = answers[currentQuestion.id]
-    
+
     if (currentQuestion.required) {
       if (answer === undefined || answer === null || answer === '') {
         setErrors({ ...errors, [currentQuestion.id]: 'This field is required' })
         return false
       }
-      
+
       if (Array.isArray(answer) && answer.length === 0) {
         setErrors({ ...errors, [currentQuestion.id]: 'Please select at least one option' })
         return false
@@ -90,9 +131,9 @@ export function FormPlayer({ form }: FormPlayerProps) {
     // Check both the parameter and the ref for skip validation
     const shouldSkip = skipValidation || skipNextValidationRef.current
     skipNextValidationRef.current = false // Reset the ref
-    
+
     if (!shouldSkip && !validateCurrentQuestion()) return
-    
+
     if (isLastQuestion) {
       handleSubmit()
     } else {
@@ -108,32 +149,47 @@ export function FormPlayer({ form }: FormPlayerProps) {
 
   const handleSubmit = async () => {
     if (!validateCurrentQuestion()) return
-    
+
     setIsSubmitting(true)
 
     try {
+      let recaptchaToken: string | undefined
+
+      // Execute reCAPTCHA if required
+      if (form.force_captcha && recaptchaLoaded && recaptchaSiteKey && window.grecaptcha) {
+        try {
+          recaptchaToken = await window.grecaptcha.execute(recaptchaSiteKey, { action: 'submit_form' })
+        } catch (err) {
+          console.error('reCAPTCHA execution failed:', err)
+          toast.error('Verification failed, please try again')
+          setIsSubmitting(false)
+          return
+        }
+      }
+
       // Map answers to AnswerInput protobuf
       const answerInputs: AnswerInput[] = Object.entries(answers).map(([questionId, value]) => {
           const input = new AnswerInput({
               questionId: questionId
           })
-          
+
           if (typeof value === 'string') {
               input.answerText = value
           } else if (typeof value === 'number') {
               input.answerNumber = value
           }
-          // Note: Simplified mapping. 
-          
+          // Note: Simplified mapping.
+
           return input
       })
 
       await responseClient.submitResponse({
         formId: form.id,
         answers: answerInputs,
-        complete: true
+        complete: true,
+        recaptchaToken: recaptchaToken
       })
-      
+
       setIsSubmitted(true)
     } catch (error) {
       console.error(error)
@@ -157,7 +213,7 @@ export function FormPlayer({ form }: FormPlayerProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isSubmitted || isSubmitting) return
-      
+
       if (e.key === 'Enter' && !e.shiftKey) {
         // Don't submit on enter for textarea
         if (currentQuestion?.type === 'long_text') {
@@ -170,12 +226,12 @@ export function FormPlayer({ form }: FormPlayerProps) {
         e.preventDefault()
         goToNext()
       }
-      
+
       if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
         e.preventDefault()
         goToPrevious()
       }
-      
+
       if (e.key === 'ArrowDown') {
         e.preventDefault()
         goToNext()
@@ -194,17 +250,17 @@ export function FormPlayer({ form }: FormPlayerProps) {
 
     const handleWheel = (e: WheelEvent) => {
       if (isSubmitted || isSubmitting) return
-      
+
       // Don't interfere with scrollable inputs like textarea
       const target = e.target as HTMLElement
       if (target.tagName === 'TEXTAREA') return
-      
+
       const now = Date.now()
       if (now - lastScrollTime < scrollThreshold) return
-      
+
       // Check if scroll delta is significant enough
       if (Math.abs(e.deltaY) < deltaThreshold) return
-      
+
       if (e.deltaY > 0) {
         // Scrolling down - go to next question
         goToNext()
@@ -212,7 +268,7 @@ export function FormPlayer({ form }: FormPlayerProps) {
         // Scrolling up - go to previous question
         goToPrevious()
       }
-      
+
       lastScrollTime = now
     }
 

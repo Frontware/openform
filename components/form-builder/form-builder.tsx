@@ -13,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
@@ -138,6 +139,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
         description: form.description || undefined,
         theme: mapThemeToProto(form.theme),
         customThankYouMessage: form.thank_you_message,
+        forceCaptcha: form.force_captcha,
       })
       console.log('[handleSave] updateForm result:', updateResult)
 
@@ -547,6 +549,25 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
                     className="mt-2"
                     placeholder="Thank you for your response!"
                     rows={3}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between py-3 border-t border-slate-100">
+                  <div className="flex-1">
+                    <Label htmlFor="force-captcha" className="text-sm font-medium cursor-pointer">
+                      Force CAPTCHA
+                    </Label>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Require invisible reCAPTCHA verification to prevent bot submissions
+                    </p>
+                  </div>
+                  <Switch
+                    id="force-captcha"
+                    checked={form.force_captcha || false}
+                    onCheckedChange={(checked) => {
+                      setForm({ ...form, force_captcha: checked })
+                      setHasUnsavedChanges(true)
+                    }}
                   />
                 </div>
               </div>

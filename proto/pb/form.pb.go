@@ -86,18 +86,26 @@ const (
 	FormTheme_FORM_THEME_SUNSET      FormTheme = 4
 	FormTheme_FORM_THEME_FOREST      FormTheme = 5
 	FormTheme_FORM_THEME_LAVENDER    FormTheme = 6
+	FormTheme_FORM_THEME_WELADEE     FormTheme = 7
+	FormTheme_FORM_THEME_AURORA      FormTheme = 8
+	FormTheme_FORM_THEME_CYBERPUNK   FormTheme = 9
+	FormTheme_FORM_THEME_DESERT      FormTheme = 10
 )
 
 // Enum value maps for FormTheme.
 var (
 	FormTheme_name = map[int32]string{
-		0: "FORM_THEME_UNSPECIFIED",
-		1: "FORM_THEME_MINIMAL",
-		2: "FORM_THEME_MIDNIGHT",
-		3: "FORM_THEME_OCEAN",
-		4: "FORM_THEME_SUNSET",
-		5: "FORM_THEME_FOREST",
-		6: "FORM_THEME_LAVENDER",
+		0:  "FORM_THEME_UNSPECIFIED",
+		1:  "FORM_THEME_MINIMAL",
+		2:  "FORM_THEME_MIDNIGHT",
+		3:  "FORM_THEME_OCEAN",
+		4:  "FORM_THEME_SUNSET",
+		5:  "FORM_THEME_FOREST",
+		6:  "FORM_THEME_LAVENDER",
+		7:  "FORM_THEME_WELADEE",
+		8:  "FORM_THEME_AURORA",
+		9:  "FORM_THEME_CYBERPUNK",
+		10: "FORM_THEME_DESERT",
 	}
 	FormTheme_value = map[string]int32{
 		"FORM_THEME_UNSPECIFIED": 0,
@@ -107,6 +115,10 @@ var (
 		"FORM_THEME_SUNSET":      4,
 		"FORM_THEME_FOREST":      5,
 		"FORM_THEME_LAVENDER":    6,
+		"FORM_THEME_WELADEE":     7,
+		"FORM_THEME_AURORA":      8,
+		"FORM_THEME_CYBERPUNK":   9,
+		"FORM_THEME_DESERT":      10,
 	}
 )
 
@@ -531,10 +543,11 @@ type Form struct {
 	ShowProgressBar          bool                   `protobuf:"varint,10,opt,name=show_progress_bar,json=showProgressBar,proto3" json:"show_progress_bar,omitempty"`
 	CustomThankYouMessage    string                 `protobuf:"bytes,11,opt,name=custom_thank_you_message,json=customThankYouMessage,proto3" json:"custom_thank_you_message,omitempty"`
 	RedirectUrl              string                 `protobuf:"bytes,12,opt,name=redirect_url,json=redirectUrl,proto3" json:"redirect_url,omitempty"`
-	Settings                 *structpb.Struct       `protobuf:"bytes,13,opt,name=settings,proto3" json:"settings,omitempty"`
-	Questions                []*Question            `protobuf:"bytes,14,rep,name=questions,proto3" json:"questions,omitempty"`
-	CreatedAt                *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt                *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	ForceCaptcha             bool                   `protobuf:"varint,13,opt,name=force_captcha,json=forceCaptcha,proto3" json:"force_captcha,omitempty"`
+	Settings                 *structpb.Struct       `protobuf:"bytes,14,opt,name=settings,proto3" json:"settings,omitempty"`
+	Questions                []*Question            `protobuf:"bytes,15,rep,name=questions,proto3" json:"questions,omitempty"`
+	CreatedAt                *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt                *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -651,6 +664,13 @@ func (x *Form) GetRedirectUrl() string {
 		return x.RedirectUrl
 	}
 	return ""
+}
+
+func (x *Form) GetForceCaptcha() bool {
+	if x != nil {
+		return x.ForceCaptcha
+	}
+	return false
 }
 
 func (x *Form) GetSettings() *structpb.Struct {
@@ -1059,7 +1079,8 @@ type UpdateFormRequest struct {
 	ShowProgressBar          *bool                  `protobuf:"varint,9,opt,name=show_progress_bar,json=showProgressBar,proto3,oneof" json:"show_progress_bar,omitempty"`
 	CustomThankYouMessage    *string                `protobuf:"bytes,10,opt,name=custom_thank_you_message,json=customThankYouMessage,proto3,oneof" json:"custom_thank_you_message,omitempty"`
 	RedirectUrl              *string                `protobuf:"bytes,11,opt,name=redirect_url,json=redirectUrl,proto3,oneof" json:"redirect_url,omitempty"`
-	Settings                 *structpb.Struct       `protobuf:"bytes,12,opt,name=settings,proto3,oneof" json:"settings,omitempty"`
+	ForceCaptcha             *bool                  `protobuf:"varint,12,opt,name=force_captcha,json=forceCaptcha,proto3,oneof" json:"force_captcha,omitempty"`
+	Settings                 *structpb.Struct       `protobuf:"bytes,13,opt,name=settings,proto3,oneof" json:"settings,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -1169,6 +1190,13 @@ func (x *UpdateFormRequest) GetRedirectUrl() string {
 		return *x.RedirectUrl
 	}
 	return ""
+}
+
+func (x *UpdateFormRequest) GetForceCaptcha() bool {
+	if x != nil && x.ForceCaptcha != nil {
+		return *x.ForceCaptcha
+	}
+	return false
 }
 
 func (x *UpdateFormRequest) GetSettings() *structpb.Struct {
@@ -2133,7 +2161,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xc1\x05\n" +
+	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xe6\x05\n" +
 	"\x04Form\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
@@ -2147,13 +2175,14 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x11show_progress_bar\x18\n" +
 	" \x01(\bR\x0fshowProgressBar\x127\n" +
 	"\x18custom_thank_you_message\x18\v \x01(\tR\x15customThankYouMessage\x12!\n" +
-	"\fredirect_url\x18\f \x01(\tR\vredirectUrl\x123\n" +
-	"\bsettings\x18\r \x01(\v2\x17.google.protobuf.StructR\bsettings\x127\n" +
-	"\tquestions\x18\x0e \x03(\v2\x19.weladee.form.v1.QuestionR\tquestions\x129\n" +
+	"\fredirect_url\x18\f \x01(\tR\vredirectUrl\x12#\n" +
+	"\rforce_captcha\x18\r \x01(\bR\fforceCaptcha\x123\n" +
+	"\bsettings\x18\x0e \x01(\v2\x17.google.protobuf.StructR\bsettings\x127\n" +
+	"\tquestions\x18\x0f \x03(\v2\x19.weladee.form.v1.QuestionR\tquestions\x129\n" +
 	"\n" +
-	"created_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x92\x01\n" +
+	"updated_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x92\x01\n" +
 	"\tFormStats\x12'\n" +
 	"\x0ftotal_responses\x18\x01 \x01(\x03R\x0etotalResponses\x12/\n" +
 	"\x13completed_responses\x18\x02 \x01(\x03R\x12completedResponses\x12+\n" +
@@ -2174,7 +2203,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x14GetFormBySlugRequest\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\"B\n" +
 	"\x15GetFormBySlugResponse\x12)\n" +
-	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"\x8f\x06\n" +
+	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"\xcb\x06\n" +
 	"\x11UpdateFormRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
@@ -2187,9 +2216,10 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x11show_progress_bar\x18\t \x01(\bH\aR\x0fshowProgressBar\x88\x01\x01\x12<\n" +
 	"\x18custom_thank_you_message\x18\n" +
 	" \x01(\tH\bR\x15customThankYouMessage\x88\x01\x01\x12&\n" +
-	"\fredirect_url\x18\v \x01(\tH\tR\vredirectUrl\x88\x01\x01\x128\n" +
-	"\bsettings\x18\f \x01(\v2\x17.google.protobuf.StructH\n" +
-	"R\bsettings\x88\x01\x01B\b\n" +
+	"\fredirect_url\x18\v \x01(\tH\tR\vredirectUrl\x88\x01\x01\x12(\n" +
+	"\rforce_captcha\x18\f \x01(\bH\n" +
+	"R\fforceCaptcha\x88\x01\x01\x128\n" +
+	"\bsettings\x18\r \x01(\v2\x17.google.protobuf.StructH\vR\bsettings\x88\x01\x01B\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\b\n" +
 	"\x06_themeB\x0f\n" +
@@ -2199,7 +2229,8 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x1b_allow_multiple_submissionsB\x14\n" +
 	"\x12_show_progress_barB\x1b\n" +
 	"\x19_custom_thank_you_messageB\x0f\n" +
-	"\r_redirect_urlB\v\n" +
+	"\r_redirect_urlB\x10\n" +
+	"\x0e_force_captchaB\v\n" +
 	"\t_settings\"?\n" +
 	"\x12UpdateFormResponse\x12)\n" +
 	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"#\n" +
@@ -2285,7 +2316,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x17FORM_STATUS_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11FORM_STATUS_DRAFT\x10\x01\x12\x19\n" +
 	"\x15FORM_STATUS_PUBLISHED\x10\x02\x12\x16\n" +
-	"\x12FORM_STATUS_CLOSED\x10\x03*\xb5\x01\n" +
+	"\x12FORM_STATUS_CLOSED\x10\x03*\x95\x02\n" +
 	"\tFormTheme\x12\x1a\n" +
 	"\x16FORM_THEME_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12FORM_THEME_MINIMAL\x10\x01\x12\x17\n" +
@@ -2293,7 +2324,12 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x10FORM_THEME_OCEAN\x10\x03\x12\x15\n" +
 	"\x11FORM_THEME_SUNSET\x10\x04\x12\x15\n" +
 	"\x11FORM_THEME_FOREST\x10\x05\x12\x17\n" +
-	"\x13FORM_THEME_LAVENDER\x10\x06*\x91\x03\n" +
+	"\x13FORM_THEME_LAVENDER\x10\x06\x12\x16\n" +
+	"\x12FORM_THEME_WELADEE\x10\a\x12\x15\n" +
+	"\x11FORM_THEME_AURORA\x10\b\x12\x18\n" +
+	"\x14FORM_THEME_CYBERPUNK\x10\t\x12\x15\n" +
+	"\x11FORM_THEME_DESERT\x10\n" +
+	"*\x91\x03\n" +
 	"\fQuestionType\x12\x1d\n" +
 	"\x19QUESTION_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18QUESTION_TYPE_SHORT_TEXT\x10\x01\x12\x1b\n" +

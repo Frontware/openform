@@ -15,6 +15,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/weladee/weladee-form/config"
 	"github.com/weladee/weladee-form/internal/auth"
 	"github.com/weladee/weladee-form/internal/db"
 	"github.com/weladee/weladee-form/internal/db/sqlc"
@@ -24,7 +25,8 @@ import (
 
 type ResponseServerImpl struct {
 	pb.UnimplementedResponseServiceServer
-	db *db.Database
+	db              *db.Database
+	recaptchaConfig config.RecaptchaConfig
 }
 
 // Helper: get form and check access
@@ -165,9 +167,32 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 		return nil, status.Errorf(codes.InvalidArgument, "invalid form ID")
 	}
 
-	_, respondentUser, err := s.getFormForResponse(ctx, formID, false)
+	form, respondentUser, err := s.getFormForResponse(ctx, formID, false)
 	if err != nil {
 		return nil, err
+	}
+
+	// Check if CAPTCHA is required and verify token
+	if form.ForceCaptcha {
+		// Get client IP from gRPC metadata
+		md, _ := metadata.FromIncomingContext(ctx)
+		ip := net.IP(net.ParseIP("127.0.0.1")) // fallback
+		if fwd := md.Get("x-forwarded-for"); len(fwd) > 0 {
+			ip = net.ParseIP(fwd[0])
+		}
+
+		// Verify reCAPTCHA if token provided
+		if req.RecaptchaToken != nil && *req.RecaptchaToken != "" {
+			verified, err := utils.VerifyRecaptcha(*req.RecaptchaToken, ip.String(), s.recaptchaConfig)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "reCAPTCHA verification failed: %v", err)
+			}
+			if !verified {
+				return nil, status.Errorf(codes.InvalidArgument, "reCAPTCHA verification failed")
+			}
+		} else {
+			return nil, status.Errorf(codes.InvalidArgument, "reCAPTCHA token is required for this form")
+		}
 	}
 
 	// Get client IP and User-Agent from gRPC metadata

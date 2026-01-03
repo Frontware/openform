@@ -51,6 +51,7 @@ message SubmitResponseRequest {
   optional string respondent_name = 3;
   repeated AnswerInput answers = 4;
   bool complete = 5;
+  optional string recaptcha_token = 6;
 }
 
 message SubmitResponseResponse {

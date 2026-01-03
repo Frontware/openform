@@ -5,6 +5,11 @@ import { Logo } from '@/components/ui/logo'
 import { ArrowRight, Palette, Shield, Sparkles, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { setRequestLocale } from 'next-intl/server'
+import { routing } from '@/i18n/routing'
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export default async function HomePage({
   params,

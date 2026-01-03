@@ -38,7 +38,7 @@ VALUES (
     $6::boolean, $7::boolean, $8::boolean,
     $9::boolean, $10::text, $11::text, $12::jsonb
 )
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, force_captcha, settings, created_at, updated_at
 `
 
 type CreateFormParams struct {
@@ -86,6 +86,7 @@ func (q *Queries) CreateForm(ctx context.Context, arg CreateFormParams) (FormFor
 		&i.ShowProgressBar,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
+		&i.ForceCaptcha,
 		&i.Settings,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -109,7 +110,7 @@ func (q *Queries) DeleteForm(ctx context.Context, arg DeleteFormParams) error {
 }
 
 const getForm = `-- name: GetForm :one
-SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, force_captcha, settings, created_at, updated_at FROM form.forms
 WHERE id = $1::uuid
 `
 
@@ -130,6 +131,7 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 		&i.ShowProgressBar,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
+		&i.ForceCaptcha,
 		&i.Settings,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -138,7 +140,7 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 }
 
 const getFormBySlug = `-- name: GetFormBySlug :one
-SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, force_captcha, settings, created_at, updated_at FROM form.forms
 WHERE $1::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND id = $1::uuid
    OR slug = $1::text
 `
@@ -161,6 +163,7 @@ func (q *Queries) GetFormBySlug(ctx context.Context, slug string) (FormForm, err
 		&i.ShowProgressBar,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
+		&i.ForceCaptcha,
 		&i.Settings,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -203,7 +206,7 @@ func (q *Queries) GetFormStats(ctx context.Context, formID uuid.UUID) (GetFormSt
 
 const getFormWithQuestions = `-- name: GetFormWithQuestions :one
 SELECT
-    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.settings, f.created_at, f.updated_at,
+    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.force_captcha, f.settings, f.created_at, f.updated_at,
     q.id as question_id,
     q.type as question_type,
     q.label as question_label,
@@ -236,6 +239,7 @@ type GetFormWithQuestionsRow struct {
 	ShowProgressBar          bool               `db:"show_progress_bar" json:"showProgressBar"`
 	CustomThankYouMessage    pgtype.Text        `db:"custom_thank_you_message" json:"customThankYouMessage"`
 	RedirectUrl              pgtype.Text        `db:"redirect_url" json:"redirectUrl"`
+	ForceCaptcha             bool               `db:"force_captcha" json:"forceCaptcha"`
 	Settings                 []byte             `db:"settings" json:"settings"`
 	CreatedAt                time.Time          `db:"created_at" json:"createdAt"`
 	UpdatedAt                time.Time          `db:"updated_at" json:"updatedAt"`
@@ -270,6 +274,7 @@ func (q *Queries) GetFormWithQuestions(ctx context.Context, id uuid.UUID) (GetFo
 		&i.ShowProgressBar,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
+		&i.ForceCaptcha,
 		&i.Settings,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -371,7 +376,7 @@ const listUserForms = `-- name: ListUserForms :many
  * @return The list of forms that match the filter criteria.
  */
 SELECT 
-    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.settings, f.created_at, f.updated_at,
+    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.force_captcha, f.settings, f.created_at, f.updated_at,
     COUNT(r.id)::bigint as response_count
 FROM form.forms f
 LEFT JOIN form.responses r ON f.id = r.form_id
@@ -419,6 +424,7 @@ type ListUserFormsRow struct {
 	ShowProgressBar          bool        `db:"show_progress_bar" json:"showProgressBar"`
 	CustomThankYouMessage    pgtype.Text `db:"custom_thank_you_message" json:"customThankYouMessage"`
 	RedirectUrl              pgtype.Text `db:"redirect_url" json:"redirectUrl"`
+	ForceCaptcha             bool        `db:"force_captcha" json:"forceCaptcha"`
 	Settings                 []byte      `db:"settings" json:"settings"`
 	CreatedAt                time.Time   `db:"created_at" json:"createdAt"`
 	UpdatedAt                time.Time   `db:"updated_at" json:"updatedAt"`
@@ -456,6 +462,7 @@ func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([
 			&i.ShowProgressBar,
 			&i.CustomThankYouMessage,
 			&i.RedirectUrl,
+			&i.ForceCaptcha,
 			&i.Settings,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -484,7 +491,7 @@ const publishForm = `-- name: PublishForm :one
 UPDATE form.forms
 SET is_published = true
 WHERE id = $1::uuid AND user_id = $2::uuid
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, force_captcha, settings, created_at, updated_at
 `
 
 type PublishFormParams struct {
@@ -509,6 +516,7 @@ func (q *Queries) PublishForm(ctx context.Context, arg PublishFormParams) (FormF
 		&i.ShowProgressBar,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
+		&i.ForceCaptcha,
 		&i.Settings,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -529,9 +537,10 @@ SET
     show_progress_bar = COALESCE($8::boolean, show_progress_bar),
     custom_thank_you_message = COALESCE($9::text, custom_thank_you_message),
     redirect_url = COALESCE($10::text, redirect_url),
-    settings = COALESCE($11::jsonb, settings)
-WHERE id = $12::uuid AND user_id = $13::uuid
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
+    force_captcha = COALESCE($11::boolean, force_captcha),
+    settings = COALESCE($12::jsonb, settings)
+WHERE id = $13::uuid AND user_id = $14::uuid
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, force_captcha, settings, created_at, updated_at
 `
 
 type UpdateFormParams struct {
@@ -545,6 +554,7 @@ type UpdateFormParams struct {
 	ShowProgressBar          bool            `db:"show_progress_bar" json:"showProgressBar"`
 	CustomThankYouMessage    string          `db:"custom_thank_you_message" json:"customThankYouMessage"`
 	RedirectUrl              string          `db:"redirect_url" json:"redirectUrl"`
+	ForceCaptcha             bool            `db:"force_captcha" json:"forceCaptcha"`
 	Settings                 json.RawMessage `db:"settings" json:"settings"`
 	ID                       uuid.UUID       `db:"id" json:"id"`
 	UserID                   uuid.UUID       `db:"user_id" json:"userId"`
@@ -562,6 +572,7 @@ func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormFor
 		arg.ShowProgressBar,
 		arg.CustomThankYouMessage,
 		arg.RedirectUrl,
+		arg.ForceCaptcha,
 		arg.Settings,
 		arg.ID,
 		arg.UserID,
@@ -581,6 +592,7 @@ func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormFor
 		&i.ShowProgressBar,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
+		&i.ForceCaptcha,
 		&i.Settings,
 		&i.CreatedAt,
 		&i.UpdatedAt,

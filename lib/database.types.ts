@@ -104,6 +104,7 @@ export interface Database {
           theme: ThemePreset
           questions: QuestionConfig[]
           thank_you_message: string
+          force_captcha: boolean
           created_at: string
           updated_at: string
         }
@@ -117,6 +118,7 @@ export interface Database {
           theme?: ThemePreset
           questions?: QuestionConfig[]
           thank_you_message?: string
+          force_captcha?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -128,6 +130,7 @@ export interface Database {
           theme?: ThemePreset
           questions?: QuestionConfig[]
           thank_you_message?: string
+          force_captcha?: boolean
           updated_at?: string
         }
       }

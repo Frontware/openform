@@ -107,7 +107,8 @@ type FormForm struct {
 	// Custom confirmation message after submission
 	CustomThankYouMessage pgtype.Text `db:"custom_thank_you_message" json:"customThankYouMessage"`
 	// Optional URL to redirect after submission
-	RedirectUrl pgtype.Text `db:"redirect_url" json:"redirectUrl"`
+	RedirectUrl  pgtype.Text `db:"redirect_url" json:"redirectUrl"`
+	ForceCaptcha bool        `db:"force_captcha" json:"forceCaptcha"`
 	// Additional configuration as JSON (flexible schema)
 	Settings  []byte    `db:"settings" json:"settings"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`

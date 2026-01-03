@@ -348,6 +348,7 @@ type SubmitResponseRequest struct {
 	RespondentName  *string                `protobuf:"bytes,3,opt,name=respondent_name,json=respondentName,proto3,oneof" json:"respondent_name,omitempty"`
 	Answers         []*AnswerInput         `protobuf:"bytes,4,rep,name=answers,proto3" json:"answers,omitempty"`
 	Complete        bool                   `protobuf:"varint,5,opt,name=complete,proto3" json:"complete,omitempty"`
+	RecaptchaToken  *string                `protobuf:"bytes,6,opt,name=recaptcha_token,json=recaptchaToken,proto3,oneof" json:"recaptcha_token,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -415,6 +416,13 @@ func (x *SubmitResponseRequest) GetComplete() bool {
 		return x.Complete
 	}
 	return false
+}
+
+func (x *SubmitResponseRequest) GetRecaptchaToken() string {
+	if x != nil && x.RecaptchaToken != nil {
+		return *x.RecaptchaToken
+	}
+	return ""
 }
 
 type SubmitResponseResponse struct {
@@ -922,15 +930,17 @@ const file_proto_response_proto_rawDesc = "" +
 	"\f_answer_dateB\x0e\n" +
 	"\f_answer_timeB\x11\n" +
 	"\x0f_answer_choicesB\x12\n" +
-	"\x10_answer_file_url\"\x8b\x02\n" +
+	"\x10_answer_file_url\"\xcd\x02\n" +
 	"\x15SubmitResponseRequest\x12\x17\n" +
 	"\aform_id\x18\x01 \x01(\tR\x06formId\x12.\n" +
 	"\x10respondent_email\x18\x02 \x01(\tH\x00R\x0frespondentEmail\x88\x01\x01\x12,\n" +
 	"\x0frespondent_name\x18\x03 \x01(\tH\x01R\x0erespondentName\x88\x01\x01\x126\n" +
 	"\aanswers\x18\x04 \x03(\v2\x1c.weladee.form.v1.AnswerInputR\aanswers\x12\x1a\n" +
-	"\bcomplete\x18\x05 \x01(\bR\bcompleteB\x13\n" +
+	"\bcomplete\x18\x05 \x01(\bR\bcomplete\x12,\n" +
+	"\x0frecaptcha_token\x18\x06 \x01(\tH\x02R\x0erecaptchaToken\x88\x01\x01B\x13\n" +
 	"\x11_respondent_emailB\x12\n" +
-	"\x10_respondent_name\"O\n" +
+	"\x10_respondent_nameB\x12\n" +
+	"\x10_recaptcha_token\"O\n" +
 	"\x16SubmitResponseResponse\x125\n" +
 	"\bresponse\x18\x01 \x01(\v2\x19.weladee.form.v1.ResponseR\bresponse\"$\n" +
 	"\x12GetResponseRequest\x12\x0e\n" +

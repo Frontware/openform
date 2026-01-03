@@ -61,7 +61,7 @@ function mapPbFormToDBForm(pbForm: PbForm): Form {
       case FormTheme.LAVENDER: theme = 'lavender'; break;
       default: theme = 'weladee';
     }
-  
+
   return {
     id: pbForm.id,
     user_id: pbForm.userId,
@@ -72,6 +72,7 @@ function mapPbFormToDBForm(pbForm: PbForm): Form {
     theme: theme,
     questions: pbForm.questions.map(mapPbQuestionToConfig),
     thank_you_message: pbForm.customThankYouMessage,
+    force_captcha: pbForm.forceCaptcha,
     created_at: pbForm.createdAt?.toDate().toISOString() || '',
     updated_at: pbForm.updatedAt?.toDate().toISOString() || '',
   }
