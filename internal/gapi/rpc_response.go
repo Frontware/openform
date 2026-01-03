@@ -242,7 +242,7 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 				AnswerNumber:  answerNumberVal,
 				AnswerDate:    "",
 				AnswerTime:    "",
-				AnswerChoices: []byte{},
+				AnswerChoices: []byte("[]"),
 				AnswerFileUrl: answerFileUrlStr,
 			})
 			if err != nil {

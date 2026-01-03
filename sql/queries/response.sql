@@ -27,7 +27,16 @@ INSERT INTO form.responses (
     form_id, respondent_user_id, respondent_email, respondent_name,
     ip_address, user_agent, completed, submitted_at
 )
-VALUES (@form_id::uuid, @respondent_user_id::uuid, @respondent_email::text, @respondent_name::text, @ip_address::inet, @user_agent::text, @completed::boolean, COALESCE(@submitted_at::timestamptz, NOW()))
+VALUES (
+    @form_id::uuid,
+    CASE WHEN @respondent_user_id::uuid = '00000000-0000-0000-0000-000000000000'::uuid THEN NULL ELSE @respondent_user_id::uuid END,
+    @respondent_email::text,
+    @respondent_name::text,
+    @ip_address::inet,
+    @user_agent::text,
+    @completed::boolean,
+    COALESCE(@submitted_at::timestamptz, NOW())
+)
 RETURNING *;
 
 -- name: GetResponse :one
@@ -49,7 +58,16 @@ INSERT INTO form.answers (
     response_id, question_id, answer_text, answer_number,
     answer_date, answer_time, answer_choices, answer_file_url
 )
-VALUES (@response_id::uuid, @question_id::uuid, @answer_text::text, @answer_number::float8, @answer_date::text, @answer_time::text, @answer_choices::jsonb, @answer_file_url::text)
+VALUES (
+    @response_id::uuid,
+    @question_id::uuid,
+    @answer_text::text,
+    @answer_number::float8,
+    CASE WHEN NULLIF(@answer_date::text, '') IS NULL THEN NULL ELSE @answer_date::date END,
+    CASE WHEN NULLIF(@answer_time::text, '') IS NULL THEN NULL ELSE @answer_time::time END,
+    @answer_choices::jsonb,
+    @answer_file_url::text
+)
 ON CONFLICT (response_id, question_id)
 DO UPDATE SET
     answer_text = EXCLUDED.answer_text,

@@ -61,7 +61,16 @@ INSERT INTO form.answers (
     response_id, question_id, answer_text, answer_number,
     answer_date, answer_time, answer_choices, answer_file_url
 )
-VALUES ($1::uuid, $2::uuid, $3::text, $4::float8, $5::text, $6::text, $7::jsonb, $8::text)
+VALUES (
+    $1::uuid,
+    $2::uuid,
+    $3::text,
+    $4::float8,
+    CASE WHEN NULLIF($5::text, '') IS NULL THEN NULL ELSE $5::date END,
+    CASE WHEN NULLIF($6::text, '') IS NULL THEN NULL ELSE $6::time END,
+    $7::jsonb,
+    $8::text
+)
 ON CONFLICT (response_id, question_id)
 DO UPDATE SET
     answer_text = EXCLUDED.answer_text,
@@ -118,7 +127,16 @@ INSERT INTO form.responses (
     form_id, respondent_user_id, respondent_email, respondent_name,
     ip_address, user_agent, completed, submitted_at
 )
-VALUES ($1::uuid, $2::uuid, $3::text, $4::text, $5::inet, $6::text, $7::boolean, COALESCE($8::timestamptz, NOW()))
+VALUES (
+    $1::uuid,
+    CASE WHEN $2::uuid = '00000000-0000-0000-0000-000000000000'::uuid THEN NULL ELSE $2::uuid END,
+    $3::text,
+    $4::text,
+    $5::inet,
+    $6::text,
+    $7::boolean,
+    COALESCE($8::timestamptz, NOW())
+)
 RETURNING id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at
 `
 
