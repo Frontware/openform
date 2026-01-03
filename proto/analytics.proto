@@ -1,0 +1,244 @@
+syntax = "proto3";
+
+package weladee.form.v1;
+
+option go_package = "github.com/weladee/weladee-form/proto/pb";
+
+import "google/protobuf/timestamp.proto";
+import "proto/common.proto";
+
+// Overview Statistics
+message OverviewStats {
+  int64 total_views = 1;
+  int64 total_responses = 2;
+  int64 completion_count = 3;
+  double completion_rate = 4;
+  int32 avg_completion_time_seconds = 5;
+  string views_change = 6;
+  string responses_change = 7;
+  string completion_rate_change = 8;
+  string avg_time_change = 9;
+}
+
+message GetOverviewStatsRequest {
+  string form_id = 1;
+  string time_range = 2; // 7d, 30d, 90d, all
+}
+
+message GetOverviewStatsResponse {
+  OverviewStats stats = 1;
+}
+
+// Response Trends
+message ResponseTrendPoint {
+  string date = 1;
+  int64 views = 2;
+  int64 responses = 3;
+  int64 completions = 4;
+}
+
+message GetResponseTrendRequest {
+  string form_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+}
+
+message GetResponseTrendResponse {
+  repeated ResponseTrendPoint data_points = 1;
+}
+
+// Device Breakdown
+message DeviceStats {
+  string device_type = 1;
+  int64 count = 2;
+  double percentage = 3;
+}
+
+message GetDeviceBreakdownRequest {
+  string form_id = 1;
+}
+
+message GetDeviceBreakdownResponse {
+  repeated DeviceStats devices = 1;
+}
+
+// Completion Funnel
+message CompletionFunnel {
+  message Stage {
+    string name = 1;
+    int64 count = 2;
+    double percentage = 3;
+  }
+  repeated Stage stages = 1;
+  double overall_completion_rate = 2;
+}
+
+message GetCompletionFunnelRequest {
+  string form_id = 1;
+}
+
+message GetCompletionFunnelResponse {
+  CompletionFunnel funnel = 1;
+}
+
+// Question Analytics
+message QuestionAnalytics {
+  string question_id = 1;
+  string question_type = 2;
+  string question_label = 3;
+  int64 response_count = 4;
+  repeated ChoiceStats choice_stats = 5;
+  repeated RatingStats rating_stats = 6;
+  NPSStats nps_stats = 7;
+  TextStats text_stats = 8;
+}
+
+message ChoiceStats {
+  string choice = 1;
+  int64 count = 2;
+  double percentage = 3;
+}
+
+message RatingStats {
+  int32 rating = 1;
+  int64 count = 2;
+  double percentage = 3;
+}
+
+message NPSStats {
+  int64 detractors = 1;
+  int64 passives = 2;
+  int64 promoters = 3;
+  double nps_score = 4;
+}
+
+message TextStats {
+  int64 total_responses = 1;
+  int32 avg_length = 2;
+  repeated string sample_responses = 3;
+}
+
+message GetQuestionAnalyticsRequest {
+  string form_id = 1;
+  optional string question_id = 2; // If null, get all questions
+}
+
+message GetQuestionAnalyticsResponse {
+  repeated QuestionAnalytics questions = 1;
+}
+
+// Question Drop-off
+message QuestionDropOff {
+  string question_id = 1;
+  string question_label = 2;
+  int32 order_index = 3;
+  int64 viewed_count = 4;
+  int64 answered_count = 5;
+  int64 abandoned_count = 6;
+  double answer_rate = 7;
+  int32 avg_time_spent_seconds = 8;
+}
+
+message GetQuestionDropOffRequest {
+  string form_id = 1;
+}
+
+message GetQuestionDropOffResponse {
+  repeated QuestionDropOff questions = 1;
+}
+
+// Geographic Distribution
+message GeographicStats {
+  string country = 1;
+  string country_name = 2;
+  int64 count = 3;
+  double percentage = 4;
+  repeated CityStats cities = 5;
+}
+
+message CityStats {
+  string city = 1;
+  int64 count = 2;
+}
+
+message GetGeographicDistributionRequest {
+  string form_id = 1;
+}
+
+message GetGeographicDistributionResponse {
+  repeated GeographicStats countries = 1;
+}
+
+// Time Distribution
+message HourlyStats {
+  int32 hour = 1;
+  int64 count = 2;
+}
+
+message DayOfWeekStats {
+  int32 day = 1; // 0 = Sunday, 6 = Saturday
+  string day_name = 2;
+  int64 count = 3;
+}
+
+message GetTimeDistributionRequest {
+  string form_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+}
+
+message GetTimeDistributionResponse {
+  repeated HourlyStats hourly = 1;
+  repeated DayOfWeekStats daily = 2;
+}
+
+// Track View
+message TrackViewRequest {
+  string form_id = 1;
+  string session_id = 2;
+  string user_agent = 3;
+  string referrer = 4;
+  string ip_address = 5;
+}
+
+message TrackViewResponse {
+  bool success = 1;
+}
+
+// Track Response Start
+message TrackResponseStartRequest {
+  string form_id = 1;
+  string session_id = 2;
+}
+
+message TrackResponseStartResponse {
+  bool success = 1;
+}
+
+// Export Analytics
+message ExportAnalyticsRequest {
+  string form_id = 1;
+  string format = 2; // csv, pdf, xlsx
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+}
+
+message ExportAnalyticsResponse {
+  bytes data = 1;
+  string filename = 2;
+  string mime_type = 3;
+}
+
+// Analytics Service
+service AnalyticsService {
+  rpc GetOverviewStats(GetOverviewStatsRequest) returns (GetOverviewStatsResponse);
+  rpc GetResponseTrend(GetResponseTrendRequest) returns (GetResponseTrendResponse);
+  rpc GetDeviceBreakdown(GetDeviceBreakdownRequest) returns (GetDeviceBreakdownResponse);
+  rpc GetCompletionFunnel(GetCompletionFunnelRequest) returns (GetCompletionFunnelResponse);
+  rpc GetQuestionAnalytics(GetQuestionAnalyticsRequest) returns (GetQuestionAnalyticsResponse);
+  rpc GetQuestionDropOff(GetQuestionDropOffRequest) returns (GetQuestionDropOffResponse);
+  rpc GetGeographicDistribution(GetGeographicDistributionRequest) returns (GetGeographicDistributionResponse);
+  rpc GetTimeDistribution(GetTimeDistributionRequest) returns (GetTimeDistributionResponse);
+  rpc TrackView(TrackViewRequest) returns (TrackViewResponse);
+  rpc TrackResponseStart(TrackResponseStartRequest) returns (TrackResponseStartResponse);
+  rpc ExportAnalytics(ExportAnalyticsRequest) returns (ExportAnalyticsResponse);
+}
