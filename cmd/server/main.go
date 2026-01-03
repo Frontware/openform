@@ -14,6 +14,7 @@ import (
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
+	"connectrpc.com/connect"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
@@ -26,7 +27,146 @@ import (
 	"github.com/weladee/weladee-form/internal/gapi"
 	"github.com/weladee/weladee-form/internal/storage"
 	pb "github.com/weladee/weladee-form/proto/pb"
+	pbconnect "github.com/weladee/weladee-form/proto/pbconnect"
 )
+
+// Adapt gRPC service to Connect interface
+type connectFormServiceAdapter struct {
+	impl *gapi.FormServerImpl
+}
+
+func (a *connectFormServiceAdapter) CreateForm(ctx context.Context, req *connect.Request[pb.CreateFormRequest]) (*connect.Response[pb.CreateFormResponse], error) {
+	resp, err := a.impl.CreateForm(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) GetForm(ctx context.Context, req *connect.Request[pb.GetFormRequest]) (*connect.Response[pb.GetFormResponse], error) {
+	resp, err := a.impl.GetForm(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) GetFormBySlug(ctx context.Context, req *connect.Request[pb.GetFormBySlugRequest]) (*connect.Response[pb.GetFormBySlugResponse], error) {
+	resp, err := a.impl.GetFormBySlug(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) UpdateForm(ctx context.Context, req *connect.Request[pb.UpdateFormRequest]) (*connect.Response[pb.UpdateFormResponse], error) {
+	resp, err := a.impl.UpdateForm(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) DeleteForm(ctx context.Context, req *connect.Request[pb.DeleteFormRequest]) (*connect.Response[pb.DeleteFormResponse], error) {
+	resp, err := a.impl.DeleteForm(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) ListForms(ctx context.Context, req *connect.Request[pb.ListFormsRequest]) (*connect.Response[pb.ListFormsResponse], error) {
+	resp, err := a.impl.ListForms(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) PublishForm(ctx context.Context, req *connect.Request[pb.PublishFormRequest]) (*connect.Response[pb.PublishFormResponse], error) {
+	resp, err := a.impl.PublishForm(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) GetFormStats(ctx context.Context, req *connect.Request[pb.GetFormStatsRequest]) (*connect.Response[pb.GetFormStatsResponse], error) {
+	resp, err := a.impl.GetFormStats(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) CreateQuestion(ctx context.Context, req *connect.Request[pb.CreateQuestionRequest]) (*connect.Response[pb.CreateQuestionResponse], error) {
+	resp, err := a.impl.CreateQuestion(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) UpdateQuestion(ctx context.Context, req *connect.Request[pb.UpdateQuestionRequest]) (*connect.Response[pb.UpdateQuestionResponse], error) {
+	resp, err := a.impl.UpdateQuestion(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) DeleteQuestion(ctx context.Context, req *connect.Request[pb.DeleteQuestionRequest]) (*connect.Response[pb.DeleteQuestionResponse], error) {
+	resp, err := a.impl.DeleteQuestion(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectFormServiceAdapter) ReorderQuestions(ctx context.Context, req *connect.Request[pb.ReorderQuestionsRequest]) (*connect.Response[pb.ReorderQuestionsResponse], error) {
+	resp, err := a.impl.ReorderQuestions(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+// Adapt gRPC ResponseService to Connect interface
+type connectResponseServiceAdapter struct {
+	impl *gapi.ResponseServerImpl
+}
+
+func (a *connectResponseServiceAdapter) SubmitResponse(ctx context.Context, req *connect.Request[pb.SubmitResponseRequest]) (*connect.Response[pb.SubmitResponseResponse], error) {
+	resp, err := a.impl.SubmitResponse(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectResponseServiceAdapter) GetResponse(ctx context.Context, req *connect.Request[pb.GetResponseRequest]) (*connect.Response[pb.GetResponseResponse], error) {
+	resp, err := a.impl.GetResponse(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectResponseServiceAdapter) ListResponses(ctx context.Context, req *connect.Request[pb.ListResponsesRequest]) (*connect.Response[pb.ListResponsesResponse], error) {
+	resp, err := a.impl.ListResponses(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectResponseServiceAdapter) DeleteResponse(ctx context.Context, req *connect.Request[pb.DeleteResponseRequest]) (*connect.Response[pb.DeleteResponseResponse], error) {
+	resp, err := a.impl.DeleteResponse(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
 
 func main() {
 	var rootCmd = &cobra.Command{
@@ -126,6 +266,30 @@ func runServe(cmd *cobra.Command, args []string) error {
 		grpcweb.WithOriginFunc(func(origin string) bool { return true }), // Allow all origins for now
 	)
 
+	// Create Connect handlers (supports Connect protocol from @bufbuild/connect)
+	// We use adapters to convert between gRPC and Connect interfaces
+	formConnectAdapter := &connectFormServiceAdapter{impl: formServer.(*gapi.FormServer).FormServerImpl}
+
+	// Create a ServeMux for all Connect handlers
+	connectMux := http.NewServeMux()
+
+	// Register FormService handler (only needed for Create Form button)
+	formPath, formHandler := pbconnect.NewFormServiceHandler(
+		formConnectAdapter,
+		connect.WithInterceptors(auth.NewConnectAuthInterceptor(tokenValidator)),
+	)
+	connectMux.Handle(formPath, formHandler)
+
+	log.Printf("✓ Connect handler registered at %s", formPath)
+
+	// Helper function to check if request is Connect protocol
+	isConnectRequest := func(r *http.Request) bool {
+		ct := r.Header.Get("Content-Type")
+		// Connect protocol content types
+		return strings.Contains(ct, "application/connect+") ||
+		 strings.Contains(ct, "application/json") && r.Method == "POST"
+	}
+
 	// Setup CORS
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // Allow all origins for dev
@@ -166,6 +330,12 @@ func runServe(cmd *cobra.Command, args []string) error {
 			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintf(w, `{"success": true, "url": "%s", "file": {"name": "%s", "type": "%s", "size": %d}}`,
 				fileURL, handler.Filename, handler.Header.Get("Content-Type"), handler.Size)
+			return
+		}
+
+		// Check for Connect protocol requests (must be before gRPC-Web check)
+		if isConnectRequest(r) {
+			connectMux.ServeHTTP(w, r)
 			return
 		}
 

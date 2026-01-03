@@ -142,6 +142,16 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 			description = req.Description
 		}
 
+		// Marshal settings to JSON, use empty object if nil
+		settingsJSON := []byte("{}")
+		if req.Settings != nil {
+			bytes, err := proto.Marshal(req.Settings)
+			if err == nil && len(bytes) > 0 {
+				// For now use empty JSON object - proto struct is complex
+				settingsJSON = []byte("{}")
+			}
+		}
+
 		formParams := sqlc.CreateFormParams{
 			UserID:                   user.ID,
 			Title:                    req.Title,
@@ -152,7 +162,7 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 			RequireLogin:             false,
 			AllowMultipleSubmissions: false,
 			ShowProgressBar:          true,
-			Settings:                 []byte{},
+			Settings:                 settingsJSON,
 		}
 
 		form, err := q.CreateForm(ctx, formParams)
@@ -178,9 +188,9 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 				Placeholder:     qPlaceholder,
 				Required:        qpb.Required,
 				OrderIndex:      int32(i),
-				Options:         []byte{},
-				ValidationRules: []byte{},
-				Settings:        []byte{},
+				Options:         []byte("{}"),
+				ValidationRules: []byte("{}"),
+				Settings:        []byte("{}"),
 			})
 			if err != nil {
 				return err

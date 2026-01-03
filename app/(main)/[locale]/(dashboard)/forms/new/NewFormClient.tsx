@@ -19,6 +19,7 @@ export function NewFormClient({ locale }: { locale: string }) {
       console.log('[NewFormClient] Starting form creation...')
       const token = getToken()
       console.log('[NewFormClient] Token for gRPC call:', token ? 'present' : 'MISSING!')
+      console.log('[NewFormClient] Token value:', token?.substring(0, 20) + '...')
 
       try {
         console.log('[NewFormClient] Calling formClient.createForm()...')
@@ -30,19 +31,27 @@ export function NewFormClient({ locale }: { locale: string }) {
           settings: {},
         })
 
-        console.log('[NewFormClient] CreateForm success:', response.form?.id)
+        console.log('[NewFormClient] CreateForm success!')
+        console.log('[NewFormClient] Response:', response)
+        console.log('[NewFormClient] Form ID:', response.form?.id)
+
         if (response.form) {
+          console.log('[NewFormClient] Redirecting to edit page...')
           router.replace(`/${locale}/forms/${response.form.id}/edit`)
         } else {
           console.error('[NewFormClient] No form returned from createForm')
+          alert('Failed to create form: No form returned from server')
           router.replace(`/${locale}/dashboard`)
         }
       } catch (error) {
         console.error('[NewFormClient] Error creating form:', error)
+        console.error('[NewFormClient] Error details:', JSON.stringify(error, null, 2))
+        alert(`Error creating form: ${error instanceof Error ? error.message : 'Unknown error'}`)
         router.replace(`/${locale}/dashboard`)
       }
     }
 
+    console.log('[NewFormClient] Component mounted, calling createForm...')
     createForm()
   }, [router, locale])
 

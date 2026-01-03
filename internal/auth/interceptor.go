@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"connectrpc.com/connect"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -27,7 +28,7 @@ type AuthInterceptor struct {
 func NewAuthInterceptor(validator *JWTValidator) *AuthInterceptor {
 	// Methods that don't require authentication
 	publicMethods := map[string]bool{
-		"/weladee.form.v1.FormService/GetFormBySlug":     true, // Public forms
+		"/weladee.form.v1.FormService/GetFormBySlug":      true, // Public forms
 		"/weladee.form.v1.ResponseService/SubmitResponse": true, // Allow anonymous responses
 	}
 
@@ -135,4 +136,51 @@ type wrappedServerStream struct {
 // Context returns the modified context
 func (w *wrappedServerStream) Context() context.Context {
 	return w.ctx
+}
+
+// NewConnectAuthInterceptor creates a Connect protocol interceptor for authentication
+func NewConnectAuthInterceptor(validator *JWTValidator) connect.UnaryInterceptorFunc {
+	// Methods that don't require authentication (same as gRPC interceptor)
+	publicMethods := map[string]bool{
+		"/weladee.form.v1.FormService/GetFormBySlug":      true,
+		"/weladee.form.v1.ResponseService/SubmitResponse": true,
+	}
+
+	return func(next connect.UnaryFunc) connect.UnaryFunc {
+		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+			// Check if method requires authentication
+			methodName := req.Spec().Procedure
+			if publicMethods[methodName] {
+				return next(ctx, req)
+			}
+
+			// Extract token from Authorization header
+			authHeader := req.Header().Get("Authorization")
+			var token string
+
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				token = strings.TrimPrefix(authHeader, "Bearer ")
+			} else {
+				// Try to get token from context (set by HTTP handler)
+				if t, ok := ctx.Value("token").(string); ok {
+					token = t
+				}
+			}
+
+			// Validate token
+			if token == "" {
+				return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("no authorization token found"))
+			}
+
+			claims, err := validator.ValidateToken(token)
+			if err != nil {
+				return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("invalid token: %w", err))
+			}
+
+			// Add claims to context
+			ctx = context.WithValue(ctx, UserClaimsKey, claims)
+
+			return next(ctx, req)
+		}
+	}
 }
