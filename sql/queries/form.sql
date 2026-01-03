@@ -76,8 +76,8 @@ SELECT f.* FROM form.forms f
 WHERE f.user_id = @user_id::uuid
   AND (@status_filter::int = 0 OR
        (@status_filter::int = 1 AND f.is_published = false) OR
-       (@status_filter::int = 2 AND f.is_published = true) OR
-       (@status_filter::int = 3 AND f.is_published = false))
+       (@status_filter::int = 2 AND f.is_published = true AND f.is_accepting_responses = true) OR
+       (@status_filter::int = 3 AND f.is_published = true AND f.is_accepting_responses = false))
   AND (@search_query::text = '' OR f.title ILIKE '%' || @search_query::text || '%')
 ORDER BY f.updated_at DESC
 LIMIT @limit_count::int OFFSET @offset_count::int;

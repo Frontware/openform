@@ -356,12 +356,26 @@ func (q *Queries) ListFormQuestions(ctx context.Context, formID uuid.UUID) ([]Fo
 }
 
 const listUserForms = `-- name: ListUserForms :many
+/**
+ * List the forms owned by a user.
+ *
+ * @param user_id The id of the user who owns the forms.
+ * @param status_filter The status of the forms to filter by.
+ *   - 0: all forms
+ *   - 1: all unpublished forms
+ *   - 2: all published forms
+ *   - 3: all unpublished forms
+ * @param search_query The search query to filter the forms by.
+ * @param limit_count The number of forms to return.
+ * @param offset_count The offset of the forms to return.
+ * @return The list of forms that match the filter criteria.
+ */
 SELECT f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.settings, f.created_at, f.updated_at FROM form.forms f
 WHERE f.user_id = $1::uuid
   AND ($2::int = 0 OR
        ($2::int = 1 AND f.is_published = false) OR
-       ($2::int = 2 AND f.is_published = true) OR
-       ($2::int = 3 AND f.is_published = false))
+       ($2::int = 2 AND f.is_published = true AND f.is_accepting_responses = true) OR
+       ($2::int = 3 AND f.is_published = true AND f.is_accepting_responses = false))
   AND ($3::text = '' OR f.title ILIKE '%' || $3::text || '%')
 ORDER BY f.updated_at DESC
 LIMIT $5::int OFFSET $4::int
