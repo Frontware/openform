@@ -1,5 +1,6 @@
 import { routing } from '@/i18n/routing'
 import { ResponsesClient } from './ResponsesClient'
+import { setRequestLocale } from 'next-intl/server'
 
 // Static export - generate placeholder for build
 // The actual form ID will be read from URL by the client component
@@ -8,6 +9,8 @@ export function generateStaticParams() {
 }
 
 export default async function ResponsesPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
+  const { locale } = await params
+  setRequestLocale(locale)
   // Just render the client component - it will read the actual ID from URL
   return <ResponsesClient />
 }

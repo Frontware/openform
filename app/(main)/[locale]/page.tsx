@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { ArrowRight, Palette, Shield, Sparkles, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { setRequestLocale } from 'next-intl/server'
 
 export default async function HomePage({
   params,
@@ -11,6 +12,7 @@ export default async function HomePage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  setRequestLocale(locale)
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
