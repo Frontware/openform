@@ -22,6 +22,8 @@ import {
 import { Form, FormStatus } from '@/lib/database.types'
 import { DeleteFormButton } from './delete-form-button'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
+
 
 interface FormCardProps {
   form: Form
@@ -61,7 +63,12 @@ function getStatusColor(status: FormStatus) {
 
 export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
   const locale = useLocale()
+  const isDraftForm = form.status === 'draft'
+  
   const copyFormLink = () => {
+    if (isDraftForm) {
+      return
+    }
     const link = `${window.location.origin}/f/${form.slug}`
     navigator.clipboard.writeText(link)
     toast.success('Link copied to clipboard')
@@ -105,15 +112,28 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
                 </Link>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem asChild>
-              <Link href={`/${locale}/forms/${form.id}/responses`} className="cursor-pointer">
+            <DropdownMenuItem 
+              asChild
+              disabled={isDraftForm}
+              className={cn(
+                isDraftForm && 'opacity-50 cursor-not-allowed text-gray-400'
+              )}
+            >
+              <Link href={`/${locale}/forms/${form.id}/responses`} className={cn(
+                'cursor-pointer',
+                isDraftForm && 'pointer-events-none'
+              )}>
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Responses
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={copyFormLink}
-              className="cursor-pointer"
+              onClick={isDraftForm ? undefined : copyFormLink}
+              disabled={isDraftForm}
+              className={cn(
+                'cursor-pointer',
+                isDraftForm && 'opacity-50 cursor-not-allowed text-gray-400'
+              )}
             >
               <Copy className="mr-2 h-4 w-4" />
               Copy link
@@ -139,12 +159,26 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
             Edit
           </Button>
         </Link>
-        <Link href={`/${locale}/forms/${form.id}/responses`} className="flex-1">
-          <Button variant="outline" size="sm" className="w-full hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition-colors">
-            <BarChart3 className="w-3 h-3 mr-2" />
-            Responses
-          </Button>
-        </Link>
+        <div className="flex-1">
+          {isDraftForm ? (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled
+              className="w-full opacity-50 cursor-not-allowed text-gray-400"
+            >
+              <BarChart3 className="w-3 h-3 mr-2" />
+              Responses
+            </Button>
+          ) : (
+            <Link href={`/${locale}/forms/${form.id}/responses`} className="block">
+              <Button variant="outline" size="sm" className="w-full hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition-colors">
+                <BarChart3 className="w-3 h-3 mr-2" />
+                Responses
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
       </div>
     </Card>
