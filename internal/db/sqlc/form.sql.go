@@ -370,30 +370,68 @@ const listUserForms = `-- name: ListUserForms :many
  * @param offset_count The offset of the forms to return.
  * @return The list of forms that match the filter criteria.
  */
-SELECT f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.settings, f.created_at, f.updated_at FROM form.forms f
+SELECT 
+    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.settings, f.created_at, f.updated_at,
+    COUNT(r.id)::bigint as response_count
+FROM form.forms f
+LEFT JOIN form.responses r ON f.id = r.form_id
 WHERE f.user_id = $1::uuid
   AND ($2::int = 0 OR
        ($2::int = 1 AND f.is_published = false) OR
        ($2::int = 2 AND f.is_published = true AND f.is_accepting_responses = true) OR
        ($2::int = 3 AND f.is_published = true AND f.is_accepting_responses = false))
   AND ($3::text = '' OR f.title ILIKE '%' || $3::text || '%')
-ORDER BY f.updated_at DESC
-LIMIT $5::int OFFSET $4::int
+GROUP BY f.id
+ORDER BY
+  CASE WHEN $4::text = 'title' AND $5::text = 'asc' THEN f.title END ASC,
+  CASE WHEN $4::text = 'title' AND $5::text = 'desc' THEN f.title END DESC,
+  CASE WHEN $4::text = 'created_at' AND $5::text = 'asc' THEN f.created_at END ASC,
+  CASE WHEN $4::text = 'created_at' AND $5::text = 'desc' THEN f.created_at END DESC,
+  CASE WHEN $4::text = 'updated_at' AND $5::text = 'asc' THEN f.updated_at END ASC,
+  CASE WHEN $4::text = 'updated_at' AND $5::text = 'desc' THEN f.updated_at END DESC,
+  CASE WHEN $4::text = 'response_count' AND $5::text = 'asc' THEN COUNT(r.id) END ASC,
+  CASE WHEN $4::text = 'response_count' AND $5::text = 'desc' THEN COUNT(r.id) END DESC,
+  f.updated_at DESC
+LIMIT $7::int OFFSET $6::int
 `
 
 type ListUserFormsParams struct {
 	UserID       uuid.UUID `db:"user_id" json:"userId"`
 	StatusFilter int32     `db:"status_filter" json:"statusFilter"`
 	SearchQuery  string    `db:"search_query" json:"searchQuery"`
+	SortBy       string    `db:"sort_by" json:"sortBy"`
+	SortOrder    string    `db:"sort_order" json:"sortOrder"`
 	OffsetCount  int32     `db:"offset_count" json:"offsetCount"`
 	LimitCount   int32     `db:"limit_count" json:"limitCount"`
 }
 
-func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([]FormForm, error) {
+type ListUserFormsRow struct {
+	ID                       uuid.UUID   `db:"id" json:"id"`
+	UserID                   uuid.UUID   `db:"user_id" json:"userId"`
+	Title                    string      `db:"title" json:"title"`
+	Description              pgtype.Text `db:"description" json:"description"`
+	Slug                     pgtype.Text `db:"slug" json:"slug"`
+	Theme                    string      `db:"theme" json:"theme"`
+	IsPublished              bool        `db:"is_published" json:"isPublished"`
+	IsAcceptingResponses     bool        `db:"is_accepting_responses" json:"isAcceptingResponses"`
+	RequireLogin             bool        `db:"require_login" json:"requireLogin"`
+	AllowMultipleSubmissions bool        `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
+	ShowProgressBar          bool        `db:"show_progress_bar" json:"showProgressBar"`
+	CustomThankYouMessage    pgtype.Text `db:"custom_thank_you_message" json:"customThankYouMessage"`
+	RedirectUrl              pgtype.Text `db:"redirect_url" json:"redirectUrl"`
+	Settings                 []byte      `db:"settings" json:"settings"`
+	CreatedAt                time.Time   `db:"created_at" json:"createdAt"`
+	UpdatedAt                time.Time   `db:"updated_at" json:"updatedAt"`
+	ResponseCount            int64       `db:"response_count" json:"responseCount"`
+}
+
+func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([]ListUserFormsRow, error) {
 	rows, err := q.db.Query(ctx, listUserForms,
 		arg.UserID,
 		arg.StatusFilter,
 		arg.SearchQuery,
+		arg.SortBy,
+		arg.SortOrder,
 		arg.OffsetCount,
 		arg.LimitCount,
 	)
@@ -401,9 +439,9 @@ func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([
 		return nil, err
 	}
 	defer rows.Close()
-	items := []FormForm{}
+	items := []ListUserFormsRow{}
 	for rows.Next() {
-		var i FormForm
+		var i ListUserFormsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -421,6 +459,7 @@ func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([
 			&i.Settings,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.ResponseCount,
 		); err != nil {
 			return nil, err
 		}

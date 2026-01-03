@@ -83,7 +83,7 @@ function mapPbFormToDBForm(pbForm: PbForm): Form {
   }
 }
 
-export function EditFormClient({ id: propId }: { id: string }) {
+export function EditFormClient({ id: propId }: { id?: string } = {}) {
   const params = useParams()
   const [form, setForm] = useState<Form | null>(null)
   const [loading, setLoading] = useState(true)
@@ -91,14 +91,14 @@ export function EditFormClient({ id: propId }: { id: string }) {
   // Extract form ID from window.location as the primary source of truth
   // This works with static export where useParams may return build-time values
   const getFormIdFromUrl = (): string => {
-    if (typeof window === 'undefined') return propId
+    if (typeof window === 'undefined') return propId || (params.id as string) || ''
     const pathname = window.location.pathname
     // Match pattern: /:locale/forms/:id/edit
     const match = pathname.match(/\/[a-z]{2}\/forms\/([a-f0-9-]+)\/edit/)
     if (match && match[1]) {
       return match[1]
     }
-    return propId
+    return propId || (params.id as string) || ''
   }
 
   const id = getFormIdFromUrl()

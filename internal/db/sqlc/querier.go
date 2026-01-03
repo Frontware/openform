@@ -40,7 +40,7 @@ type Querier interface {
 	IncrementFormViews(ctx context.Context, formID uuid.UUID) error
 	ListFormQuestions(ctx context.Context, formID uuid.UUID) ([]FormQuestion, error)
 	ListFormResponses(ctx context.Context, arg ListFormResponsesParams) ([]FormResponse, error)
-	ListUserForms(ctx context.Context, arg ListUserFormsParams) ([]FormForm, error)
+	ListUserForms(ctx context.Context, arg ListUserFormsParams) ([]ListUserFormsRow, error)
 	PublishForm(ctx context.Context, arg PublishFormParams) (FormForm, error)
 	ReorderQuestions(ctx context.Context, arg ReorderQuestionsParams) error
 	UpdateForm(ctx context.Context, arg UpdateFormParams) (FormForm, error)

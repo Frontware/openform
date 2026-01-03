@@ -72,14 +72,28 @@ RETURNING *;
  * @return The list of forms that match the filter criteria.
  */
 -- name: ListUserForms :many
-SELECT f.* FROM form.forms f
+SELECT 
+    f.*,
+    COUNT(r.id)::bigint as response_count
+FROM form.forms f
+LEFT JOIN form.responses r ON f.id = r.form_id
 WHERE f.user_id = @user_id::uuid
   AND (@status_filter::int = 0 OR
        (@status_filter::int = 1 AND f.is_published = false) OR
        (@status_filter::int = 2 AND f.is_published = true AND f.is_accepting_responses = true) OR
        (@status_filter::int = 3 AND f.is_published = true AND f.is_accepting_responses = false))
   AND (@search_query::text = '' OR f.title ILIKE '%' || @search_query::text || '%')
-ORDER BY f.updated_at DESC
+GROUP BY f.id
+ORDER BY
+  CASE WHEN @sort_by::text = 'title' AND @sort_order::text = 'asc' THEN f.title END ASC,
+  CASE WHEN @sort_by::text = 'title' AND @sort_order::text = 'desc' THEN f.title END DESC,
+  CASE WHEN @sort_by::text = 'created_at' AND @sort_order::text = 'asc' THEN f.created_at END ASC,
+  CASE WHEN @sort_by::text = 'created_at' AND @sort_order::text = 'desc' THEN f.created_at END DESC,
+  CASE WHEN @sort_by::text = 'updated_at' AND @sort_order::text = 'asc' THEN f.updated_at END ASC,
+  CASE WHEN @sort_by::text = 'updated_at' AND @sort_order::text = 'desc' THEN f.updated_at END DESC,
+  CASE WHEN @sort_by::text = 'response_count' AND @sort_order::text = 'asc' THEN COUNT(r.id) END ASC,
+  CASE WHEN @sort_by::text = 'response_count' AND @sort_order::text = 'desc' THEN COUNT(r.id) END DESC,
+  f.updated_at DESC
 LIMIT @limit_count::int OFFSET @offset_count::int;
 
 -- name: GetFormWithQuestions :one
