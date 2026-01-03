@@ -309,6 +309,29 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 	if req.ForceCaptcha != nil {
 		params.ForceCaptcha = *req.ForceCaptcha
 	}
+	if req.IsAcceptingResponses != nil {
+		params.IsAcceptingResponses = *req.IsAcceptingResponses
+	}
+	if req.RequireLogin != nil {
+		params.RequireLogin = *req.RequireLogin
+	}
+	if req.AllowMultipleSubmissions != nil {
+		params.AllowMultipleSubmissions = *req.AllowMultipleSubmissions
+	}
+	if req.ShowProgressBar != nil {
+		params.ShowProgressBar = *req.ShowProgressBar
+	}
+	if req.CustomThankYouMessage != nil {
+		params.CustomThankYouMessage = *req.CustomThankYouMessage
+	}
+	if req.RedirectUrl != nil {
+		params.RedirectUrl = *req.RedirectUrl
+	}
+	if req.Settings != nil {
+		if jsonBytes, err := json.Marshal(req.Settings.AsMap()); err == nil {
+			params.Settings = jsonBytes
+		}
+	}
 
 	form, err := s.db.Queries.UpdateForm(ctx, params)
 	if err != nil {

@@ -60,6 +60,10 @@ function mapThemeToProto(theme: string): FormTheme {
     case 'sunset': return FormTheme.SUNSET
     case 'forest': return FormTheme.FOREST
     case 'lavender': return FormTheme.LAVENDER
+    case 'weladee': return FormTheme.WELADEE
+    case 'aurora': return FormTheme.AURORA
+    case 'cyberpunk': return FormTheme.CYBERPUNK
+    case 'desert': return FormTheme.DESERT
     default: return FormTheme.UNSPECIFIED // or default
   }
 }
