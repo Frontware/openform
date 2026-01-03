@@ -5,7 +5,7 @@ package weladee.form.v1;
 option go_package = "github.com/weladee/weladee-form/proto/pb";
 
 import "google/protobuf/timestamp.proto";
-import "proto/common.proto";
+
 
 // Overview Statistics
 message OverviewStats {
