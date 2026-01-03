@@ -474,14 +474,32 @@ func (s *FormServerImpl) CreateQuestion(ctx context.Context, req *pb.CreateQuest
 		placeholder = req.Placeholder
 	}
 
+	// Marshal options and validation rules from protobuf Struct to JSONB
+	optionsJSON := []byte("{}")
+	if req.Options != nil {
+		if jsonBytes, err := json.Marshal(req.Options.AsMap()); err == nil {
+			optionsJSON = jsonBytes
+		}
+	}
+
+	validationRulesJSON := []byte("{}")
+	if req.ValidationRules != nil {
+		if jsonBytes, err := json.Marshal(req.ValidationRules.AsMap()); err == nil {
+			validationRulesJSON = jsonBytes
+		}
+	}
+
 	question, err := s.db.Queries.CreateQuestion(ctx, sqlc.CreateQuestionParams{
-		FormID:      formID,
-		Type:        strings.ToLower(req.Type.String()[13:]),
-		Label:       req.Label,
-		Description: description,
-		Placeholder: placeholder,
-		Required:    req.Required,
-		OrderIndex:  req.OrderIndex,
+		FormID:         formID,
+		Type:           strings.ToLower(req.Type.String()[13:]),
+		Label:          req.Label,
+		Description:    description,
+		Placeholder:    placeholder,
+		Required:       req.Required,
+		OrderIndex:     req.OrderIndex,
+		Options:        optionsJSON,
+		ValidationRules: validationRulesJSON,
+		Settings:       []byte("{}"),
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create question: %v", err)
@@ -494,6 +512,9 @@ func (s *FormServerImpl) CreateQuestion(ctx context.Context, req *pb.CreateQuest
 		Label:       question.Label,
 		Required:    question.Required,
 		OrderIndex:  question.OrderIndex,
+		Options:     req.Options,
+		ValidationRules: req.ValidationRules,
+		Settings:    &structpb.Struct{},
 		CreatedAt:   timestamppb.New(question.CreatedAt),
 		UpdatedAt:   timestamppb.New(question.UpdatedAt),
 	}
@@ -572,17 +593,15 @@ func (s *FormServerImpl) UpdateQuestion(ctx context.Context, req *pb.UpdateQuest
 		params.OrderIndex = *req.OrderIndex
 	}
 	if req.Options != nil {
-		if opts, err := structpb.NewStruct(req.Options.AsMap()); err == nil {
-			if optsBytes, err := proto.Marshal(opts); err == nil {
-				params.Options = optsBytes
-			}
+		// Convert protobuf Struct directly to JSON for JSONB storage
+		if jsonBytes, err := json.Marshal(req.Options.AsMap()); err == nil {
+			params.Options = jsonBytes
 		}
 	}
 	if req.ValidationRules != nil {
-		if rules, err := structpb.NewStruct(req.ValidationRules.AsMap()); err == nil {
-			if rulesBytes, err := proto.Marshal(rules); err == nil {
-				params.ValidationRules = rulesBytes
-			}
+		// Convert protobuf Struct directly to JSON for JSONB storage
+		if jsonBytes, err := json.Marshal(req.ValidationRules.AsMap()); err == nil {
+			params.ValidationRules = jsonBytes
 		}
 	}
 

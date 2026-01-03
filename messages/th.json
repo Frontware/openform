@@ -1,248 +1,248 @@
 {
   "common": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "submit": "Submit",
-    "create": "Create",
-    "edit": "Edit",
-    "delete": "Delete",
-    "back": "Back",
-    "next": "Next",
-    "previous": "Previous",
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
-    "draft": "Draft",
-    "published": "Published",
-    "closed": "Closed",
-    "unsavedChanges": "Unsaved changes",
-    "or": "or",
-    "and": "and",
-    "required": "Required",
-    "optional": "Optional",
-    "name": "Name",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm password",
-    "yes": "Yes",
-    "no": "No",
-    "ok": "OK"
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "submit": "ส่ง",
+    "create": "สร้าง",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "back": "ย้อนกลับ",
+    "next": "ถัดไป",
+    "previous": "ก่อนหน้า",
+    "loading": "กำลังโหลด...",
+    "error": "ข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "draft": "ร่าง",
+    "published": "เผยแพร่แล้ว",
+    "closed": "ปิดแล้ว",
+    "unsavedChanges": "มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก",
+    "or": "หรือ",
+    "and": "และ",
+    "required": "จำเป็น",
+    "optional": "ไม่จำเป็น",
+    "name": "ชื่อ",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "confirmPassword": "ยืนยันรหัสผ่าน",
+    "yes": "ใช่",
+    "no": "ไม่",
+    "ok": "ตกลง"
   },
   "nav": {
-    "dashboard": "Dashboard",
-    "forms": "My Forms",
-    "create": "Create Form",
-    "settings": "Settings",
-    "signOut": "Sign out",
-    "signIn": "Sign in",
-    "getStarted": "Get Started"
+    "dashboard": "แผงควบคุม",
+    "forms": "แบบฟอร์มของฉัน",
+    "create": "สร้างแบบฟอร์ม",
+    "settings": "การตั้งค่า",
+    "signOut": "ออกจากระบบ",
+    "signIn": "เข้าสู่ระบบ",
+    "getStarted": "เริ่มต้นใช้งาน"
   },
   "auth": {
     "login": {
-      "title": "Welcome back",
-      "subtitle": "Sign in to your account",
-      "googleLogin": "Continue with Google",
-      "magicLink": "Sign in with email",
-      "emailLabel": "Email address",
-      "emailPlaceholder": "you@example.com",
-      "sendMagicLink": "Send magic link",
-      "sending": "Sending...",
-      "checkEmail": "Check your email",
-      "magicLinkSent": "We've sent a magic link to",
-      "magicLinkInstructions": "Click the link in your email to sign in. You can close this tab.",
-      "differentEmail": "Use a different email",
-      "termsPrivacy": "By continuing, you agree to our Terms of Service and Privacy Policy",
-      "createAccount": "Don't have an account? Sign up",
-      "forgotPassword": "Forgot your password?"
+      "title": "ยินดีต้อนรับกลับ",
+      "subtitle": "เข้าสู่ระบบบัญชีของคุณ",
+      "googleLogin": "เข้าสู่ระบบด้วย Google",
+      "magicLink": "เข้าสู่ระบบด้วยอีเมล",
+      "emailLabel": "ที่อยู่อีเมล",
+      "emailPlaceholder": "คุณ@ตัวอย่าง.com",
+      "sendMagicLink": "ส่งลิงก์พิเศษ",
+      "sending": "กำลังส่ง...",
+      "checkEmail": "ตรวจสอบอีเมลของคุณ",
+      "magicLinkSent": "เราได้ส่งลิงก์พิเศษไปยัง",
+      "magicLinkInstructions": "คลิกที่ลิงก์ในอีเมลของคุณเพื่อเข้าสู่ระบบ คุณสามารถปิดแท็บนี้ได้",
+      "differentEmail": "ใช้อีเมลอื่น",
+      "termsPrivacy": "โดยการดำเนินการต่อ คุณยอมรับข้อกำหนดการให้บริการและนโยบายความเป็นส่วนตัวของเรา",
+      "createAccount": "ยังไม่มีบัญชี? ลงทะเบียน",
+      "forgotPassword": "ลืมรหัสผ่าน?"
     }
   },
   "marketing": {
     "home": {
       "hero": {
-        "badge": "Free & Open Source",
-        "title": "Forms that feel",
+        "badge": "ฟรีและโอเพนซอร์ส",
+        "title": "โซลูชัน HRMS ที่ดีที่สุดของคุณ",
         "titleHighlight": "Weladee",
-        "subtitle": "Create beautiful, engaging forms that people actually want to fill out. One question at a time, just like a conversation.",
-        "startFree": "Start creating for free",
-        "seeHow": "See how it works"
+        "subtitle": "สร้างแบบฟอร์มที่สวยงาม ดึงดูด และผู้คนอยากตอบจริงๆ หนึ่งคำถามในหนึ่งเวลา เหมือนการสนทนา",
+        "startFree": "เริ่มสร้างฟรี",
+        "seeHow": "ดูวิธีการทำงาน"
       },
       "features": {
-        "title": "Everything you need to create amazing forms",
-        "subtitle": "Powerful features that make form building a breeze",
+        "title": "ทุกสิ่งที่คุณต้องการเพื่อสร้างแบบฟอร์มที่น่าทึ่ง",
+        "subtitle": "ฟีเจอร์ทรงพลังที่ทำให้การสร้างแบบฟอร์มเป็นเรื่องง่าย",
         "oneAtTime": {
-          "title": "One at a Time",
-          "description": "Questions appear one by one, creating a focused, distraction-free experience for respondents."
+          "title": "ทีละคำถาม",
+          "description": "คำถามปรากฏทีละข้อ สร้างประสบการณ์ที่โฟกัสและไม่มีสิ่งรบกวนสำหรับผู้ตอบ"
         },
         "beautifulThemes": {
-          "title": "Beautiful Themes",
-          "description": "Choose from stunning preset themes that make your forms look professional and on-brand."
+          "title": "ธีมสวยงาม",
+          "description": "เลือกจากธีมที่กำหนดไว้อย่างสวยงาม ทำให้แบบฟอร์มของคุณดูเป็นมืออาชีพและสอดคล้องกับแบรนด์"
         },
         "privacyFirst": {
-          "title": "Privacy First",
-          "description": "Your data stays yours. Export responses anytime, delete when you want."
+          "title": "ความเป็นส่วนตัวมาก่อน",
+          "description": "ข้อมูลของคุณยังคงเป็นของคุณ ส่งออกคำตอบได้ทุกเวลา ลบเมื่อคุณต้องการ"
         }
       },
       "questionTypes": {
-        "title": "13 question types to choose from",
-        "subtitle": "From simple text to file uploads, we've got you covered",
+        "title": "เลือกจากประเภทคำถาม 13 แบบ",
+        "subtitle": "ตั้งแต่ข้อความสั้นๆ ไปจนถึงการอัปโหลดไฟล์ เราครอบคลุมทั้งหมด",
         "types": [
-          "Short Text", "Long Text", "Dropdown", "Checkboxes",
-          "Email", "Phone", "Number", "Date", "Rating", "Opinion Scale",
-          "Yes/No", "File Upload", "Website URL"
+          "ข้อความสั้น", "ข้อความยาว", "ดรอปดาวน์", "ช่องทำเครื่องหมาย",
+          "อีเมล", "โทรศัพท์", "ตัวเลข", "วันที่", "การให้คะแนน", "สเกลความคิดเห็น",
+          "ใช่/ไม่ใช่", "อัปโหลดไฟล์", "URL เว็บไซต์"
         ]
       },
       "cta": {
-        "title": "Ready to create your first form?",
-        "subtitle": "Join thousands of people using Weladee Form to collect responses.",
-        "getStarted": "Get started for free"
+        "title": "พร้อมที่จะสร้างแบบฟอร์มแรกของคุณแล้วหรือยัง?",
+        "subtitle": "ร่วมกับผู้คนหลายพันคนที่ใช้ Weladee Form เพื่อเก็บรวบรวมคำตอบ",
+        "getStarted": "เริ่มต้นใช้งานฟรี"
       },
       "footer": {
-        "copyright": "© 2026 Weladee Form. Open source and free forever.",
+        "copyright": "© 2026 Weladee Form โอเพนซอร์สและฟรีตลอดไป",
         "github": "GitHub",
-        "privacy": "Privacy",
-        "terms": "Terms"
+        "privacy": "ความเป็นส่วนตัว",
+        "terms": "ข้อกำหนด"
       }
     }
   },
   "dashboard": {
-    "title": "My Forms",
-    "subtitle": "Create and manage your forms",
+    "title": "แบบฟอร์มของฉัน",
+    "subtitle": "สร้างและจัดการแบบฟอร์มของคุณ",
     "createFirst": {
-      "title": "Create your first form",
-      "description": "Build beautiful, engaging forms that people actually want to fill out. One question at a time.",
-      "button": "Create your first form"
+      "title": "สร้างแบบฟอร์มแรกของคุณ",
+      "description": "สร้างแบบฟอร์มที่สวยงาม ดึงดูด และผู้คนอยากตอบจริงๆ หนึ่งคำถามในหนึ่งเวลา",
+      "button": "สร้างแบบฟอร์มแรกของคุณ"
     },
     "empty": {
-      "title": "No forms yet",
-      "description": "Create your first form to get started"
+      "title": "ยังไม่มีแบบฟอร์ม",
+      "description": "สร้างแบบฟอร์มแรกของคุณเพื่อเริ่มต้น"
     },
     "actions": {
-      "edit": "Edit",
-      "view": "View form",
-      "responses": "Responses",
-      "copyLink": "Copy link",
-      "more": "More"
+      "edit": "แก้ไข",
+      "view": "ดูแบบฟอร์ม",
+      "responses": "คำตอบ",
+      "copyLink": "คัดลอกลิงก์",
+      "more": "เพิ่มเติม"
     },
     "status": {
-      "responses": "responses",
-      "updated": "Updated"
+      "responses": "คำตอบ",
+      "updated": "อัปเดตเมื่อ"
     }
   },
   "form": {
-    "title": "Form Title",
-    "untitled": "Untitled Form",
-    "description": "Description",
-    "descriptionPlaceholder": "Optional form description...",
-    "thankYouMessage": "Thank You Message",
-    "thankYouPlaceholder": "Thank you for your response!",
-    "url": "Form URL",
+    "title": "ชื่อแบบฟอร์ม",
+    "untitled": "แบบฟอร์มยังไม่มีชื่อ",
+    "description": "คำอธิบาย",
+    "descriptionPlaceholder": "คำอธิบายแบบฟอร์ม (ไม่จำเป็น)...",
+    "thankYouMessage": "ข้อความขอบคุณ",
+    "thankYouPlaceholder": "ขอบคุณสำหรับคำตอบของคุณ!",
+    "url": "URL แบบฟอร์ม",
     "urlPrefix": "/f/",
-    "urlPlaceholder": "my-form",
-    "settings": "Settings",
-    "design": "Design",
-    "questions": "Questions",
-    "addQuestion": "Add Question",
-    "addQuestionTitle": "Add Question",
-    "addQuestionDescription": "Choose a question type to add to your form",
-    "noQuestions": "No questions yet",
-    "noQuestionsDescription": "Add your first question to get started",
-    "editQuestion": "Edit Question",
-    "theme": "Theme",
+    "urlPlaceholder": "แบบฟอร์มของฉัน",
+    "settings": "การตั้งค่า",
+    "design": "การออกแบบ",
+    "questions": "คำถาม",
+    "addQuestion": "เพิ่มคำถาม",
+    "addQuestionTitle": "เพิ่มคำถาม",
+    "addQuestionDescription": "เลือกประเภทคำถามเพื่อเพิ่มในแบบฟอร์มของคุณ",
+    "noQuestions": "ยังไม่มีคำถาม",
+    "noQuestionsDescription": "เพิ่มคำถามแรกของคุณเพื่อเริ่มต้น",
+    "editQuestion": "แก้ไขคำถาม",
+    "theme": "ธีม",
     "status": {
-      "published": "Published",
-      "draft": "Draft",
-      "closed": "Closed"
+      "published": "เผยแพร่แล้ว",
+      "draft": "ร่าง",
+      "closed": "ปิดแล้ว"
     },
     "actions": {
-      "save": "Save",
-      "publish": "Publish",
-      "unpublish": "Unpublish",
-      "copyLink": "Copy link",
-      "view": "View"
+      "save": "บันทึก",
+      "publish": "เผยแพร่",
+      "unpublish": "เลิกเผยแพร่",
+      "copyLink": "คัดลอกลิงก์",
+      "view": "ดู"
     },
     "publishDialog": {
-      "title": "Publish form?",
-      "titleUnpublish": "Unpublish form?",
-      "description": "Your form will be accessible at:",
-      "descriptionUnpublish": "This will make your form inaccessible to respondents. Existing responses will be kept.",
-      "cancel": "Cancel"
+      "title": "เผยแพร่แบบฟอร์ม?",
+      "titleUnpublish": "เลิกเผยแพร่แบบฟอร์ม?",
+      "description": "แบบฟอร์มของคุณจะสามารถเข้าถึงได้ที่:",
+      "descriptionUnpublish": "การกระทำนี้จะทำให้แบบฟอร์มของคุณไม่สามารถเข้าถึงได้สำหรับผู้ตอบ คำตอบที่มีอยู่จะถูกเก็บรักษาไว้",
+      "cancel": "ยกเลิก"
     },
     "questionTypes": {
-      "short_text": "Short Text",
-      "long_text": "Long Text",
-      "dropdown": "Dropdown",
-      "checkboxes": "Checkboxes",
-      "email": "Email",
-      "phone": "Phone",
-      "number": "Number",
-      "date": "Date",
-      "rating": "Rating",
-      "opinion_scale": "Opinion Scale",
-      "yes_no": "Yes/No",
-      "file_upload": "File Upload",
-      "url": "Website URL"
+      "short_text": "ข้อความสั้น",
+      "long_text": "ข้อความยาว",
+      "dropdown": "ดรอปดาวน์",
+      "checkboxes": "ช่องทำเครื่องหมาย",
+      "email": "อีเมล",
+      "phone": "โทรศัพท์",
+      "number": "ตัวเลข",
+      "date": "วันที่",
+      "rating": "การให้คะแนน",
+      "opinion_scale": "สเกลความคิดเห็น",
+      "yes_no": "ใช่/ไม่ใช่",
+      "file_upload": "อัปโหลดไฟล์",
+      "url": "URL เว็บไซต์"
     }
   },
   "formPlayer": {
-    "emptyForm": "This form has no questions yet.",
-    "submitting": "Submitting...",
-    "responseRecorded": "Your response has been recorded.",
-    "madeWith": "Made with",
-    "poweredBy": "Powered by",
-    "pressEnter": "press",
+    "emptyForm": "แบบฟอร์มนี้ยังไม่มีคำถาม",
+    "submitting": "กำลังส่ง...",
+    "responseRecorded": "คำตอบของคุณได้รับการบันทึกแล้ว",
+    "madeWith": "สร้างด้วย",
+    "poweredBy": "ขับเคลื่อนโดย",
+    "pressEnter": "กด",
     "validation": {
-      "required": "This field is required",
-      "selectAtLeastOne": "Please select at least one option",
-      "validEmail": "Please enter a valid email address",
-      "validUrl": "Please enter a valid URL",
-      "validPhone": "Please enter a valid phone number"
+      "required": "จำเป็นต้องกรอกข้อมูลนี้",
+      "selectAtLeastOne": "กรุณาเลือกอย่างน้อยหนึ่งตัวเลือก",
+      "validEmail": "กรุณากรอกที่อยู่อีเมลที่ถูกต้อง",
+      "validUrl": "กรุณากรอก URL ที่ถูกต้อง",
+      "validPhone": "กรุณากรอกหมายเลขโทรศัพท์ที่ถูกต้อง"
     }
   },
   "responses": {
-    "title": "Responses",
-    "subtitle": "View and manage form responses",
-    "totalResponses": "Total responses",
-    "exportCsv": "Export CSV",
-    "noResponses": "No responses yet",
-    "searchPlaceholder": "Search responses...",
-    "filterPlaceholder": "Filter by date...",
-    "columns": "Columns",
-    "showAll": "Show all",
-    "hideAll": "Hide all"
+    "title": "คำตอบ",
+    "subtitle": "ดูและจัดการคำตอบแบบฟอร์ม",
+    "totalResponses": "คำตอบทั้งหมด",
+    "exportCsv": "ส่งออก CSV",
+    "noResponses": "ยังไม่มีคำตอบ",
+    "searchPlaceholder": "ค้นหาคำตอบ...",
+    "filterPlaceholder": "กรองตามวันที่...",
+    "columns": "คอลัมน์",
+    "showAll": "แสดงทั้งหมด",
+    "hideAll": "ซ่อนทั้งหมด"
   },
   "settings": {
-    "title": "Settings",
-    "subtitle": "Manage your account settings",
-    "account": "Account",
-    "emailLabel": "Email",
-    "emailCannotChange": "Your email cannot be changed",
-    "nameLabel": "Name",
-    "accountCreated": "Account created",
-    "profile": "Profile"
+    "title": "การตั้งค่า",
+    "subtitle": "จัดการการตั้งค่าบัญชีของคุณ",
+    "account": "บัญชี",
+    "emailLabel": "อีเมล",
+    "emailCannotChange": "ไม่สามารถเปลี่ยนอีเมลของคุณได้",
+    "nameLabel": "ชื่อ",
+    "accountCreated": "สร้างบัญชีแล้ว",
+    "profile": "โปรไฟล์"
   },
   "errors": {
-    "generic": "Something went wrong. Please try again.",
-    "network": "Network error. Please check your connection.",
-    "unauthorized": "You are not authorized to perform this action.",
-    "notFound": "The requested resource was not found.",
-    "validation": "Please check your input and try again.",
-    "saveFailed": "Failed to save. Please try again.",
-    "deleteFailed": "Failed to delete. Please try again.",
-    "loadFailed": "Failed to load data. Please refresh the page.",
-    "submitFailed": "Failed to submit response",
-    "signOutFailed": "Failed to sign out",
-    "publishFailed": "Failed to update form status"
+    "generic": "มีข้อผิดพลาดเกิดขึ้น กรุณาลองอีกครั้ง",
+    "network": "ข้อผิดพลาดเครือข่าย กรุณาตรวจสอบการเชื่อมต่อของคุณ",
+    "unauthorized": "คุณไม่ได้รับอนุญาตให้ดำเนินการนี้",
+    "notFound": "ไม่พบทรัพยากรที่ร้องขอ",
+    "validation": "กรุณาตรวจสอบข้อมูลของคุณและลองอีกครั้ง",
+    "saveFailed": "บันทึกไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "deleteFailed": "ลบไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "loadFailed": "โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้า",
+    "submitFailed": "ส่งคำตอบไม่สำเร็จ",
+    "signOutFailed": "ออกจากระบบไม่สำเร็จ",
+    "publishFailed": "อัปเดตสถานะแบบฟอร์มไม่สำเร็จ"
   },
   "validation": {
-    "emailRequired": "Email is required",
-    "emailInvalid": "Please enter a valid email address",
-    "passwordRequired": "Password is required",
-    "passwordMinLength": "Password must be at least 8 characters",
-    "nameRequired": "Name is required",
-    "formTitleRequired": "Form title is required",
-    "slugRequired": "Form URL is required",
-    "slugInvalid": "Form URL can only contain letters, numbers, and hyphens",
-    "questionRequired": "Please add at least one question",
-    "atLeastOneQuestion": "Add at least one question before publishing"
+    "emailRequired": "จำเป็นต้องกรอกอีเมล",
+    "emailInvalid": "กรุณากรอกที่อยู่อีเมลที่ถูกต้อง",
+    "passwordRequired": "จำเป็นต้องกรอกรหัสผ่าน",
+    "passwordMinLength": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
+    "nameRequired": "จำเป็นต้องกรอกชื่อ",
+    "formTitleRequired": "จำเป็นต้องกรอกชื่อแบบฟอร์ม",
+    "slugRequired": "จำเป็นต้องกรอก URL แบบฟอร์ม",
+    "slugInvalid": "URL แบบฟอร์มสามารถประกอบด้วยตัวอักษร ตัวเลข และยัติภังค์เท่านั้น",
+    "questionRequired": "กรุณาเพิ่มอย่างน้อยหนึ่งคำถาม",
+    "atLeastOneQuestion": "เพิ่มอย่างน้อยหนึ่งคำถามก่อนเผยแพร่"
   }
 }

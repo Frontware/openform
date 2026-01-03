@@ -231,7 +231,7 @@ export default async function HomePage({
       <footer className="relative z-10 py-8 px-6 border-t border-slate-100 bg-white">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-600 text-sm">
-            © 2026 Weladee Form. Open source and free forever.
+            © 2026 Weladee Form. 
           </p>
           <div className="flex items-center gap-6">
             <a href="https://github.com" className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
