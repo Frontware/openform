@@ -87,6 +87,15 @@ The database layer uses SQLC for type-safe SQL queries:
 - `internal/storage/s3.go` - S3Storage client with presigned URL generation
 - Supports AWS S3 and S3-compatible storage (Cloudflare R2, MinIO)
 
+### Bot Protection Layer
+
+**Google reCAPTCHA v3** for bot protection:
+- `internal/utils/recaptcha.go` - `VerifyRecaptcha()` function for server-side token validation
+- `config/config.go` - `RecaptchaConfig` with CLI flags, env vars, and YAML support
+- **Invisible CAPTCHA** - No user interaction required, score-based verification (0.0-1.0)
+- **Per-form control** - Enable/disable via "Force CAPTCHA" toggle in form builder
+- Configuration priority: CLI flags > Environment variables > config.yaml
+
 ## Backend Configuration
 
 The Go backend supports three configuration methods with the following priority:
@@ -106,6 +115,10 @@ The Go backend supports three configuration methods with the following priority:
 | S3 Access Key | `--s3-access-key` | `S3_ACCESS_KEY` | - | No |
 | S3 Secret Key | `--s3-secret-key` | `S3_SECRET_KEY` | - | No |
 | S3 Endpoint | `--s3-endpoint` | `S3_ENDPOINT` | - | No |
+| reCAPTCHA Enabled | `--recaptcha-enabled` | `RECAPTCHA_ENABLED` | `false` | No |
+| reCAPTCHA Site Key | `--recaptcha-site-key` | `RECAPTCHA_SITE_KEY` | - | No |
+| reCAPTCHA Secret Key | `--recaptcha-secret-key` | `RECAPTCHA_SECRET_KEY` | - | No |
+| reCAPTCHA Threshold | `--recaptcha-threshold` | `RECAPTCHA_THRESHOLD` | `0.5` | No |
 
 ### Usage Examples
 
@@ -119,6 +132,13 @@ The Go backend supports three configuration methods with the following priority:
 ```bash
 export DATABASE_URL="postgresql://user:pass@localhost/db"
 export GRPC_PORT="8080"
+
+# Optional: Enable reCAPTCHA v3
+export RECAPTCHA_ENABLED=true
+export RECAPTCHA_SITE_KEY="6Lxxxxxxxxxxxxxxxx"
+export RECAPTCHA_SECRET_KEY="6Lxxxxxxxxxxxxxxxx"
+export RECAPTCHA_THRESHOLD=0.5
+
 ./bin/weladee-form
 ```
 
@@ -126,11 +146,20 @@ export GRPC_PORT="8080"
 ```yaml
 grpc_port: "8080"
 database_url: "postgresql://user:pass@localhost/db"
+
+# S3 configuration
 s3_region: "auto"
 s3_bucket: "your-bucket"
 s3_access_key: "your-key"
 s3_secret_key: "your-secret"
 s3_endpoint: "https://your-endpoint.com"
+
+# reCAPTCHA v3 configuration
+recaptcha:
+  enabled: true          # Global toggle for reCAPTCHA
+  site_key: "6Lxxxxxxxxxxxxxxxx"
+  secret_key: "6Lxxxxxxxxxxxxxxxx"
+  threshold: 0.5         # Score threshold (0.0-1.0), default 0.5
 ```
 
 ## Development Commands

@@ -13,6 +13,7 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - **Response dashboard** - View, search, filter, and export to CSV/JSON
 - **13 question types** - Text, multiple choice, rating, file upload, and more
 - **Internationalization** - Support for English, Thai, and French with in-app language switcher
+- **Bot protection** - Optional Google reCAPTCHA v3 for form submissions
 
 ## Question types
 
@@ -145,13 +146,23 @@ Available flags:
 - `--s3-access-key`: S3 access key
 - `--s3-secret-key`: S3 secret key
 - `--s3-endpoint`: S3 endpoint URL
+- `--recaptcha-enabled`: Enable reCAPTCHA v3 globally (default: false)
+- `--recaptcha-site-key`: Google reCAPTCHA site key
+- `--recaptcha-secret-key`: Google reCAPTCHA secret key
+- `--recaptcha-threshold`: Score threshold (0.0-1.0, default: 0.5)
 
 #### Method 2: Environment Variables
 ```bash
 export DATABASE_URL="postgresql://user:pass@localhost/db"
 export GRPC_PORT="50051"
-# ... other variables
 
+# Optional: reCAPTCHA v3 for bot protection
+export RECAPTCHA_ENABLED=true
+export RECAPTCHA_SITE_KEY="your-site-key-here"
+export RECAPTCHA_SECRET_KEY="your-secret-key-here"
+export RECAPTCHA_THRESHOLD=0.5
+
+# ... other variables
 ./bin/weladee-form
 ```
 
@@ -174,6 +185,13 @@ s3_bucket: "your-bucket"
 s3_access_key: "your-key"
 s3_secret_key: "your-secret"
 s3_endpoint: "https://your-endpoint.com"
+
+# Optional reCAPTCHA v3 configuration
+recaptcha:
+  enabled: false          # Global toggle for reCAPTCHA
+  site_key: "your-site-key-here"
+  secret_key: "your-secret-key-here"
+  threshold: 0.5         # Score threshold (0.0-1.0), default 0.5
 ```
 
 **Note:** The application will automatically load `config.yaml` from the current directory or `./config/` directory if it exists.
@@ -194,6 +212,65 @@ JWT_SECRET="your-custom-secret" ./bin/weladee-form create-jwt --name "John Doe" 
 ```
 
 The generated token will be valid for 2 hours and can be used for authentication with the backend API.
+
+### 4.1. Configure reCAPTCHA v3 (Optional)
+
+Weladee Form supports Google reCAPTCHA v3 for bot protection. This is an **invisible** CAPTCHA that doesn't require user interaction.
+
+#### Getting reCAPTCHA Keys
+
+1. Go to [Google reCAPTCHA Admin](https://www.google.com/recaptcha/admin)
+2. Register your site/domain
+3. Select **reCAPTCHA v3**
+4. Add your domain (e.g., `localhost` for development)
+5. Copy the **Site Key** and **Secret Key**
+
+#### Configuration
+
+Add reCAPTCHA configuration via any of the three methods:
+
+**Command line flags:**
+```bash
+./bin/weladee-form \
+  --recaptcha-enabled=true \
+  --recaptcha-site-key="6Lxxxxxxxxxxxxxxxx" \
+  --recaptcha-secret-key="6Lxxxxxxxxxxxxxxxx" \
+  --recaptcha-threshold=0.5
+```
+
+**Environment variables:**
+```bash
+export RECAPTCHA_ENABLED=true
+export RECAPTCHA_SITE_KEY="6Lxxxxxxxxxxxxxxxx"
+export RECAPTCHA_SECRET_KEY="6Lxxxxxxxxxxxxxxxx"
+export RECAPTCHA_THRESHOLD=0.5
+```
+
+**Configuration file (`config.yaml`):**
+```yaml
+recaptcha:
+  enabled: true
+  site_key: "6Lxxxxxxxxxxxxxxxx"
+  secret_key: "6Lxxxxxxxxxxxxxxxx"
+  threshold: 0.5
+```
+
+#### Per-Form Setting
+
+Once reCAPTCHA is globally enabled, you can enable it per-form in the form builder:
+
+1. Go to **Settings** tab in the form builder
+2. Toggle **Force CAPTCHA** to enable
+3. Save the form
+
+The form will now require reCAPTCHA verification on submission.
+
+#### How it Works
+
+- **Invisible**: No user interaction required
+- **Score-based**: Returns a score (0.0 = likely bot, 1.0 = likely human)
+- **Configurable threshold**: Submissions below the threshold are rejected (default: 0.5)
+- **Per-form control**: Enable/disable per form in the form builder
 
 ### 5. Run the application
 
