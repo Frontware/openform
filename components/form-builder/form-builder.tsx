@@ -125,15 +125,21 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
   const handleSave = useCallback(async () => {
     setIsSaving(true)
+    console.log('[handleSave] Starting save process...')
+    console.log('[handleSave] Form ID:', form.id)
+    console.log('[handleSave] Questions:', questions)
+    console.log('[handleSave] Original questions:', originalQuestions)
     try {
       // 1. Update Form Metadata
-      await formClient.updateForm({
+      console.log('[handleSave] Calling updateForm...')
+      const updateResult = await formClient.updateForm({
         id: form.id,
         title: form.title,
         description: form.description || undefined,
         theme: mapThemeToProto(form.theme),
         customThankYouMessage: form.thank_you_message,
       })
+      console.log('[handleSave] updateForm result:', updateResult)
 
       // 2. Delete removed questions
       for (const id of deletedQuestionIds) {
@@ -147,12 +153,16 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
       // 3. Update or Create questions
       const newQuestionsState: QuestionConfig[] = []
-      
+
+      console.log('[handleSave] Processing questions...')
+
       for (const [index, q] of questions.entries()) {
         const isExisting = originalQuestions.some(oq => oq.id === q.id)
-        
+        console.log(`[handleSave] Question ${index}: id=${q.id}, isExisting=${isExisting}, title=${q.title}`)
+
         if (isExisting) {
             // Update
+            console.log(`[handleSave] Updating question ${q.id}...`)
             await formClient.updateQuestion({
                 id: q.id,
                 type: mapQuestionTypeToProto(q.type),
@@ -167,6 +177,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
             newQuestionsState.push(q)
         } else {
             // Create
+            console.log(`[handleSave] Creating new question for form ${form.id}...`)
             const res = await formClient.createQuestion({
                 formId: form.id,
                 type: mapQuestionTypeToProto(q.type),
@@ -178,6 +189,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
                 options: buildOptions(q),
                 validationRules: buildValidationRules(q)
             })
+            console.log('[handleSave] createQuestion result:', res)
             // Update ID to the real server ID
             if (res.question) {
                 newQuestionsState.push({ ...q, id: res.question.id })
@@ -193,7 +205,10 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
       toast.success('Form saved')
       setHasUnsavedChanges(false)
     } catch (error) {
-      console.error(error)
+      console.error('[handleSave] Error saving form:', error)
+      console.error('[handleSave] Error name:', error instanceof Error ? error.name : 'unknown')
+      console.error('[handleSave] Error message:', error instanceof Error ? error.message : String(error))
+      console.error('[handleSave] Error stack:', error instanceof Error ? error.stack : 'no stack')
       toast.error('Failed to save form')
     } finally {
       setIsSaving(false)
