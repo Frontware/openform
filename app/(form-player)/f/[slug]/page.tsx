@@ -6,7 +6,7 @@ interface FormPageProps {
   params: Promise<{ slug: string }>
 }
 
-// Generate one static page for the template - Go server handles all other slugs dynamically
+// Generate one static page for the template - actual slug is read from URL on client side
 export function generateStaticParams() {
   return [{ slug: 'form' }]
 }

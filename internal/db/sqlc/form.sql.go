@@ -139,9 +139,11 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 
 const getFormBySlug = `-- name: GetFormBySlug :one
 SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
-WHERE slug = $1::text
+WHERE $1::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND id = $1::uuid
+   OR slug = $1::text
 `
 
+// Try to look up by ID (if slug is a UUID) or by slug column
 func (q *Queries) GetFormBySlug(ctx context.Context, slug string) (FormForm, error) {
 	row := q.db.QueryRow(ctx, getFormBySlug, slug)
 	var i FormForm
@@ -167,10 +169,19 @@ func (q *Queries) GetFormBySlug(ctx context.Context, slug string) (FormForm, err
 }
 
 const getFormStats = `-- name: GetFormStats :one
+/**
+ * Get the statistics for a form.
+ *
+ * Retrieves the total number of responses, number of completed responses,
+ * and number of partial responses for a form.
+ *
+ * @param form_id The id of the form.
+ * @return The statistics for the form.
+ */
 SELECT
-    COUNT(DISTINCT r.id) as total_responses,
-    COUNT(DISTINCT CASE WHEN r.completed = true THEN r.id END) as completed_responses,
-    COUNT(DISTINCT CASE WHEN r.completed = false THEN r.id END) as partial_responses
+    COUNT(DISTINCT r.id) AS total_responses,
+    COUNT(DISTINCT CASE WHEN r.completed = true THEN r.id END) AS completed_responses,
+    COUNT(DISTINCT CASE WHEN r.completed = false THEN r.id END) AS partial_responses
 FROM form.forms f
 LEFT JOIN form.responses r ON f.id = r.form_id
 WHERE f.id = $1::uuid
@@ -395,6 +406,15 @@ func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([
 }
 
 const publishForm = `-- name: PublishForm :one
+/**
+ * Publish a form.
+ *
+ * Updates the form with the given id and user_id to be published.
+ *
+ * @param id The id of the form to publish.
+ * @param user_id The id of the user who owns the form.
+ * @return The updated form.
+ */
 UPDATE form.forms
 SET is_published = true
 WHERE id = $1::uuid AND user_id = $2::uuid
@@ -431,7 +451,6 @@ func (q *Queries) PublishForm(ctx context.Context, arg PublishFormParams) (FormF
 }
 
 const updateForm = `-- name: UpdateForm :one
-
 UPDATE form.forms
 SET
     title = COALESCE($1::text, title),
@@ -465,7 +484,6 @@ type UpdateFormParams struct {
 	UserID                   uuid.UUID       `db:"user_id" json:"userId"`
 }
 
-// Note: slug field not in current schema, may need to add
 func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormForm, error) {
 	row := q.db.QueryRow(ctx, updateForm,
 		arg.Title,

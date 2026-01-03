@@ -77,7 +77,7 @@ function mapPbFormToDBForm(pbForm: PbForm): Form {
   }
 }
 
-export function FormPlayerWrapper({ slug }: { slug: string }) {
+export function FormPlayerWrapper({ slug: serverSlug }: { slug: string }) {
   const [form, setForm] = useState<Form | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -85,11 +85,16 @@ export function FormPlayerWrapper({ slug }: { slug: string }) {
   useEffect(() => {
     async function load() {
       try {
-        // Treating slug as ID for migration
-        const response = await formClient.getForm({ 
-          id: slug,
-          includeQuestions: true 
-        })
+        // For static exports, read the actual slug from the browser URL
+        // The serverSlug prop is just a placeholder from the static build
+        const actualSlug = typeof window !== 'undefined'
+          ? window.location.pathname.split('/').pop() || serverSlug
+          : serverSlug
+
+        console.log('[FormPlayerWrapper] Loading form with slug:', actualSlug)
+
+        // Use getFormBySlug for public form access (no auth required)
+        const response = await formClient.getFormBySlug({ slug: actualSlug })
         if (response.form) {
             setForm(mapPbFormToDBForm(response.form))
         } else {
@@ -103,7 +108,7 @@ export function FormPlayerWrapper({ slug }: { slug: string }) {
       }
     }
     load()
-  }, [slug])
+  }, [serverSlug])
 
   if (loading) {
     return (

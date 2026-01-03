@@ -16,8 +16,10 @@ SELECT * FROM form.forms
 WHERE id = @id::uuid;
 
 -- name: GetFormBySlug :one
+-- Try to look up by ID (if slug is a UUID) or by slug column
 SELECT * FROM form.forms
-WHERE slug = @slug::text;  -- Note: slug field not in current schema, may need to add
+WHERE @slug::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND id = @slug::uuid
+   OR slug = @slug::text;
 
 -- name: UpdateForm :one
 UPDATE form.forms

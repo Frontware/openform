@@ -25,6 +25,7 @@ type Querier interface {
 	DeleteResponse(ctx context.Context, id uuid.UUID) error
 	GetFileUpload(ctx context.Context, id uuid.UUID) (FormFileUpload, error)
 	GetForm(ctx context.Context, id uuid.UUID) (FormForm, error)
+	// Try to look up by ID (if slug is a UUID) or by slug column
 	GetFormBySlug(ctx context.Context, slug string) (FormForm, error)
 	GetFormResponsesWithAnswers(ctx context.Context, formID uuid.UUID) ([]GetFormResponsesWithAnswersRow, error)
 	GetFormStats(ctx context.Context, formID uuid.UUID) (GetFormStatsRow, error)
@@ -42,7 +43,6 @@ type Querier interface {
 	ListUserForms(ctx context.Context, arg ListUserFormsParams) ([]FormForm, error)
 	PublishForm(ctx context.Context, arg PublishFormParams) (FormForm, error)
 	ReorderQuestions(ctx context.Context, arg ReorderQuestionsParams) error
-	// Note: slug field not in current schema, may need to add
 	UpdateForm(ctx context.Context, arg UpdateFormParams) (FormForm, error)
 	UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (FormQuestion, error)
 }
