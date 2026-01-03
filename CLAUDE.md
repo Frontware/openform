@@ -432,7 +432,7 @@ Defined in `lib/questions.ts`:
 | `rating` | Star rating (1-5) | `minValue`, `maxValue` |
 | `opinion_scale` | Numeric scale (1-10) | `minValue`, `maxValue` |
 | `yes_no` | Binary choice | - |
-| `file_upload` | Images/PDFs | `allowedFileTypes[]`, `maxFileSize` (MB) |
+| `file_upload` | Images and PDFs | `allowedFileTypes[]`, `maxFileSize` (MB) |
 | `url` | Website URL | `placeholder` |
 
 Helper functions:
