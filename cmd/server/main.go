@@ -168,6 +168,14 @@ func (a *connectResponseServiceAdapter) DeleteResponse(ctx context.Context, req 
 	return connect.NewResponse(resp), nil
 }
 
+func (a *connectResponseServiceAdapter) ExportResponses(ctx context.Context, req *connect.Request[pb.ExportResponsesRequest]) (*connect.Response[pb.ExportResponsesResponse], error) {
+	resp, err := a.impl.ExportResponses(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "weladee-form",
@@ -269,18 +277,26 @@ func runServe(cmd *cobra.Command, args []string) error {
 	// Create Connect handlers (supports Connect protocol from @bufbuild/connect)
 	// We use adapters to convert between gRPC and Connect interfaces
 	formConnectAdapter := &connectFormServiceAdapter{impl: formServer.(*gapi.FormServer).FormServerImpl}
+	responseConnectAdapter := &connectResponseServiceAdapter{impl: responseServer.(*gapi.ResponseServer).ResponseServerImpl}
 
 	// Create a ServeMux for all Connect handlers
 	connectMux := http.NewServeMux()
 
-	// Register FormService handler (only needed for Create Form button)
+	// Register FormService handler
 	formPath, formHandler := pbconnect.NewFormServiceHandler(
 		formConnectAdapter,
 		connect.WithInterceptors(auth.NewConnectAuthInterceptor(tokenValidator)),
 	)
 	connectMux.Handle(formPath, formHandler)
+	log.Printf("✓ Connect FormService handler registered at %s", formPath)
 
-	log.Printf("✓ Connect handler registered at %s", formPath)
+	// Register ResponseService handler
+	respPath, respHandler := pbconnect.NewResponseServiceHandler(
+		responseConnectAdapter,
+		connect.WithInterceptors(auth.NewConnectAuthInterceptor(tokenValidator)),
+	)
+	connectMux.Handle(respPath, respHandler)
+	log.Printf("✓ Connect ResponseService handler registered at %s", respPath)
 
 	// Helper function to check if request is Connect protocol
 	isConnectRequest := func(r *http.Request) bool {
@@ -335,6 +351,12 @@ func runServe(cmd *cobra.Command, args []string) error {
 
 		// Check for Connect protocol requests (must be before gRPC-Web check)
 		if isConnectRequest(r) {
+			// Extract token from URL and add to context for Connect auth interceptor
+			if token := r.URL.Query().Get("token"); token != "" {
+				// Create new context with token value that Connect auth interceptor can read
+				ctx := context.WithValue(r.Context(), "token", token)
+				r = r.WithContext(ctx)
+			}
 			connectMux.ServeHTTP(w, r)
 			return
 		}
