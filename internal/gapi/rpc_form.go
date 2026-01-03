@@ -160,7 +160,7 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 			UserID:                   user.ID,
 			Title:                    req.Title,
 			Description:              description,
-			Theme:                    strings.ToLower(req.Theme.String()[11:]), // strip FORM_THEME_
+			Theme:                    mapThemeToDB(req.Theme),
 			IsPublished:              false,
 			IsAcceptingResponses:     true,
 			RequireLogin:             false,
@@ -187,7 +187,7 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 
 			_, err := q.CreateQuestion(ctx, sqlc.CreateQuestionParams{
 				FormID:          form.ID,
-				Type:            strings.ToLower(qpb.Type.String()[13:]),
+				Type:            mapQuestionTypeToDB(qpb.Type),
 				Label:           qpb.Label,
 				Description:     qDescription,
 				Placeholder:     qPlaceholder,
@@ -301,7 +301,11 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 		params.Description = *req.Description
 	}
 	if req.Theme != nil {
-		params.Theme = strings.ToLower(req.Theme.String()[11:])
+		if *req.Theme != pb.FormTheme_FORM_THEME_UNSPECIFIED {
+			params.Theme = mapThemeToDB(*req.Theme)
+		} else {
+			log.Printf("[UpdateForm] Warning: Received UNSPECIFIED theme for form %s, ignoring update", formID)
+		}
 	}
 	if req.IsPublished != nil {
 		params.IsPublished = *req.IsPublished
@@ -569,8 +573,7 @@ func (s *FormServerImpl) CreateQuestion(ctx context.Context, req *pb.CreateQuest
 	}
 
 	// Convert proto enum to database string format
-	// Format: "QUESTION_TYPE_SHORT_TEXT" -> "short_text"
-	questionType := strings.ToLower(typeStr[len("QUESTION_TYPE_"):])
+	questionType := mapQuestionTypeToDB(req.Type)
 	log.Printf("[CreateQuestion] Converted question type: %s", questionType)
 
 	description := ""
@@ -683,7 +686,9 @@ func (s *FormServerImpl) UpdateQuestion(ctx context.Context, req *pb.UpdateQuest
 
 	// Override with provided values
 	if req.Type != nil {
-		params.Type = strings.ToLower(req.Type.String()[13:])
+		if *req.Type != pb.QuestionType_QUESTION_TYPE_UNSPECIFIED {
+			params.Type = mapQuestionTypeToDB(*req.Type)
+		}
 	}
 	if req.Label != nil {
 		params.Label = *req.Label
@@ -839,4 +844,66 @@ func (s *FormServerImpl) convertQuestionToProto(q sqlc.FormQuestion) *pb.Questio
 	}
 
 	return pbQ
+}
+
+// Helper to map QuestionType enum to DB string
+func mapQuestionTypeToDB(qt pb.QuestionType) string {
+	switch qt {
+	case pb.QuestionType_QUESTION_TYPE_SHORT_TEXT:
+		return "short_text"
+	case pb.QuestionType_QUESTION_TYPE_LONG_TEXT:
+		return "long_text"
+	case pb.QuestionType_QUESTION_TYPE_DROPDOWN:
+		return "dropdown"
+	case pb.QuestionType_QUESTION_TYPE_CHECKBOXES:
+		return "checkboxes"
+	case pb.QuestionType_QUESTION_TYPE_EMAIL:
+		return "email"
+	case pb.QuestionType_QUESTION_TYPE_PHONE:
+		return "phone"
+	case pb.QuestionType_QUESTION_TYPE_NUMBER:
+		return "number"
+	case pb.QuestionType_QUESTION_TYPE_DATE:
+		return "date"
+	case pb.QuestionType_QUESTION_TYPE_RATING:
+		return "rating"
+	case pb.QuestionType_QUESTION_TYPE_OPINION_SCALE:
+		return "opinion_scale"
+	case pb.QuestionType_QUESTION_TYPE_YES_NO:
+		return "yes_no"
+	case pb.QuestionType_QUESTION_TYPE_FILE_UPLOAD:
+		return "file_upload"
+	case pb.QuestionType_QUESTION_TYPE_URL:
+		return "url"
+	default:
+		return ""
+	}
+}
+
+// Helper to map FormTheme enum to DB string
+func mapThemeToDB(theme pb.FormTheme) string {
+	switch theme {
+	case pb.FormTheme_FORM_THEME_MINIMAL:
+		return "minimal"
+	case pb.FormTheme_FORM_THEME_MIDNIGHT:
+		return "midnight"
+	case pb.FormTheme_FORM_THEME_OCEAN:
+		return "ocean"
+	case pb.FormTheme_FORM_THEME_SUNSET:
+		return "sunset"
+	case pb.FormTheme_FORM_THEME_FOREST:
+		return "forest"
+	case pb.FormTheme_FORM_THEME_LAVENDER:
+		return "lavender"
+	case pb.FormTheme_FORM_THEME_WELADEE:
+		return "weladee"
+	case pb.FormTheme_FORM_THEME_AURORA:
+		return "aurora"
+	case pb.FormTheme_FORM_THEME_CYBERPUNK:
+		return "cyberpunk"
+	case pb.FormTheme_FORM_THEME_DESERT:
+		return "desert"
+	default:
+		return "minimal"
+	}
 }

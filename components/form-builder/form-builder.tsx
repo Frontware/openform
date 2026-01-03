@@ -215,7 +215,11 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
       console.error('[handleSave] Error name:', error instanceof Error ? error.name : 'unknown')
       console.error('[handleSave] Error message:', error instanceof Error ? error.message : String(error))
       console.error('[handleSave] Error stack:', error instanceof Error ? error.stack : 'no stack')
-      toast.error('Failed to save form')
+      let errorMessage = 'Failed to save form';
+      if (error instanceof Error) {
+        errorMessage += ': ' + error.message;
+      }
+      toast.error(errorMessage)
     } finally {
       setIsSaving(false)
     }
