@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"sort"
 	"strings"
 
 	"github.com/google/uuid"
@@ -138,6 +137,8 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 		return nil, err
 	}
 
+	var createdFormID uuid.UUID
+
 	err = s.db.ExecTx(ctx, func(q *sqlc.Queries) error {
 		description := ""
 		if req.Description != "" {
@@ -171,6 +172,7 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 		if err != nil {
 			return err
 		}
+		createdFormID = form.ID
 
 		for i, qpb := range req.Questions {
 			qDescription := ""
@@ -205,18 +207,14 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 		return nil, status.Errorf(codes.Internal, "failed to create form: %v", err)
 	}
 
-	// Fetch final form with questions - get the most recent form
-	forms, err := s.db.Queries.ListUserForms(ctx, sqlc.ListUserFormsParams{
-		UserID:      user.ID,
-		LimitCount:  1,
-		OffsetCount: 0,
-	})
-	if err != nil || len(forms) == 0 {
-		return nil, status.Errorf(codes.Internal, "failed to retrieve created form")
+	// Fetch final form with questions
+	form, err := s.db.Queries.GetForm(ctx, createdFormID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to retrieve created form: %v", err)
 	}
 
-	questions, _ := s.db.Queries.ListFormQuestions(ctx, forms[0].ID)
-	pbForm, err := s.convertFormWithQuestions(forms[0], questions)
+	questions, _ := s.db.Queries.ListFormQuestions(ctx, createdFormID)
+	pbForm, err := s.convertFormWithQuestions(form, questions)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to convert form: %v", err)
 	}

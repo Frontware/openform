@@ -77,30 +77,11 @@ func (fs *FileSystem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if strings.Count(filePath, "/") == 3 { // e.g., "en/forms/xxx/edit" or "en/forms/xxx/responses"
 			parts := strings.Split(filePath, "/")
 			if len(parts) == 4 && (parts[2] != "new") { // Skip /forms/new which is handled separately
-				locale, _, _, page := parts[0], parts[1], parts[2], parts[3]
+				locale, _, page := parts[0], parts[1], parts[3]
 
-				// Try to serve a generic template for this page type
-				genericTemplate := fmt.Sprintf("%s/forms/%s-%s.html", locale, page, "template")
-				if fGeneric, errGeneric := fs.root.Open(genericTemplate); errGeneric == nil {
-					fGeneric.Close()
-					// Template exists, but we need to serve the actual page
-					// For now, serve the first available pre-generated page as a template
-					// Try to find any pre-generated edit page
-					templatePath := fmt.Sprintf("%s/forms/00000000-0000-0000-0000-000000000001/%s", locale, page)
-					if fTemplate, errTemplate := fs.root.Open(templatePath); errTemplate == nil {
-						fTemplate.Close()
-						// Serve the template file
-						f, err = fs.root.Open(templatePath + ".html")
-						if err == nil {
-							filePath = templatePath + ".html"
-							defer f.Close()
-							goto serveFile
-						}
-					}
-				}
-
-				// Fallback: try to serve any edit.html as template
-				templatePath := fmt.Sprintf("%s/forms/00000000-0000-0000-0000-000000000001/%s.html", locale, page)
+				// Try to serve the __dynamic__ placeholder page as a template
+				// The static build generates pages at /en/forms/__dynamic__/edit.html and /en/forms/__dynamic__/responses.html
+				templatePath := fmt.Sprintf("%s/forms/__dynamic__/%s.html", locale, page)
 				if fTemplate, errTemplate := fs.root.Open(templatePath); errTemplate == nil {
 					fTemplate.Close()
 					f, err = fs.root.Open(templatePath)
