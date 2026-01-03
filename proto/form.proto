@@ -65,18 +65,19 @@ message Form {
   string user_id = 2;
   string title = 3;
   string description = 4;
-  FormTheme theme = 5;
-  bool is_published = 6;
-  bool is_accepting_responses = 7;
-  bool require_login = 8;
-  bool allow_multiple_submissions = 9;
-  bool show_progress_bar = 10;
-  string custom_thank_you_message = 11;
-  string redirect_url = 12;
-  google.protobuf.Struct settings = 13;
-  repeated Question questions = 14;
-  google.protobuf.Timestamp created_at = 15;
-  google.protobuf.Timestamp updated_at = 16;
+  string slug = 5;  // URL-friendly identifier for public forms (e.g., 'customer-feedback')
+  FormTheme theme = 6;
+  bool is_published = 7;
+  bool is_accepting_responses = 8;
+  bool require_login = 9;
+  bool allow_multiple_submissions = 10;
+  bool show_progress_bar = 11;
+  string custom_thank_you_message = 12;
+  string redirect_url = 13;
+  google.protobuf.Struct settings = 14;
+  repeated Question questions = 15;
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
 }
 
 message FormStats {

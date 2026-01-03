@@ -26,6 +26,7 @@ import { toast } from 'sonner'
 interface FormCardProps {
   form: Form
   responseCount: number
+  onDelete?: (formId: string) => void
 }
 
 function getStatusBadge(status: FormStatus) {
@@ -58,7 +59,7 @@ function getStatusColor(status: FormStatus) {
   }
 }
 
-export function FormCard({ form, responseCount }: FormCardProps) {
+export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
   const locale = useLocale()
   const copyFormLink = () => {
     const link = `${window.location.origin}/f/${form.slug}`
@@ -118,7 +119,7 @@ export function FormCard({ form, responseCount }: FormCardProps) {
               Copy link
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DeleteFormButton formId={form.id} formTitle={form.title} />
+            <DeleteFormButton formId={form.id} formTitle={form.title} onDelete={onDelete} />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

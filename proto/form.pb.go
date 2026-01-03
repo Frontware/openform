@@ -366,18 +366,19 @@ type Form struct {
 	UserId                   string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Title                    string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
 	Description              string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Theme                    FormTheme              `protobuf:"varint,5,opt,name=theme,proto3,enum=weladee.form.v1.FormTheme" json:"theme,omitempty"`
-	IsPublished              bool                   `protobuf:"varint,6,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
-	IsAcceptingResponses     bool                   `protobuf:"varint,7,opt,name=is_accepting_responses,json=isAcceptingResponses,proto3" json:"is_accepting_responses,omitempty"`
-	RequireLogin             bool                   `protobuf:"varint,8,opt,name=require_login,json=requireLogin,proto3" json:"require_login,omitempty"`
-	AllowMultipleSubmissions bool                   `protobuf:"varint,9,opt,name=allow_multiple_submissions,json=allowMultipleSubmissions,proto3" json:"allow_multiple_submissions,omitempty"`
-	ShowProgressBar          bool                   `protobuf:"varint,10,opt,name=show_progress_bar,json=showProgressBar,proto3" json:"show_progress_bar,omitempty"`
-	CustomThankYouMessage    string                 `protobuf:"bytes,11,opt,name=custom_thank_you_message,json=customThankYouMessage,proto3" json:"custom_thank_you_message,omitempty"`
-	RedirectUrl              string                 `protobuf:"bytes,12,opt,name=redirect_url,json=redirectUrl,proto3" json:"redirect_url,omitempty"`
-	Settings                 *structpb.Struct       `protobuf:"bytes,13,opt,name=settings,proto3" json:"settings,omitempty"`
-	Questions                []*Question            `protobuf:"bytes,14,rep,name=questions,proto3" json:"questions,omitempty"`
-	CreatedAt                *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt                *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Slug                     string                 `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"` // URL-friendly identifier for public forms (e.g., 'customer-feedback')
+	Theme                    FormTheme              `protobuf:"varint,6,opt,name=theme,proto3,enum=weladee.form.v1.FormTheme" json:"theme,omitempty"`
+	IsPublished              bool                   `protobuf:"varint,7,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
+	IsAcceptingResponses     bool                   `protobuf:"varint,8,opt,name=is_accepting_responses,json=isAcceptingResponses,proto3" json:"is_accepting_responses,omitempty"`
+	RequireLogin             bool                   `protobuf:"varint,9,opt,name=require_login,json=requireLogin,proto3" json:"require_login,omitempty"`
+	AllowMultipleSubmissions bool                   `protobuf:"varint,10,opt,name=allow_multiple_submissions,json=allowMultipleSubmissions,proto3" json:"allow_multiple_submissions,omitempty"`
+	ShowProgressBar          bool                   `protobuf:"varint,11,opt,name=show_progress_bar,json=showProgressBar,proto3" json:"show_progress_bar,omitempty"`
+	CustomThankYouMessage    string                 `protobuf:"bytes,12,opt,name=custom_thank_you_message,json=customThankYouMessage,proto3" json:"custom_thank_you_message,omitempty"`
+	RedirectUrl              string                 `protobuf:"bytes,13,opt,name=redirect_url,json=redirectUrl,proto3" json:"redirect_url,omitempty"`
+	Settings                 *structpb.Struct       `protobuf:"bytes,14,opt,name=settings,proto3" json:"settings,omitempty"`
+	Questions                []*Question            `protobuf:"bytes,15,rep,name=questions,proto3" json:"questions,omitempty"`
+	CreatedAt                *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt                *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -436,6 +437,13 @@ func (x *Form) GetTitle() string {
 func (x *Form) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *Form) GetSlug() string {
+	if x != nil {
+		return x.Slug
 	}
 	return ""
 }
@@ -1952,27 +1960,28 @@ const file_proto_form_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xc1\x05\n" +
+	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xd5\x05\n" +
 	"\x04Form\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05title\x18\x03 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x120\n" +
-	"\x05theme\x18\x05 \x01(\x0e2\x1a.weladee.form.v1.FormThemeR\x05theme\x12!\n" +
-	"\fis_published\x18\x06 \x01(\bR\visPublished\x124\n" +
-	"\x16is_accepting_responses\x18\a \x01(\bR\x14isAcceptingResponses\x12#\n" +
-	"\rrequire_login\x18\b \x01(\bR\frequireLogin\x12<\n" +
-	"\x1aallow_multiple_submissions\x18\t \x01(\bR\x18allowMultipleSubmissions\x12*\n" +
-	"\x11show_progress_bar\x18\n" +
-	" \x01(\bR\x0fshowProgressBar\x127\n" +
-	"\x18custom_thank_you_message\x18\v \x01(\tR\x15customThankYouMessage\x12!\n" +
-	"\fredirect_url\x18\f \x01(\tR\vredirectUrl\x123\n" +
-	"\bsettings\x18\r \x01(\v2\x17.google.protobuf.StructR\bsettings\x127\n" +
-	"\tquestions\x18\x0e \x03(\v2\x19.weladee.form.v1.QuestionR\tquestions\x129\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04slug\x18\x05 \x01(\tR\x04slug\x120\n" +
+	"\x05theme\x18\x06 \x01(\x0e2\x1a.weladee.form.v1.FormThemeR\x05theme\x12!\n" +
+	"\fis_published\x18\a \x01(\bR\visPublished\x124\n" +
+	"\x16is_accepting_responses\x18\b \x01(\bR\x14isAcceptingResponses\x12#\n" +
+	"\rrequire_login\x18\t \x01(\bR\frequireLogin\x12<\n" +
+	"\x1aallow_multiple_submissions\x18\n" +
+	" \x01(\bR\x18allowMultipleSubmissions\x12*\n" +
+	"\x11show_progress_bar\x18\v \x01(\bR\x0fshowProgressBar\x127\n" +
+	"\x18custom_thank_you_message\x18\f \x01(\tR\x15customThankYouMessage\x12!\n" +
+	"\fredirect_url\x18\r \x01(\tR\vredirectUrl\x123\n" +
+	"\bsettings\x18\x0e \x01(\v2\x17.google.protobuf.StructR\bsettings\x127\n" +
+	"\tquestions\x18\x0f \x03(\v2\x19.weladee.form.v1.QuestionR\tquestions\x129\n" +
 	"\n" +
-	"created_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x92\x01\n" +
+	"updated_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x92\x01\n" +
 	"\tFormStats\x12'\n" +
 	"\x0ftotal_responses\x18\x01 \x01(\x03R\x0etotalResponses\x12/\n" +
 	"\x13completed_responses\x18\x02 \x01(\x03R\x12completedResponses\x12+\n" +

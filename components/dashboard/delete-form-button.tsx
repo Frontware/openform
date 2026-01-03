@@ -21,9 +21,10 @@ import { formClient } from '@/lib/grpc-client'
 interface DeleteFormButtonProps {
   formId: string
   formTitle: string
+  onDelete?: (formId: string) => void
 }
 
-export function DeleteFormButton({ formId, formTitle }: DeleteFormButtonProps) {
+export function DeleteFormButton({ formId, formTitle, onDelete }: DeleteFormButtonProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
   const [open, setOpen] = useState(false)
@@ -34,7 +35,10 @@ export function DeleteFormButton({ formId, formTitle }: DeleteFormButtonProps) {
       await formClient.deleteForm({ id: formId })
       toast.success('Form deleted successfully')
       setOpen(false)
-      router.refresh()
+      // Call the onDelete callback to update parent state
+      if (onDelete) {
+        onDelete(formId)
+      }
     } catch (error) {
       console.error('Delete error:', error)
       toast.error('Failed to delete form')

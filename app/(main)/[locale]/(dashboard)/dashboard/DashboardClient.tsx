@@ -46,20 +46,26 @@ export function DashboardClient() {
   const [loading, setLoading] = useState(true)
   const [responseCounts, setResponseCounts] = useState<Map<string, number>>(new Map())
 
-  useEffect(() => {
-    async function fetchForms() {
-      try {
-        const response = await formClient.listForms({})
-        const mappedForms = response.forms.map(mapPbFormToDBForm)
-        setForms(mappedForms)
-      } catch (error) {
-        console.error('Failed to fetch forms:', error)
-      } finally {
-        setLoading(false)
-      }
+  const fetchForms = async () => {
+    try {
+      const response = await formClient.listForms({})
+      const mappedForms = response.forms.map(mapPbFormToDBForm)
+      setForms(mappedForms)
+    } catch (error) {
+      console.error('Failed to fetch forms:', error)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchForms()
   }, [])
+
+  const handleDeleteForm = (formId: string) => {
+    // Remove the form from state immediately for better UX
+    setForms(forms.filter(f => f.id !== formId))
+  }
 
   if (loading) {
     return (
@@ -103,10 +109,11 @@ export function DashboardClient() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {forms.map((form) => (
-            <FormCard 
-              key={form.id} 
-              form={form} 
-              responseCount={responseCounts.get(form.id) || 0} 
+            <FormCard
+              key={form.id}
+              form={form}
+              responseCount={responseCounts.get(form.id) || 0}
+              onDelete={handleDeleteForm}
             />
           ))}
         </div>

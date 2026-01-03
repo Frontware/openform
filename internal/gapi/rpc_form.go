@@ -61,6 +61,7 @@ func (s *FormServerImpl) convertFormWithQuestions(form sqlc.FormForm, questions 
 		UserId:                form.UserID.String(),
 		Title:                 form.Title,
 		Description:           form.Description.String,
+		Slug:                  form.Slug.String,
 		Theme:                 pb.FormTheme(pb.FormTheme_value["FORM_THEME_"+strings.ToUpper(form.Theme)]),
 		IsPublished:           form.IsPublished,
 		IsAcceptingResponses:  form.IsAcceptingResponses,
@@ -331,14 +332,18 @@ func (s *FormServerImpl) DeleteForm(ctx context.Context, req *pb.DeleteFormReque
 		return nil, status.Errorf(codes.InvalidArgument, "invalid form ID")
 	}
 
+	log.Printf("[DeleteForm] User %s attempting to delete form %s", user.Email, formID)
+
 	err = s.db.Queries.DeleteForm(ctx, sqlc.DeleteFormParams{
 		ID:     formID,
 		UserID: user.ID,
 	})
 	if err != nil {
+		log.Printf("[DeleteForm] Failed to delete form: %v", err)
 		return nil, status.Errorf(codes.NotFound, "form not found or unauthorized")
 	}
 
+	log.Printf("[DeleteForm] Successfully deleted form %s", formID)
 	return &pb.DeleteFormResponse{Success: true}, nil
 }
 
@@ -465,6 +470,18 @@ func (s *FormServerImpl) CreateQuestion(ctx context.Context, req *pb.CreateQuest
 		return nil, status.Errorf(codes.PermissionDenied, "not form owner")
 	}
 
+	// Validate question type - reject UNSPECIFIED
+	typeStr := req.Type.String()
+	log.Printf("[CreateQuestion] Question type raw: %s", typeStr)
+	if req.Type == pb.QuestionType_QUESTION_TYPE_UNSPECIFIED {
+		return nil, status.Errorf(codes.InvalidArgument, "question type cannot be unspecified")
+	}
+
+	// Convert proto enum to database string format
+	// Format: "QUESTION_TYPE_SHORT_TEXT" -> "short_text"
+	questionType := strings.ToLower(typeStr[len("QUESTION_TYPE_"):])
+	log.Printf("[CreateQuestion] Converted question type: %s", questionType)
+
 	description := ""
 	if req.Description != "" {
 		description = req.Description
@@ -491,7 +508,7 @@ func (s *FormServerImpl) CreateQuestion(ctx context.Context, req *pb.CreateQuest
 
 	question, err := s.db.Queries.CreateQuestion(ctx, sqlc.CreateQuestionParams{
 		FormID:         formID,
-		Type:           strings.ToLower(req.Type.String()[13:]),
+		Type:           questionType,
 		Label:          req.Label,
 		Description:    description,
 		Placeholder:    placeholder,
