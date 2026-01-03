@@ -39,6 +39,7 @@ CREATE TABLE form.forms (
     show_progress_bar BOOLEAN NOT NULL DEFAULT true,  -- Display progress indicator
     custom_thank_you_message TEXT,  -- Custom message shown after submission
     redirect_url TEXT,  -- Optional URL to redirect to after submission
+    force_captcha BOOLEAN NOT NULL DEFAULT false,  -- Whether to require reCAPTCHA verification on form submission to prevent bots
     settings JSONB DEFAULT '{}'::jsonb,  -- Additional form settings as JSON
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

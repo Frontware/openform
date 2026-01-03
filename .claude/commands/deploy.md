@@ -1,0 +1,3 @@
+# Deploy project
+
+make deploy
