@@ -34,6 +34,9 @@ export type ThemePreset =
   | 'lavender'
   | 'weladee'
   | 'minimal'
+  | 'aurora'
+  | 'cyberpunk'
+  | 'desert'
 
 export interface ThemeConfig {
   id: ThemePreset
