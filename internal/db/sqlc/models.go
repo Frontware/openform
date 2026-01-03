@@ -12,99 +12,172 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// Daily aggregated analytics - views, starts, completions per form per day
 type FormAnalytic struct {
-	ID               uuid.UUID   `db:"id" json:"id"`
-	FormID           uuid.UUID   `db:"form_id" json:"formId"`
-	Date             pgtype.Date `db:"date" json:"date"`
-	TotalViews       int32       `db:"total_views" json:"totalViews"`
-	TotalStarts      int32       `db:"total_starts" json:"totalStarts"`
-	TotalCompletions int32       `db:"total_completions" json:"totalCompletions"`
-	CreatedAt        time.Time   `db:"created_at" json:"createdAt"`
+	// Analytics record identifier (UUID)
+	ID uuid.UUID `db:"id" json:"id"`
+	// Form being analyzed (foreign key)
+	FormID uuid.UUID `db:"form_id" json:"formId"`
+	// Date of aggregation (one record per form per day)
+	Date pgtype.Date `db:"date" json:"date"`
+	// Number of times form was viewed
+	TotalViews int32 `db:"total_views" json:"totalViews"`
+	// Number of times form was started (first question viewed)
+	TotalStarts int32 `db:"total_starts" json:"totalStarts"`
+	// Number of completed submissions
+	TotalCompletions int32     `db:"total_completions" json:"totalCompletions"`
+	CreatedAt        time.Time `db:"created_at" json:"createdAt"`
 }
 
+// Individual question answers - links responses to questions with answers
 type FormAnswer struct {
-	ID            uuid.UUID      `db:"id" json:"id"`
-	ResponseID    uuid.UUID      `db:"response_id" json:"responseId"`
-	QuestionID    uuid.UUID      `db:"question_id" json:"questionId"`
-	AnswerText    pgtype.Text    `db:"answer_text" json:"answerText"`
-	AnswerNumber  pgtype.Numeric `db:"answer_number" json:"answerNumber"`
-	AnswerDate    pgtype.Date    `db:"answer_date" json:"answerDate"`
-	AnswerTime    pgtype.Time    `db:"answer_time" json:"answerTime"`
-	AnswerChoices []byte         `db:"answer_choices" json:"answerChoices"`
-	AnswerFileUrl pgtype.Text    `db:"answer_file_url" json:"answerFileUrl"`
-	CreatedAt     time.Time      `db:"created_at" json:"createdAt"`
-	UpdatedAt     time.Time      `db:"updated_at" json:"updatedAt"`
+	// Answer identifier (UUID)
+	ID uuid.UUID `db:"id" json:"id"`
+	// Parent response (foreign key)
+	ResponseID uuid.UUID `db:"response_id" json:"responseId"`
+	// Question being answered (foreign key)
+	QuestionID uuid.UUID `db:"question_id" json:"questionId"`
+	// Text answer (for short_text, long_text, url, etc.)
+	AnswerText pgtype.Text `db:"answer_text" json:"answerText"`
+	// Numeric answer (for number, rating, opinion_scale)
+	AnswerNumber pgtype.Numeric `db:"answer_number" json:"answerNumber"`
+	// Date answer (for date questions)
+	AnswerDate pgtype.Date `db:"answer_date" json:"answerDate"`
+	// Time answer (for time questions)
+	AnswerTime pgtype.Time `db:"answer_time" json:"answerTime"`
+	// Selected choices (for dropdown, checkboxes - JSON array)
+	AnswerChoices []byte `db:"answer_choices" json:"answerChoices"`
+	// Uploaded file URL (for file_upload questions)
+	AnswerFileUrl pgtype.Text `db:"answer_file_url" json:"answerFileUrl"`
+	CreatedAt     time.Time   `db:"created_at" json:"createdAt"`
+	UpdatedAt     time.Time   `db:"updated_at" json:"updatedAt"`
 }
 
+// Uploaded file metadata - tracks files submitted via file_upload questions
 type FormFileUpload struct {
-	ID               uuid.UUID   `db:"id" json:"id"`
-	FormID           uuid.UUID   `db:"form_id" json:"formId"`
-	QuestionID       uuid.UUID   `db:"question_id" json:"questionId"`
-	ResponseID       pgtype.UUID `db:"response_id" json:"responseId"`
-	Filename         string      `db:"filename" json:"filename"`
-	OriginalFilename string      `db:"original_filename" json:"originalFilename"`
-	MimeType         string      `db:"mime_type" json:"mimeType"`
-	FileSize         int64       `db:"file_size" json:"fileSize"`
-	S3Key            string      `db:"s3_key" json:"s3Key"`
-	S3Url            string      `db:"s3_url" json:"s3Url"`
+	// File upload record identifier (UUID)
+	ID uuid.UUID `db:"id" json:"id"`
+	// Form containing the file upload question
+	FormID uuid.UUID `db:"form_id" json:"formId"`
+	// File upload question that accepted this file
+	QuestionID uuid.UUID `db:"question_id" json:"questionId"`
+	// Response submission (null if uploaded before submission)
+	ResponseID pgtype.UUID `db:"response_id" json:"responseId"`
+	// Storage filename (UUID-based)
+	Filename string `db:"filename" json:"filename"`
+	// Original user filename
+	OriginalFilename string `db:"original_filename" json:"originalFilename"`
+	// File MIME type (e.g., image/jpeg, application/pdf)
+	MimeType string `db:"mime_type" json:"mimeType"`
+	// File size in bytes
+	FileSize int64 `db:"file_size" json:"fileSize"`
+	// S3 object key for retrieval
+	S3Key string `db:"s3_key" json:"s3Key"`
+	// Full S3 URL (can be presigned)
+	S3Url string `db:"s3_url" json:"s3Url"`
+	// User who uploaded (for audit)
 	UploadedByUserID pgtype.UUID `db:"uploaded_by_user_id" json:"uploadedByUserId"`
 	CreatedAt        time.Time   `db:"created_at" json:"createdAt"`
 }
 
+// Form definitions - stores form structure, settings, and metadata
 type FormForm struct {
-	ID                       uuid.UUID   `db:"id" json:"id"`
-	UserID                   uuid.UUID   `db:"user_id" json:"userId"`
-	Title                    string      `db:"title" json:"title"`
-	Description              pgtype.Text `db:"description" json:"description"`
-	Theme                    string      `db:"theme" json:"theme"`
-	IsPublished              bool        `db:"is_published" json:"isPublished"`
-	IsAcceptingResponses     bool        `db:"is_accepting_responses" json:"isAcceptingResponses"`
-	RequireLogin             bool        `db:"require_login" json:"requireLogin"`
-	AllowMultipleSubmissions bool        `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
-	ShowProgressBar          bool        `db:"show_progress_bar" json:"showProgressBar"`
-	CustomThankYouMessage    pgtype.Text `db:"custom_thank_you_message" json:"customThankYouMessage"`
-	RedirectUrl              pgtype.Text `db:"redirect_url" json:"redirectUrl"`
-	Settings                 []byte      `db:"settings" json:"settings"`
-	CreatedAt                time.Time   `db:"created_at" json:"createdAt"`
-	UpdatedAt                time.Time   `db:"updated_at" json:"updatedAt"`
+	// Unique form identifier (UUID)
+	ID uuid.UUID `db:"id" json:"id"`
+	// Owner of the form (foreign key to users table)
+	UserID uuid.UUID `db:"user_id" json:"userId"`
+	// Form title displayed to respondents
+	Title string `db:"title" json:"title"`
+	// Optional form description or instructions
+	Description pgtype.Text `db:"description" json:"description"`
+	// URL-friendly identifier for public form access (e.g., /f/customer-feedback)
+	Slug pgtype.Text `db:"slug" json:"slug"`
+	// Visual theme/appearance preset
+	Theme string `db:"theme" json:"theme"`
+	// Whether form is live and accessible via public URL
+	IsPublished bool `db:"is_published" json:"isPublished"`
+	// Whether form currently accepts new responses
+	IsAcceptingResponses bool `db:"is_accepting_responses" json:"isAcceptingResponses"`
+	// Whether respondents must be authenticated
+	RequireLogin bool `db:"require_login" json:"requireLogin"`
+	// Allow same user to submit more than once
+	AllowMultipleSubmissions bool `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
+	// Display progress indicator to respondents
+	ShowProgressBar bool `db:"show_progress_bar" json:"showProgressBar"`
+	// Custom confirmation message after submission
+	CustomThankYouMessage pgtype.Text `db:"custom_thank_you_message" json:"customThankYouMessage"`
+	// Optional URL to redirect after submission
+	RedirectUrl pgtype.Text `db:"redirect_url" json:"redirectUrl"`
+	// Additional configuration as JSON (flexible schema)
+	Settings  []byte    `db:"settings" json:"settings"`
+	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
 }
 
+// Form questions - individual fields in a form
 type FormQuestion struct {
-	ID              uuid.UUID   `db:"id" json:"id"`
-	FormID          uuid.UUID   `db:"form_id" json:"formId"`
-	Type            string      `db:"type" json:"type"`
-	Label           string      `db:"label" json:"label"`
-	Description     pgtype.Text `db:"description" json:"description"`
-	Placeholder     pgtype.Text `db:"placeholder" json:"placeholder"`
-	Required        bool        `db:"required" json:"required"`
-	OrderIndex      int32       `db:"order_index" json:"orderIndex"`
-	Options         []byte      `db:"options" json:"options"`
-	ValidationRules []byte      `db:"validation_rules" json:"validationRules"`
-	Settings        []byte      `db:"settings" json:"settings"`
-	CreatedAt       time.Time   `db:"created_at" json:"createdAt"`
-	UpdatedAt       time.Time   `db:"updated_at" json:"updatedAt"`
+	// Question identifier (UUID)
+	ID uuid.UUID `db:"id" json:"id"`
+	// Parent form (foreign key)
+	FormID uuid.UUID `db:"form_id" json:"formId"`
+	// Question type (short_text, long_text, dropdown, checkboxes, etc.)
+	Type string `db:"type" json:"type"`
+	// Question text/title
+	Label string `db:"label" json:"label"`
+	// Additional explanation or instructions
+	Description pgtype.Text `db:"description" json:"description"`
+	// Example text shown in empty input field
+	Placeholder pgtype.Text `db:"placeholder" json:"placeholder"`
+	// Whether question must be answered
+	Required bool `db:"required" json:"required"`
+	// Display order within form (0, 1, 2, ...)
+	OrderIndex int32 `db:"order_index" json:"orderIndex"`
+	// Options for choice-based questions (JSON array)
+	Options []byte `db:"options" json:"options"`
+	// Validation rules (min, max, pattern, etc.)
+	ValidationRules []byte `db:"validation_rules" json:"validationRules"`
+	// Additional question configuration (JSON)
+	Settings  []byte    `db:"settings" json:"settings"`
+	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
 }
 
+// Form submissions - one record per form submission
 type FormResponse struct {
-	ID               uuid.UUID          `db:"id" json:"id"`
-	FormID           uuid.UUID          `db:"form_id" json:"formId"`
-	RespondentUserID pgtype.UUID        `db:"respondent_user_id" json:"respondentUserId"`
-	RespondentEmail  pgtype.Text        `db:"respondent_email" json:"respondentEmail"`
-	RespondentName   pgtype.Text        `db:"respondent_name" json:"respondentName"`
-	IpAddress        *netip.Addr        `db:"ip_address" json:"ipAddress"`
-	UserAgent        pgtype.Text        `db:"user_agent" json:"userAgent"`
-	Completed        bool               `db:"completed" json:"completed"`
-	SubmittedAt      pgtype.Timestamptz `db:"submitted_at" json:"submittedAt"`
-	CreatedAt        time.Time          `db:"created_at" json:"createdAt"`
-	UpdatedAt        time.Time          `db:"updated_at" json:"updatedAt"`
+	// Response identifier (UUID)
+	ID uuid.UUID `db:"id" json:"id"`
+	// Form that was submitted (foreign key)
+	FormID uuid.UUID `db:"form_id" json:"formId"`
+	// Authenticated user who submitted (if logged in)
+	RespondentUserID pgtype.UUID `db:"respondent_user_id" json:"respondentUserId"`
+	// Email provided by respondent (if not logged in)
+	RespondentEmail pgtype.Text `db:"respondent_email" json:"respondentEmail"`
+	// Name provided by respondent (if not logged in)
+	RespondentName pgtype.Text `db:"respondent_name" json:"respondentName"`
+	// IP address of respondent
+	IpAddress *netip.Addr `db:"ip_address" json:"ipAddress"`
+	// Browser/device user agent string
+	UserAgent pgtype.Text `db:"user_agent" json:"userAgent"`
+	// Whether response was fully completed
+	Completed bool `db:"completed" json:"completed"`
+	// Timestamp of final submission
+	SubmittedAt pgtype.Timestamptz `db:"submitted_at" json:"submittedAt"`
+	CreatedAt   time.Time          `db:"created_at" json:"createdAt"`
+	UpdatedAt   time.Time          `db:"updated_at" json:"updatedAt"`
 }
 
+// Form system users - linked to Weladee platform users
 type FormUser struct {
-	ID            uuid.UUID   `db:"id" json:"id"`
-	WeladeeUserID int32       `db:"weladee_user_id" json:"weladeeUserId"`
-	Email         string      `db:"email" json:"email"`
-	FullName      pgtype.Text `db:"full_name" json:"fullName"`
-	AvatarUrl     pgtype.Text `db:"avatar_url" json:"avatarUrl"`
-	CreatedAt     time.Time   `db:"created_at" json:"createdAt"`
-	UpdatedAt     time.Time   `db:"updated_at" json:"updatedAt"`
+	// Internal user identifier (UUID)
+	ID uuid.UUID `db:"id" json:"id"`
+	// Reference to Weladee platform user ID
+	WeladeeUserID int32 `db:"weladee_user_id" json:"weladeeUserId"`
+	// User email address (unique)
+	Email string `db:"email" json:"email"`
+	// User display name
+	FullName pgtype.Text `db:"full_name" json:"fullName"`
+	// Profile picture URL
+	AvatarUrl pgtype.Text `db:"avatar_url" json:"avatarUrl"`
+	CreatedAt time.Time   `db:"created_at" json:"createdAt"`
+	UpdatedAt time.Time   `db:"updated_at" json:"updatedAt"`
 }

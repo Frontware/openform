@@ -29,20 +29,19 @@ func (q *Queries) CountUserForms(ctx context.Context, userID uuid.UUID) (int64, 
 
 const createForm = `-- name: CreateForm :one
 INSERT INTO form.forms (
-    id, user_id, title, description, theme, is_published,
+    user_id, title, description, theme, is_published,
     is_accepting_responses, require_login, allow_multiple_submissions,
     show_progress_bar, custom_thank_you_message, redirect_url, settings
 )
 VALUES (
-    $1::uuid, $2::uuid, $3::text, $4::text, $5::text, $6::boolean,
-    $7::boolean, $8::boolean, $9::boolean,
-    $10::boolean, $11::text, $12::text, $13::jsonb
+    $1::uuid, $2::text, $3::text, $4::text, $5::boolean,
+    $6::boolean, $7::boolean, $8::boolean,
+    $9::boolean, $10::text, $11::text, $12::jsonb
 )
-RETURNING id, user_id, title, description, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
 `
 
 type CreateFormParams struct {
-	ID                       uuid.UUID       `db:"id" json:"id"`
 	UserID                   uuid.UUID       `db:"user_id" json:"userId"`
 	Title                    string          `db:"title" json:"title"`
 	Description              string          `db:"description" json:"description"`
@@ -59,7 +58,6 @@ type CreateFormParams struct {
 
 func (q *Queries) CreateForm(ctx context.Context, arg CreateFormParams) (FormForm, error) {
 	row := q.db.QueryRow(ctx, createForm,
-		arg.ID,
 		arg.UserID,
 		arg.Title,
 		arg.Description,
@@ -79,6 +77,7 @@ func (q *Queries) CreateForm(ctx context.Context, arg CreateFormParams) (FormFor
 		&i.UserID,
 		&i.Title,
 		&i.Description,
+		&i.Slug,
 		&i.Theme,
 		&i.IsPublished,
 		&i.IsAcceptingResponses,
@@ -110,7 +109,7 @@ func (q *Queries) DeleteForm(ctx context.Context, arg DeleteFormParams) error {
 }
 
 const getForm = `-- name: GetForm :one
-SELECT id, user_id, title, description, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
 WHERE id = $1::uuid
 `
 
@@ -122,6 +121,7 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 		&i.UserID,
 		&i.Title,
 		&i.Description,
+		&i.Slug,
 		&i.Theme,
 		&i.IsPublished,
 		&i.IsAcceptingResponses,
@@ -138,7 +138,7 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 }
 
 const getFormBySlug = `-- name: GetFormBySlug :one
-SELECT id, user_id, title, description, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
 WHERE slug = $1::text
 `
 
@@ -150,6 +150,7 @@ func (q *Queries) GetFormBySlug(ctx context.Context, slug string) (FormForm, err
 		&i.UserID,
 		&i.Title,
 		&i.Description,
+		&i.Slug,
 		&i.Theme,
 		&i.IsPublished,
 		&i.IsAcceptingResponses,
@@ -191,7 +192,7 @@ func (q *Queries) GetFormStats(ctx context.Context, formID uuid.UUID) (GetFormSt
 
 const getFormWithQuestions = `-- name: GetFormWithQuestions :one
 SELECT
-    f.id, f.user_id, f.title, f.description, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.settings, f.created_at, f.updated_at,
+    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.custom_thank_you_message, f.redirect_url, f.settings, f.created_at, f.updated_at,
     q.id as question_id,
     q.type as question_type,
     q.label as question_label,
@@ -215,6 +216,7 @@ type GetFormWithQuestionsRow struct {
 	UserID                   uuid.UUID          `db:"user_id" json:"userId"`
 	Title                    string             `db:"title" json:"title"`
 	Description              pgtype.Text        `db:"description" json:"description"`
+	Slug                     pgtype.Text        `db:"slug" json:"slug"`
 	Theme                    string             `db:"theme" json:"theme"`
 	IsPublished              bool               `db:"is_published" json:"isPublished"`
 	IsAcceptingResponses     bool               `db:"is_accepting_responses" json:"isAcceptingResponses"`
@@ -248,6 +250,7 @@ func (q *Queries) GetFormWithQuestions(ctx context.Context, id uuid.UUID) (GetFo
 		&i.UserID,
 		&i.Title,
 		&i.Description,
+		&i.Slug,
 		&i.Theme,
 		&i.IsPublished,
 		&i.IsAcceptingResponses,
@@ -342,7 +345,7 @@ func (q *Queries) ListFormQuestions(ctx context.Context, formID uuid.UUID) ([]Fo
 }
 
 const listUserForms = `-- name: ListUserForms :many
-SELECT id, user_id, title, description, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at FROM form.forms
 WHERE user_id = $1::uuid
 ORDER BY updated_at DESC
 LIMIT $3::int OFFSET $2::int
@@ -368,6 +371,7 @@ func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([
 			&i.UserID,
 			&i.Title,
 			&i.Description,
+			&i.Slug,
 			&i.Theme,
 			&i.IsPublished,
 			&i.IsAcceptingResponses,
@@ -394,7 +398,7 @@ const publishForm = `-- name: PublishForm :one
 UPDATE form.forms
 SET is_published = true
 WHERE id = $1::uuid AND user_id = $2::uuid
-RETURNING id, user_id, title, description, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
 `
 
 type PublishFormParams struct {
@@ -410,6 +414,7 @@ func (q *Queries) PublishForm(ctx context.Context, arg PublishFormParams) (FormF
 		&i.UserID,
 		&i.Title,
 		&i.Description,
+		&i.Slug,
 		&i.Theme,
 		&i.IsPublished,
 		&i.IsAcceptingResponses,
@@ -441,7 +446,7 @@ SET
     redirect_url = COALESCE($10::text, redirect_url),
     settings = COALESCE($11::jsonb, settings)
 WHERE id = $12::uuid AND user_id = $13::uuid
-RETURNING id, user_id, title, description, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, custom_thank_you_message, redirect_url, settings, created_at, updated_at
 `
 
 type UpdateFormParams struct {
@@ -483,6 +488,7 @@ func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormFor
 		&i.UserID,
 		&i.Title,
 		&i.Description,
+		&i.Slug,
 		&i.Theme,
 		&i.IsPublished,
 		&i.IsAcceptingResponses,

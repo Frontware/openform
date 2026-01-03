@@ -3,6 +3,7 @@ package gapi
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -223,22 +224,30 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 }
 
 func (s *FormServerImpl) GetForm(ctx context.Context, req *pb.GetFormRequest) (*pb.GetFormResponse, error) {
+	log.Printf("[GetForm] Request received - Form ID: %s, IncludeQuestions: %v", req.Id, req.IncludeQuestions)
+
 	formID, err := uuid.Parse(req.Id)
 	if err != nil {
+		log.Printf("[GetForm] Invalid UUID: %v", err)
 		return nil, status.Errorf(codes.InvalidArgument, "invalid form ID")
 	}
 
 	form, err := s.db.Queries.GetForm(ctx, formID)
 	if err != nil {
+		log.Printf("[GetForm] Database error for ID %s: %v", formID, err)
 		return nil, status.Errorf(codes.NotFound, "form not found")
 	}
+
+	log.Printf("[GetForm] Form found - ID: %s, Title: %s, UserID: %s", form.ID, form.Title, form.UserID)
 
 	var questions []sqlc.FormQuestion
 	if req.IncludeQuestions {
 		questions, err = s.db.Queries.ListFormQuestions(ctx, formID)
 		if err != nil {
+			log.Printf("[GetForm] Failed to load questions: %v", err)
 			return nil, status.Errorf(codes.Internal, "failed to load questions: %v", err)
 		}
+		log.Printf("[GetForm] Loaded %d questions", len(questions))
 	}
 
 	pbForm, err := s.convertFormWithQuestions(form, questions)
