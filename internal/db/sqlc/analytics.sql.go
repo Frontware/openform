@@ -115,7 +115,7 @@ type GetCompletionStatsForDateParams struct {
 
 type GetCompletionStatsForDateRow struct {
 	ID                    uuid.UUID   `db:"id" json:"id"`
-	CompletionTimeSeconds any `db:"completion_time_seconds" json:"completionTimeSeconds"`
+	CompletionTimeSeconds interface{} `db:"completion_time_seconds" json:"completionTimeSeconds"`
 }
 
 func (q *Queries) GetCompletionStatsForDate(ctx context.Context, arg GetCompletionStatsForDateParams) ([]GetCompletionStatsForDateRow, error) {
@@ -469,7 +469,7 @@ type GetQuestionAnalyticsRow struct {
 	Label          string      `db:"label" json:"label"`
 	Required       bool        `db:"required" json:"required"`
 	ResponseCount  int64       `db:"response_count" json:"responseCount"`
-	AggregatedData any `db:"aggregated_data" json:"aggregatedData"`
+	AggregatedData interface{} `db:"aggregated_data" json:"aggregatedData"`
 }
 
 func (q *Queries) GetQuestionAnalytics(ctx context.Context, formID uuid.UUID) ([]GetQuestionAnalyticsRow, error) {

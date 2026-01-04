@@ -47,6 +47,7 @@ import {
 import Link from 'next/link'
 import { QuestionEditor } from './question-editor'
 import { FormPreview } from './form-preview'
+import { ProgressBarSettings } from './settings/progress-bar-settings'
 import { formClient } from '@/lib/grpc-client'
 import { FormTheme, QuestionType } from '@/lib/proto/proto/form_pb'
 import { Struct, Value } from '@bufbuild/protobuf'
@@ -90,6 +91,16 @@ function mapQuestionTypeToProto(type: QuestionConfig['type']): QuestionType {
     case 'matrix': return QuestionType.MATRIX
     case 'ranking': return QuestionType.RANKING
     default: return QuestionType.UNSPECIFIED
+  }
+}
+
+function mapProgressBarStyleToProto(style: 'none' | 'linear' | 'steps' | 'circular'): number {
+  switch (style) {
+    case 'none': return 1
+    case 'linear': return 2
+    case 'steps': return 3
+    case 'circular': return 4
+    default: return 1
   }
 }
 
@@ -282,7 +293,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
         forceCaptcha: form.force_captcha,
 
 
-        showProgressBar: form.show_progress_bar !== undefined ? form.show_progress_bar : true,
+        progressBarStyle: mapProgressBarStyleToProto(form.progress_bar_style || 'none'),
 
 
         allowMultipleSubmissions: form.allow_multiple_submissions !== undefined ? form.allow_multiple_submissions : false,
@@ -1745,54 +1756,13 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
 
-                <div className="flex items-center justify-between py-3 border-t border-slate-100">
-
-
-                  <div className="flex-1">
-
-
-                    <Label htmlFor="show-progress-bar" className="text-sm font-medium cursor-pointer">
-
-
-                      Show Progress Bar
-
-
-                    </Label>
-
-
-                    <p className="text-xs text-slate-500 mt-1">
-
-
-                      Display question progress at the top of the form
-
-
-                    </p>
-
-
-                  </div>
-
-
-                  <Switch
-
-
-                    id="show-progress-bar"
-
-
-                    checked={form.show_progress_bar !== undefined ? form.show_progress_bar : true}
-
-
-                    onCheckedChange={(checked) => {
-
-
-                      setForm({ ...form, show_progress_bar: checked })
-
-
+                <div className="py-3 border-t border-slate-100">
+                  <ProgressBarSettings
+                    value={form.progress_bar_style || 'none'}
+                    onChange={(value) => {
+                      setForm({ ...form, progress_bar_style: value })
                       setHasUnsavedChanges(true)
-
-
                     }}
-
-
                   />
 
 

@@ -164,10 +164,13 @@ const (
 	QuestionType_QUESTION_TYPE_RATING        QuestionType = 9
 	QuestionType_QUESTION_TYPE_OPINION_SCALE QuestionType = 10
 	QuestionType_QUESTION_TYPE_YES_NO        QuestionType = 11
-	QuestionType_QUESTION_TYPE_FILE_UPLOAD   QuestionType = 12
-	QuestionType_QUESTION_TYPE_URL           QuestionType = 13
-	QuestionType_QUESTION_TYPE_MATRIX        QuestionType = 14
-	QuestionType_QUESTION_TYPE_RANKING       QuestionType = 15
+	// Only for enterprise plans
+	QuestionType_QUESTION_TYPE_FILE_UPLOAD QuestionType = 12
+	QuestionType_QUESTION_TYPE_URL         QuestionType = 13
+	// Not available to SME plans
+	QuestionType_QUESTION_TYPE_MATRIX QuestionType = 14
+	// Only for enterprise plans
+	QuestionType_QUESTION_TYPE_RANKING QuestionType = 15
 )
 
 // Enum value maps for QuestionType.
@@ -237,6 +240,61 @@ func (QuestionType) EnumDescriptor() ([]byte, []int) {
 	return file_proto_form_proto_rawDescGZIP(), []int{2}
 }
 
+type ProgressBarStyle int32
+
+const (
+	ProgressBarStyle_PROGRESS_BAR_STYLE_UNSPECIFIED ProgressBarStyle = 0
+	ProgressBarStyle_PROGRESS_BAR_STYLE_NONE        ProgressBarStyle = 1
+	ProgressBarStyle_PROGRESS_BAR_STYLE_LINEAR      ProgressBarStyle = 2
+	ProgressBarStyle_PROGRESS_BAR_STYLE_STEPS       ProgressBarStyle = 3
+	ProgressBarStyle_PROGRESS_BAR_STYLE_CIRCULAR    ProgressBarStyle = 4
+)
+
+// Enum value maps for ProgressBarStyle.
+var (
+	ProgressBarStyle_name = map[int32]string{
+		0: "PROGRESS_BAR_STYLE_UNSPECIFIED",
+		1: "PROGRESS_BAR_STYLE_NONE",
+		2: "PROGRESS_BAR_STYLE_LINEAR",
+		3: "PROGRESS_BAR_STYLE_STEPS",
+		4: "PROGRESS_BAR_STYLE_CIRCULAR",
+	}
+	ProgressBarStyle_value = map[string]int32{
+		"PROGRESS_BAR_STYLE_UNSPECIFIED": 0,
+		"PROGRESS_BAR_STYLE_NONE":        1,
+		"PROGRESS_BAR_STYLE_LINEAR":      2,
+		"PROGRESS_BAR_STYLE_STEPS":       3,
+		"PROGRESS_BAR_STYLE_CIRCULAR":    4,
+	}
+)
+
+func (x ProgressBarStyle) Enum() *ProgressBarStyle {
+	p := new(ProgressBarStyle)
+	*p = x
+	return p
+}
+
+func (x ProgressBarStyle) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ProgressBarStyle) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_form_proto_enumTypes[3].Descriptor()
+}
+
+func (ProgressBarStyle) Type() protoreflect.EnumType {
+	return &file_proto_form_proto_enumTypes[3]
+}
+
+func (x ProgressBarStyle) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ProgressBarStyle.Descriptor instead.
+func (ProgressBarStyle) EnumDescriptor() ([]byte, []int) {
+	return file_proto_form_proto_rawDescGZIP(), []int{3}
+}
+
 // Sort options for ListForms
 type FormSortBy int32
 
@@ -277,11 +335,11 @@ func (x FormSortBy) String() string {
 }
 
 func (FormSortBy) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_form_proto_enumTypes[3].Descriptor()
+	return file_proto_form_proto_enumTypes[4].Descriptor()
 }
 
 func (FormSortBy) Type() protoreflect.EnumType {
-	return &file_proto_form_proto_enumTypes[3]
+	return &file_proto_form_proto_enumTypes[4]
 }
 
 func (x FormSortBy) Number() protoreflect.EnumNumber {
@@ -290,7 +348,7 @@ func (x FormSortBy) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FormSortBy.Descriptor instead.
 func (FormSortBy) EnumDescriptor() ([]byte, []int) {
-	return file_proto_form_proto_rawDescGZIP(), []int{3}
+	return file_proto_form_proto_rawDescGZIP(), []int{4}
 }
 
 type FormSortOrder int32
@@ -326,11 +384,11 @@ func (x FormSortOrder) String() string {
 }
 
 func (FormSortOrder) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_form_proto_enumTypes[4].Descriptor()
+	return file_proto_form_proto_enumTypes[5].Descriptor()
 }
 
 func (FormSortOrder) Type() protoreflect.EnumType {
-	return &file_proto_form_proto_enumTypes[4]
+	return &file_proto_form_proto_enumTypes[5]
 }
 
 func (x FormSortOrder) Number() protoreflect.EnumNumber {
@@ -339,7 +397,7 @@ func (x FormSortOrder) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FormSortOrder.Descriptor instead.
 func (FormSortOrder) EnumDescriptor() ([]byte, []int) {
-	return file_proto_form_proto_rawDescGZIP(), []int{4}
+	return file_proto_form_proto_rawDescGZIP(), []int{5}
 }
 
 type FormStatusFilter int32
@@ -378,11 +436,11 @@ func (x FormStatusFilter) String() string {
 }
 
 func (FormStatusFilter) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_form_proto_enumTypes[5].Descriptor()
+	return file_proto_form_proto_enumTypes[6].Descriptor()
 }
 
 func (FormStatusFilter) Type() protoreflect.EnumType {
-	return &file_proto_form_proto_enumTypes[5]
+	return &file_proto_form_proto_enumTypes[6]
 }
 
 func (x FormStatusFilter) Number() protoreflect.EnumNumber {
@@ -391,7 +449,7 @@ func (x FormStatusFilter) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FormStatusFilter.Descriptor instead.
 func (FormStatusFilter) EnumDescriptor() ([]byte, []int) {
-	return file_proto_form_proto_rawDescGZIP(), []int{5}
+	return file_proto_form_proto_rawDescGZIP(), []int{6}
 }
 
 // Messages
@@ -546,7 +604,7 @@ type Form struct {
 	IsAcceptingResponses     bool                   `protobuf:"varint,7,opt,name=is_accepting_responses,json=isAcceptingResponses,proto3" json:"is_accepting_responses,omitempty"`
 	RequireLogin             bool                   `protobuf:"varint,8,opt,name=require_login,json=requireLogin,proto3" json:"require_login,omitempty"`
 	AllowMultipleSubmissions bool                   `protobuf:"varint,9,opt,name=allow_multiple_submissions,json=allowMultipleSubmissions,proto3" json:"allow_multiple_submissions,omitempty"`
-	ShowProgressBar          bool                   `protobuf:"varint,10,opt,name=show_progress_bar,json=showProgressBar,proto3" json:"show_progress_bar,omitempty"`
+	ProgressBarStyle         ProgressBarStyle       `protobuf:"varint,10,opt,name=progress_bar_style,json=progressBarStyle,proto3,enum=weladee.form.v1.ProgressBarStyle" json:"progress_bar_style,omitempty"`
 	CustomThankYouMessage    string                 `protobuf:"bytes,11,opt,name=custom_thank_you_message,json=customThankYouMessage,proto3" json:"custom_thank_you_message,omitempty"`
 	RedirectUrl              string                 `protobuf:"bytes,12,opt,name=redirect_url,json=redirectUrl,proto3" json:"redirect_url,omitempty"`
 	ForceCaptcha             bool                   `protobuf:"varint,13,opt,name=force_captcha,json=forceCaptcha,proto3" json:"force_captcha,omitempty"`
@@ -651,11 +709,11 @@ func (x *Form) GetAllowMultipleSubmissions() bool {
 	return false
 }
 
-func (x *Form) GetShowProgressBar() bool {
+func (x *Form) GetProgressBarStyle() ProgressBarStyle {
 	if x != nil {
-		return x.ShowProgressBar
+		return x.ProgressBarStyle
 	}
-	return false
+	return ProgressBarStyle_PROGRESS_BAR_STYLE_UNSPECIFIED
 }
 
 func (x *Form) GetCustomThankYouMessage() string {
@@ -769,14 +827,15 @@ func (x *FormStats) GetPartialResponses() int64 {
 
 // RPC Requests/Responses
 type CreateFormRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Theme         FormTheme              `protobuf:"varint,3,opt,name=theme,proto3,enum=weladee.form.v1.FormTheme" json:"theme,omitempty"`
-	Questions     []*Question            `protobuf:"bytes,4,rep,name=questions,proto3" json:"questions,omitempty"`
-	Settings      *structpb.Struct       `protobuf:"bytes,5,opt,name=settings,proto3" json:"settings,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Title            string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description      string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Theme            FormTheme              `protobuf:"varint,3,opt,name=theme,proto3,enum=weladee.form.v1.FormTheme" json:"theme,omitempty"`
+	ProgressBarStyle ProgressBarStyle       `protobuf:"varint,4,opt,name=progress_bar_style,json=progressBarStyle,proto3,enum=weladee.form.v1.ProgressBarStyle" json:"progress_bar_style,omitempty"`
+	Questions        []*Question            `protobuf:"bytes,5,rep,name=questions,proto3" json:"questions,omitempty"`
+	Settings         *structpb.Struct       `protobuf:"bytes,6,opt,name=settings,proto3" json:"settings,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *CreateFormRequest) Reset() {
@@ -828,6 +887,13 @@ func (x *CreateFormRequest) GetTheme() FormTheme {
 		return x.Theme
 	}
 	return FormTheme_FORM_THEME_UNSPECIFIED
+}
+
+func (x *CreateFormRequest) GetProgressBarStyle() ProgressBarStyle {
+	if x != nil {
+		return x.ProgressBarStyle
+	}
+	return ProgressBarStyle_PROGRESS_BAR_STYLE_UNSPECIFIED
 }
 
 func (x *CreateFormRequest) GetQuestions() []*Question {
@@ -1082,7 +1148,7 @@ type UpdateFormRequest struct {
 	IsAcceptingResponses     *bool                  `protobuf:"varint,6,opt,name=is_accepting_responses,json=isAcceptingResponses,proto3,oneof" json:"is_accepting_responses,omitempty"`
 	RequireLogin             *bool                  `protobuf:"varint,7,opt,name=require_login,json=requireLogin,proto3,oneof" json:"require_login,omitempty"`
 	AllowMultipleSubmissions *bool                  `protobuf:"varint,8,opt,name=allow_multiple_submissions,json=allowMultipleSubmissions,proto3,oneof" json:"allow_multiple_submissions,omitempty"`
-	ShowProgressBar          *bool                  `protobuf:"varint,9,opt,name=show_progress_bar,json=showProgressBar,proto3,oneof" json:"show_progress_bar,omitempty"`
+	ProgressBarStyle         *ProgressBarStyle      `protobuf:"varint,9,opt,name=progress_bar_style,json=progressBarStyle,proto3,enum=weladee.form.v1.ProgressBarStyle,oneof" json:"progress_bar_style,omitempty"`
 	CustomThankYouMessage    *string                `protobuf:"bytes,10,opt,name=custom_thank_you_message,json=customThankYouMessage,proto3,oneof" json:"custom_thank_you_message,omitempty"`
 	RedirectUrl              *string                `protobuf:"bytes,11,opt,name=redirect_url,json=redirectUrl,proto3,oneof" json:"redirect_url,omitempty"`
 	ForceCaptcha             *bool                  `protobuf:"varint,12,opt,name=force_captcha,json=forceCaptcha,proto3,oneof" json:"force_captcha,omitempty"`
@@ -1177,11 +1243,11 @@ func (x *UpdateFormRequest) GetAllowMultipleSubmissions() bool {
 	return false
 }
 
-func (x *UpdateFormRequest) GetShowProgressBar() bool {
-	if x != nil && x.ShowProgressBar != nil {
-		return *x.ShowProgressBar
+func (x *UpdateFormRequest) GetProgressBarStyle() ProgressBarStyle {
+	if x != nil && x.ProgressBarStyle != nil {
+		return *x.ProgressBarStyle
 	}
-	return false
+	return ProgressBarStyle_PROGRESS_BAR_STYLE_UNSPECIFIED
 }
 
 func (x *UpdateFormRequest) GetCustomThankYouMessage() string {
@@ -2167,7 +2233,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xe6\x05\n" +
+	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x8b\x06\n" +
 	"\x04Form\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
@@ -2177,9 +2243,9 @@ const file_proto_form_proto_rawDesc = "" +
 	"\fis_published\x18\x06 \x01(\bR\visPublished\x124\n" +
 	"\x16is_accepting_responses\x18\a \x01(\bR\x14isAcceptingResponses\x12#\n" +
 	"\rrequire_login\x18\b \x01(\bR\frequireLogin\x12<\n" +
-	"\x1aallow_multiple_submissions\x18\t \x01(\bR\x18allowMultipleSubmissions\x12*\n" +
-	"\x11show_progress_bar\x18\n" +
-	" \x01(\bR\x0fshowProgressBar\x127\n" +
+	"\x1aallow_multiple_submissions\x18\t \x01(\bR\x18allowMultipleSubmissions\x12O\n" +
+	"\x12progress_bar_style\x18\n" +
+	" \x01(\x0e2!.weladee.form.v1.ProgressBarStyleR\x10progressBarStyle\x127\n" +
 	"\x18custom_thank_you_message\x18\v \x01(\tR\x15customThankYouMessage\x12!\n" +
 	"\fredirect_url\x18\f \x01(\tR\vredirectUrl\x12#\n" +
 	"\rforce_captcha\x18\r \x01(\bR\fforceCaptcha\x123\n" +
@@ -2192,13 +2258,14 @@ const file_proto_form_proto_rawDesc = "" +
 	"\tFormStats\x12'\n" +
 	"\x0ftotal_responses\x18\x01 \x01(\x03R\x0etotalResponses\x12/\n" +
 	"\x13completed_responses\x18\x02 \x01(\x03R\x12completedResponses\x12+\n" +
-	"\x11partial_responses\x18\x03 \x01(\x03R\x10partialResponses\"\xeb\x01\n" +
+	"\x11partial_responses\x18\x03 \x01(\x03R\x10partialResponses\"\xbc\x02\n" +
 	"\x11CreateFormRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x120\n" +
-	"\x05theme\x18\x03 \x01(\x0e2\x1a.weladee.form.v1.FormThemeR\x05theme\x127\n" +
-	"\tquestions\x18\x04 \x03(\v2\x19.weladee.form.v1.QuestionR\tquestions\x123\n" +
-	"\bsettings\x18\x05 \x01(\v2\x17.google.protobuf.StructR\bsettings\"?\n" +
+	"\x05theme\x18\x03 \x01(\x0e2\x1a.weladee.form.v1.FormThemeR\x05theme\x12O\n" +
+	"\x12progress_bar_style\x18\x04 \x01(\x0e2!.weladee.form.v1.ProgressBarStyleR\x10progressBarStyle\x127\n" +
+	"\tquestions\x18\x05 \x03(\v2\x19.weladee.form.v1.QuestionR\tquestions\x123\n" +
+	"\bsettings\x18\x06 \x01(\v2\x17.google.protobuf.StructR\bsettings\"?\n" +
 	"\x12CreateFormResponse\x12)\n" +
 	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"M\n" +
 	"\x0eGetFormRequest\x12\x0e\n" +
@@ -2209,7 +2276,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x14GetFormBySlugRequest\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\"B\n" +
 	"\x15GetFormBySlugResponse\x12)\n" +
-	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"\xcb\x06\n" +
+	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"\xf1\x06\n" +
 	"\x11UpdateFormRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
@@ -2218,8 +2285,8 @@ const file_proto_form_proto_rawDesc = "" +
 	"\fis_published\x18\x05 \x01(\bH\x03R\visPublished\x88\x01\x01\x129\n" +
 	"\x16is_accepting_responses\x18\x06 \x01(\bH\x04R\x14isAcceptingResponses\x88\x01\x01\x12(\n" +
 	"\rrequire_login\x18\a \x01(\bH\x05R\frequireLogin\x88\x01\x01\x12A\n" +
-	"\x1aallow_multiple_submissions\x18\b \x01(\bH\x06R\x18allowMultipleSubmissions\x88\x01\x01\x12/\n" +
-	"\x11show_progress_bar\x18\t \x01(\bH\aR\x0fshowProgressBar\x88\x01\x01\x12<\n" +
+	"\x1aallow_multiple_submissions\x18\b \x01(\bH\x06R\x18allowMultipleSubmissions\x88\x01\x01\x12T\n" +
+	"\x12progress_bar_style\x18\t \x01(\x0e2!.weladee.form.v1.ProgressBarStyleH\aR\x10progressBarStyle\x88\x01\x01\x12<\n" +
 	"\x18custom_thank_you_message\x18\n" +
 	" \x01(\tH\bR\x15customThankYouMessage\x88\x01\x01\x12&\n" +
 	"\fredirect_url\x18\v \x01(\tH\tR\vredirectUrl\x88\x01\x01\x12(\n" +
@@ -2232,8 +2299,8 @@ const file_proto_form_proto_rawDesc = "" +
 	"\r_is_publishedB\x19\n" +
 	"\x17_is_accepting_responsesB\x10\n" +
 	"\x0e_require_loginB\x1d\n" +
-	"\x1b_allow_multiple_submissionsB\x14\n" +
-	"\x12_show_progress_barB\x1b\n" +
+	"\x1b_allow_multiple_submissionsB\x15\n" +
+	"\x13_progress_bar_styleB\x1b\n" +
 	"\x19_custom_thank_you_messageB\x0f\n" +
 	"\r_redirect_urlB\x10\n" +
 	"\x0e_force_captchaB\v\n" +
@@ -2353,7 +2420,13 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x19QUESTION_TYPE_FILE_UPLOAD\x10\f\x12\x15\n" +
 	"\x11QUESTION_TYPE_URL\x10\r\x12\x18\n" +
 	"\x14QUESTION_TYPE_MATRIX\x10\x0e\x12\x19\n" +
-	"\x15QUESTION_TYPE_RANKING\x10\x0f*\x9d\x01\n" +
+	"\x15QUESTION_TYPE_RANKING\x10\x0f*\xb1\x01\n" +
+	"\x10ProgressBarStyle\x12\"\n" +
+	"\x1ePROGRESS_BAR_STYLE_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17PROGRESS_BAR_STYLE_NONE\x10\x01\x12\x1d\n" +
+	"\x19PROGRESS_BAR_STYLE_LINEAR\x10\x02\x12\x1c\n" +
+	"\x18PROGRESS_BAR_STYLE_STEPS\x10\x03\x12\x1f\n" +
+	"\x1bPROGRESS_BAR_STYLE_CIRCULAR\x10\x04*\x9d\x01\n" +
 	"\n" +
 	"FormSortBy\x12\x1c\n" +
 	"\x18FORM_SORT_BY_UNSPECIFIED\x10\x00\x12\x1b\n" +
@@ -2399,113 +2472,117 @@ func file_proto_form_proto_rawDescGZIP() []byte {
 	return file_proto_form_proto_rawDescData
 }
 
-var file_proto_form_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
+var file_proto_form_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
 var file_proto_form_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_proto_form_proto_goTypes = []any{
 	(FormStatus)(0),                  // 0: weladee.form.v1.FormStatus
 	(FormTheme)(0),                   // 1: weladee.form.v1.FormTheme
 	(QuestionType)(0),                // 2: weladee.form.v1.QuestionType
-	(FormSortBy)(0),                  // 3: weladee.form.v1.FormSortBy
-	(FormSortOrder)(0),               // 4: weladee.form.v1.FormSortOrder
-	(FormStatusFilter)(0),            // 5: weladee.form.v1.FormStatusFilter
-	(*Question)(nil),                 // 6: weladee.form.v1.Question
-	(*Form)(nil),                     // 7: weladee.form.v1.Form
-	(*FormStats)(nil),                // 8: weladee.form.v1.FormStats
-	(*CreateFormRequest)(nil),        // 9: weladee.form.v1.CreateFormRequest
-	(*CreateFormResponse)(nil),       // 10: weladee.form.v1.CreateFormResponse
-	(*GetFormRequest)(nil),           // 11: weladee.form.v1.GetFormRequest
-	(*GetFormResponse)(nil),          // 12: weladee.form.v1.GetFormResponse
-	(*GetFormBySlugRequest)(nil),     // 13: weladee.form.v1.GetFormBySlugRequest
-	(*GetFormBySlugResponse)(nil),    // 14: weladee.form.v1.GetFormBySlugResponse
-	(*UpdateFormRequest)(nil),        // 15: weladee.form.v1.UpdateFormRequest
-	(*UpdateFormResponse)(nil),       // 16: weladee.form.v1.UpdateFormResponse
-	(*DeleteFormRequest)(nil),        // 17: weladee.form.v1.DeleteFormRequest
-	(*DeleteFormResponse)(nil),       // 18: weladee.form.v1.DeleteFormResponse
-	(*ListFormsRequest)(nil),         // 19: weladee.form.v1.ListFormsRequest
-	(*ListFormsResponse)(nil),        // 20: weladee.form.v1.ListFormsResponse
-	(*PublishFormRequest)(nil),       // 21: weladee.form.v1.PublishFormRequest
-	(*PublishFormResponse)(nil),      // 22: weladee.form.v1.PublishFormResponse
-	(*GetFormStatsRequest)(nil),      // 23: weladee.form.v1.GetFormStatsRequest
-	(*GetFormStatsResponse)(nil),     // 24: weladee.form.v1.GetFormStatsResponse
-	(*CreateQuestionRequest)(nil),    // 25: weladee.form.v1.CreateQuestionRequest
-	(*CreateQuestionResponse)(nil),   // 26: weladee.form.v1.CreateQuestionResponse
-	(*UpdateQuestionRequest)(nil),    // 27: weladee.form.v1.UpdateQuestionRequest
-	(*UpdateQuestionResponse)(nil),   // 28: weladee.form.v1.UpdateQuestionResponse
-	(*DeleteQuestionRequest)(nil),    // 29: weladee.form.v1.DeleteQuestionRequest
-	(*DeleteQuestionResponse)(nil),   // 30: weladee.form.v1.DeleteQuestionResponse
-	(*ReorderQuestionsRequest)(nil),  // 31: weladee.form.v1.ReorderQuestionsRequest
-	(*ReorderQuestionsResponse)(nil), // 32: weladee.form.v1.ReorderQuestionsResponse
-	(*structpb.Struct)(nil),          // 33: google.protobuf.Struct
-	(*timestamppb.Timestamp)(nil),    // 34: google.protobuf.Timestamp
-	(*PaginationRequest)(nil),        // 35: weladee.form.v1.PaginationRequest
-	(*PaginationResponse)(nil),       // 36: weladee.form.v1.PaginationResponse
+	(ProgressBarStyle)(0),            // 3: weladee.form.v1.ProgressBarStyle
+	(FormSortBy)(0),                  // 4: weladee.form.v1.FormSortBy
+	(FormSortOrder)(0),               // 5: weladee.form.v1.FormSortOrder
+	(FormStatusFilter)(0),            // 6: weladee.form.v1.FormStatusFilter
+	(*Question)(nil),                 // 7: weladee.form.v1.Question
+	(*Form)(nil),                     // 8: weladee.form.v1.Form
+	(*FormStats)(nil),                // 9: weladee.form.v1.FormStats
+	(*CreateFormRequest)(nil),        // 10: weladee.form.v1.CreateFormRequest
+	(*CreateFormResponse)(nil),       // 11: weladee.form.v1.CreateFormResponse
+	(*GetFormRequest)(nil),           // 12: weladee.form.v1.GetFormRequest
+	(*GetFormResponse)(nil),          // 13: weladee.form.v1.GetFormResponse
+	(*GetFormBySlugRequest)(nil),     // 14: weladee.form.v1.GetFormBySlugRequest
+	(*GetFormBySlugResponse)(nil),    // 15: weladee.form.v1.GetFormBySlugResponse
+	(*UpdateFormRequest)(nil),        // 16: weladee.form.v1.UpdateFormRequest
+	(*UpdateFormResponse)(nil),       // 17: weladee.form.v1.UpdateFormResponse
+	(*DeleteFormRequest)(nil),        // 18: weladee.form.v1.DeleteFormRequest
+	(*DeleteFormResponse)(nil),       // 19: weladee.form.v1.DeleteFormResponse
+	(*ListFormsRequest)(nil),         // 20: weladee.form.v1.ListFormsRequest
+	(*ListFormsResponse)(nil),        // 21: weladee.form.v1.ListFormsResponse
+	(*PublishFormRequest)(nil),       // 22: weladee.form.v1.PublishFormRequest
+	(*PublishFormResponse)(nil),      // 23: weladee.form.v1.PublishFormResponse
+	(*GetFormStatsRequest)(nil),      // 24: weladee.form.v1.GetFormStatsRequest
+	(*GetFormStatsResponse)(nil),     // 25: weladee.form.v1.GetFormStatsResponse
+	(*CreateQuestionRequest)(nil),    // 26: weladee.form.v1.CreateQuestionRequest
+	(*CreateQuestionResponse)(nil),   // 27: weladee.form.v1.CreateQuestionResponse
+	(*UpdateQuestionRequest)(nil),    // 28: weladee.form.v1.UpdateQuestionRequest
+	(*UpdateQuestionResponse)(nil),   // 29: weladee.form.v1.UpdateQuestionResponse
+	(*DeleteQuestionRequest)(nil),    // 30: weladee.form.v1.DeleteQuestionRequest
+	(*DeleteQuestionResponse)(nil),   // 31: weladee.form.v1.DeleteQuestionResponse
+	(*ReorderQuestionsRequest)(nil),  // 32: weladee.form.v1.ReorderQuestionsRequest
+	(*ReorderQuestionsResponse)(nil), // 33: weladee.form.v1.ReorderQuestionsResponse
+	(*structpb.Struct)(nil),          // 34: google.protobuf.Struct
+	(*timestamppb.Timestamp)(nil),    // 35: google.protobuf.Timestamp
+	(*PaginationRequest)(nil),        // 36: weladee.form.v1.PaginationRequest
+	(*PaginationResponse)(nil),       // 37: weladee.form.v1.PaginationResponse
 }
 var file_proto_form_proto_depIdxs = []int32{
 	2,  // 0: weladee.form.v1.Question.type:type_name -> weladee.form.v1.QuestionType
-	33, // 1: weladee.form.v1.Question.options:type_name -> google.protobuf.Struct
-	33, // 2: weladee.form.v1.Question.validation_rules:type_name -> google.protobuf.Struct
-	33, // 3: weladee.form.v1.Question.settings:type_name -> google.protobuf.Struct
-	34, // 4: weladee.form.v1.Question.created_at:type_name -> google.protobuf.Timestamp
-	34, // 5: weladee.form.v1.Question.updated_at:type_name -> google.protobuf.Timestamp
+	34, // 1: weladee.form.v1.Question.options:type_name -> google.protobuf.Struct
+	34, // 2: weladee.form.v1.Question.validation_rules:type_name -> google.protobuf.Struct
+	34, // 3: weladee.form.v1.Question.settings:type_name -> google.protobuf.Struct
+	35, // 4: weladee.form.v1.Question.created_at:type_name -> google.protobuf.Timestamp
+	35, // 5: weladee.form.v1.Question.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 6: weladee.form.v1.Form.theme:type_name -> weladee.form.v1.FormTheme
-	33, // 7: weladee.form.v1.Form.settings:type_name -> google.protobuf.Struct
-	6,  // 8: weladee.form.v1.Form.questions:type_name -> weladee.form.v1.Question
-	34, // 9: weladee.form.v1.Form.created_at:type_name -> google.protobuf.Timestamp
-	34, // 10: weladee.form.v1.Form.updated_at:type_name -> google.protobuf.Timestamp
-	1,  // 11: weladee.form.v1.CreateFormRequest.theme:type_name -> weladee.form.v1.FormTheme
-	6,  // 12: weladee.form.v1.CreateFormRequest.questions:type_name -> weladee.form.v1.Question
-	33, // 13: weladee.form.v1.CreateFormRequest.settings:type_name -> google.protobuf.Struct
-	7,  // 14: weladee.form.v1.CreateFormResponse.form:type_name -> weladee.form.v1.Form
-	7,  // 15: weladee.form.v1.GetFormResponse.form:type_name -> weladee.form.v1.Form
-	7,  // 16: weladee.form.v1.GetFormBySlugResponse.form:type_name -> weladee.form.v1.Form
-	1,  // 17: weladee.form.v1.UpdateFormRequest.theme:type_name -> weladee.form.v1.FormTheme
-	33, // 18: weladee.form.v1.UpdateFormRequest.settings:type_name -> google.protobuf.Struct
-	7,  // 19: weladee.form.v1.UpdateFormResponse.form:type_name -> weladee.form.v1.Form
-	35, // 20: weladee.form.v1.ListFormsRequest.pagination:type_name -> weladee.form.v1.PaginationRequest
-	3,  // 21: weladee.form.v1.ListFormsRequest.sort_by:type_name -> weladee.form.v1.FormSortBy
-	4,  // 22: weladee.form.v1.ListFormsRequest.sort_order:type_name -> weladee.form.v1.FormSortOrder
-	5,  // 23: weladee.form.v1.ListFormsRequest.status_filter:type_name -> weladee.form.v1.FormStatusFilter
-	7,  // 24: weladee.form.v1.ListFormsResponse.forms:type_name -> weladee.form.v1.Form
-	36, // 25: weladee.form.v1.ListFormsResponse.pagination:type_name -> weladee.form.v1.PaginationResponse
-	7,  // 26: weladee.form.v1.PublishFormResponse.form:type_name -> weladee.form.v1.Form
-	8,  // 27: weladee.form.v1.GetFormStatsResponse.stats:type_name -> weladee.form.v1.FormStats
-	2,  // 28: weladee.form.v1.CreateQuestionRequest.type:type_name -> weladee.form.v1.QuestionType
-	33, // 29: weladee.form.v1.CreateQuestionRequest.options:type_name -> google.protobuf.Struct
-	33, // 30: weladee.form.v1.CreateQuestionRequest.validation_rules:type_name -> google.protobuf.Struct
-	6,  // 31: weladee.form.v1.CreateQuestionResponse.question:type_name -> weladee.form.v1.Question
-	2,  // 32: weladee.form.v1.UpdateQuestionRequest.type:type_name -> weladee.form.v1.QuestionType
-	33, // 33: weladee.form.v1.UpdateQuestionRequest.options:type_name -> google.protobuf.Struct
-	33, // 34: weladee.form.v1.UpdateQuestionRequest.validation_rules:type_name -> google.protobuf.Struct
-	6,  // 35: weladee.form.v1.UpdateQuestionResponse.question:type_name -> weladee.form.v1.Question
-	9,  // 36: weladee.form.v1.FormService.CreateForm:input_type -> weladee.form.v1.CreateFormRequest
-	11, // 37: weladee.form.v1.FormService.GetForm:input_type -> weladee.form.v1.GetFormRequest
-	13, // 38: weladee.form.v1.FormService.GetFormBySlug:input_type -> weladee.form.v1.GetFormBySlugRequest
-	15, // 39: weladee.form.v1.FormService.UpdateForm:input_type -> weladee.form.v1.UpdateFormRequest
-	17, // 40: weladee.form.v1.FormService.DeleteForm:input_type -> weladee.form.v1.DeleteFormRequest
-	19, // 41: weladee.form.v1.FormService.ListForms:input_type -> weladee.form.v1.ListFormsRequest
-	21, // 42: weladee.form.v1.FormService.PublishForm:input_type -> weladee.form.v1.PublishFormRequest
-	23, // 43: weladee.form.v1.FormService.GetFormStats:input_type -> weladee.form.v1.GetFormStatsRequest
-	25, // 44: weladee.form.v1.FormService.CreateQuestion:input_type -> weladee.form.v1.CreateQuestionRequest
-	27, // 45: weladee.form.v1.FormService.UpdateQuestion:input_type -> weladee.form.v1.UpdateQuestionRequest
-	29, // 46: weladee.form.v1.FormService.DeleteQuestion:input_type -> weladee.form.v1.DeleteQuestionRequest
-	31, // 47: weladee.form.v1.FormService.ReorderQuestions:input_type -> weladee.form.v1.ReorderQuestionsRequest
-	10, // 48: weladee.form.v1.FormService.CreateForm:output_type -> weladee.form.v1.CreateFormResponse
-	12, // 49: weladee.form.v1.FormService.GetForm:output_type -> weladee.form.v1.GetFormResponse
-	14, // 50: weladee.form.v1.FormService.GetFormBySlug:output_type -> weladee.form.v1.GetFormBySlugResponse
-	16, // 51: weladee.form.v1.FormService.UpdateForm:output_type -> weladee.form.v1.UpdateFormResponse
-	18, // 52: weladee.form.v1.FormService.DeleteForm:output_type -> weladee.form.v1.DeleteFormResponse
-	20, // 53: weladee.form.v1.FormService.ListForms:output_type -> weladee.form.v1.ListFormsResponse
-	22, // 54: weladee.form.v1.FormService.PublishForm:output_type -> weladee.form.v1.PublishFormResponse
-	24, // 55: weladee.form.v1.FormService.GetFormStats:output_type -> weladee.form.v1.GetFormStatsResponse
-	26, // 56: weladee.form.v1.FormService.CreateQuestion:output_type -> weladee.form.v1.CreateQuestionResponse
-	28, // 57: weladee.form.v1.FormService.UpdateQuestion:output_type -> weladee.form.v1.UpdateQuestionResponse
-	30, // 58: weladee.form.v1.FormService.DeleteQuestion:output_type -> weladee.form.v1.DeleteQuestionResponse
-	32, // 59: weladee.form.v1.FormService.ReorderQuestions:output_type -> weladee.form.v1.ReorderQuestionsResponse
-	48, // [48:60] is the sub-list for method output_type
-	36, // [36:48] is the sub-list for method input_type
-	36, // [36:36] is the sub-list for extension type_name
-	36, // [36:36] is the sub-list for extension extendee
-	0,  // [0:36] is the sub-list for field type_name
+	3,  // 7: weladee.form.v1.Form.progress_bar_style:type_name -> weladee.form.v1.ProgressBarStyle
+	34, // 8: weladee.form.v1.Form.settings:type_name -> google.protobuf.Struct
+	7,  // 9: weladee.form.v1.Form.questions:type_name -> weladee.form.v1.Question
+	35, // 10: weladee.form.v1.Form.created_at:type_name -> google.protobuf.Timestamp
+	35, // 11: weladee.form.v1.Form.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 12: weladee.form.v1.CreateFormRequest.theme:type_name -> weladee.form.v1.FormTheme
+	3,  // 13: weladee.form.v1.CreateFormRequest.progress_bar_style:type_name -> weladee.form.v1.ProgressBarStyle
+	7,  // 14: weladee.form.v1.CreateFormRequest.questions:type_name -> weladee.form.v1.Question
+	34, // 15: weladee.form.v1.CreateFormRequest.settings:type_name -> google.protobuf.Struct
+	8,  // 16: weladee.form.v1.CreateFormResponse.form:type_name -> weladee.form.v1.Form
+	8,  // 17: weladee.form.v1.GetFormResponse.form:type_name -> weladee.form.v1.Form
+	8,  // 18: weladee.form.v1.GetFormBySlugResponse.form:type_name -> weladee.form.v1.Form
+	1,  // 19: weladee.form.v1.UpdateFormRequest.theme:type_name -> weladee.form.v1.FormTheme
+	3,  // 20: weladee.form.v1.UpdateFormRequest.progress_bar_style:type_name -> weladee.form.v1.ProgressBarStyle
+	34, // 21: weladee.form.v1.UpdateFormRequest.settings:type_name -> google.protobuf.Struct
+	8,  // 22: weladee.form.v1.UpdateFormResponse.form:type_name -> weladee.form.v1.Form
+	36, // 23: weladee.form.v1.ListFormsRequest.pagination:type_name -> weladee.form.v1.PaginationRequest
+	4,  // 24: weladee.form.v1.ListFormsRequest.sort_by:type_name -> weladee.form.v1.FormSortBy
+	5,  // 25: weladee.form.v1.ListFormsRequest.sort_order:type_name -> weladee.form.v1.FormSortOrder
+	6,  // 26: weladee.form.v1.ListFormsRequest.status_filter:type_name -> weladee.form.v1.FormStatusFilter
+	8,  // 27: weladee.form.v1.ListFormsResponse.forms:type_name -> weladee.form.v1.Form
+	37, // 28: weladee.form.v1.ListFormsResponse.pagination:type_name -> weladee.form.v1.PaginationResponse
+	8,  // 29: weladee.form.v1.PublishFormResponse.form:type_name -> weladee.form.v1.Form
+	9,  // 30: weladee.form.v1.GetFormStatsResponse.stats:type_name -> weladee.form.v1.FormStats
+	2,  // 31: weladee.form.v1.CreateQuestionRequest.type:type_name -> weladee.form.v1.QuestionType
+	34, // 32: weladee.form.v1.CreateQuestionRequest.options:type_name -> google.protobuf.Struct
+	34, // 33: weladee.form.v1.CreateQuestionRequest.validation_rules:type_name -> google.protobuf.Struct
+	7,  // 34: weladee.form.v1.CreateQuestionResponse.question:type_name -> weladee.form.v1.Question
+	2,  // 35: weladee.form.v1.UpdateQuestionRequest.type:type_name -> weladee.form.v1.QuestionType
+	34, // 36: weladee.form.v1.UpdateQuestionRequest.options:type_name -> google.protobuf.Struct
+	34, // 37: weladee.form.v1.UpdateQuestionRequest.validation_rules:type_name -> google.protobuf.Struct
+	7,  // 38: weladee.form.v1.UpdateQuestionResponse.question:type_name -> weladee.form.v1.Question
+	10, // 39: weladee.form.v1.FormService.CreateForm:input_type -> weladee.form.v1.CreateFormRequest
+	12, // 40: weladee.form.v1.FormService.GetForm:input_type -> weladee.form.v1.GetFormRequest
+	14, // 41: weladee.form.v1.FormService.GetFormBySlug:input_type -> weladee.form.v1.GetFormBySlugRequest
+	16, // 42: weladee.form.v1.FormService.UpdateForm:input_type -> weladee.form.v1.UpdateFormRequest
+	18, // 43: weladee.form.v1.FormService.DeleteForm:input_type -> weladee.form.v1.DeleteFormRequest
+	20, // 44: weladee.form.v1.FormService.ListForms:input_type -> weladee.form.v1.ListFormsRequest
+	22, // 45: weladee.form.v1.FormService.PublishForm:input_type -> weladee.form.v1.PublishFormRequest
+	24, // 46: weladee.form.v1.FormService.GetFormStats:input_type -> weladee.form.v1.GetFormStatsRequest
+	26, // 47: weladee.form.v1.FormService.CreateQuestion:input_type -> weladee.form.v1.CreateQuestionRequest
+	28, // 48: weladee.form.v1.FormService.UpdateQuestion:input_type -> weladee.form.v1.UpdateQuestionRequest
+	30, // 49: weladee.form.v1.FormService.DeleteQuestion:input_type -> weladee.form.v1.DeleteQuestionRequest
+	32, // 50: weladee.form.v1.FormService.ReorderQuestions:input_type -> weladee.form.v1.ReorderQuestionsRequest
+	11, // 51: weladee.form.v1.FormService.CreateForm:output_type -> weladee.form.v1.CreateFormResponse
+	13, // 52: weladee.form.v1.FormService.GetForm:output_type -> weladee.form.v1.GetFormResponse
+	15, // 53: weladee.form.v1.FormService.GetFormBySlug:output_type -> weladee.form.v1.GetFormBySlugResponse
+	17, // 54: weladee.form.v1.FormService.UpdateForm:output_type -> weladee.form.v1.UpdateFormResponse
+	19, // 55: weladee.form.v1.FormService.DeleteForm:output_type -> weladee.form.v1.DeleteFormResponse
+	21, // 56: weladee.form.v1.FormService.ListForms:output_type -> weladee.form.v1.ListFormsResponse
+	23, // 57: weladee.form.v1.FormService.PublishForm:output_type -> weladee.form.v1.PublishFormResponse
+	25, // 58: weladee.form.v1.FormService.GetFormStats:output_type -> weladee.form.v1.GetFormStatsResponse
+	27, // 59: weladee.form.v1.FormService.CreateQuestion:output_type -> weladee.form.v1.CreateQuestionResponse
+	29, // 60: weladee.form.v1.FormService.UpdateQuestion:output_type -> weladee.form.v1.UpdateQuestionResponse
+	31, // 61: weladee.form.v1.FormService.DeleteQuestion:output_type -> weladee.form.v1.DeleteQuestionResponse
+	33, // 62: weladee.form.v1.FormService.ReorderQuestions:output_type -> weladee.form.v1.ReorderQuestionsResponse
+	51, // [51:63] is the sub-list for method output_type
+	39, // [39:51] is the sub-list for method input_type
+	39, // [39:39] is the sub-list for extension type_name
+	39, // [39:39] is the sub-list for extension extendee
+	0,  // [0:39] is the sub-list for field type_name
 }
 
 func init() { file_proto_form_proto_init() }
@@ -2522,7 +2599,7 @@ func file_proto_form_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_form_proto_rawDesc), len(file_proto_form_proto_rawDesc)),
-			NumEnums:      6,
+			NumEnums:      7,
 			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,

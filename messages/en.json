@@ -365,5 +365,18 @@
     "slugInvalid": "Form URL can only contain letters, numbers, and hyphens",
     "questionRequired": "Please add at least one question",
     "atLeastOneQuestion": "Add at least one question before publishing"
+  },
+  "formBuilder": {
+    "progressBarStyle": "Progress Indicator",
+    "progressBarStyleDesc": "Choose how to show progress to respondents",
+    "progressBarNone": "None",
+    "progressBarNoneDesc": "No progress indicator shown",
+    "progressBarLinear": "Linear Bar",
+    "progressBarLinearDesc": "Horizontal bar at top with percentage",
+    "progressBarSteps": "Step Indicators",
+    "progressBarStepsDesc": "Visual timeline with checkmarks",
+    "progressBarCircular": "Circular",
+    "progressBarCircularDesc": "Compact circle in corner",
+    "livePreview": "Live Preview"
   }
 }

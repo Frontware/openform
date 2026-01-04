@@ -28,7 +28,7 @@ export type QuestionType =
 export type FormStatus = 'draft' | 'published' | 'closed'
 
 // Theme presets
-export type ThemePreset = 
+export type ThemePreset =
   | 'midnight'
   | 'ocean'
   | 'sunset'
@@ -39,6 +39,9 @@ export type ThemePreset =
   | 'aurora'
   | 'cyberpunk'
   | 'desert'
+
+// Progress bar style options
+export type ProgressBarStyle = 'none' | 'linear' | 'steps' | 'circular'
 
 export interface ThemeConfig {
   id: ThemePreset
@@ -117,7 +120,7 @@ export interface Database {
           questions: QuestionConfig[]
           thank_you_message: string
           force_captcha: boolean
-          show_progress_bar: boolean
+          progress_bar_style: ProgressBarStyle
           allow_multiple_submissions: boolean
           created_at: string
           updated_at: string
@@ -133,7 +136,7 @@ export interface Database {
           questions?: QuestionConfig[]
           thank_you_message?: string
           force_captcha?: boolean
-          show_progress_bar?: boolean
+          progress_bar_style?: ProgressBarStyle
           allow_multiple_submissions?: boolean
           created_at?: string
           updated_at?: string
@@ -147,7 +150,7 @@ export interface Database {
           questions?: QuestionConfig[]
           thank_you_message?: string
           force_captcha?: boolean
-          show_progress_bar?: boolean
+          progress_bar_style?: ProgressBarStyle
           allow_multiple_submissions?: boolean
           updated_at?: string
         }

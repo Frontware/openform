@@ -66,6 +66,14 @@ function mapPbFormToDBForm(pbForm: PbForm): Form {
       default: theme = 'weladee';
     }
 
+    let progress_bar_style: 'none' | 'linear' | 'steps' | 'circular' = 'none'
+    switch (pbForm.progressBarStyle) {
+      case 2: progress_bar_style = 'linear'; break;
+      case 3: progress_bar_style = 'steps'; break;
+      case 4: progress_bar_style = 'circular'; break;
+      default: progress_bar_style = 'none';
+    }
+
   return {
     id: pbForm.id,
     user_id: pbForm.userId,
@@ -77,7 +85,7 @@ function mapPbFormToDBForm(pbForm: PbForm): Form {
     questions: pbForm.questions.map(mapPbQuestionToConfig),
     thank_you_message: pbForm.customThankYouMessage,
     force_captcha: pbForm.forceCaptcha,
-    show_progress_bar: pbForm.showProgressBar,
+    progress_bar_style: progress_bar_style,
     allow_multiple_submissions: pbForm.allowMultipleSubmissions,
     created_at: pbForm.createdAt?.toDate().toISOString() || '',
     updated_at: pbForm.updatedAt?.toDate().toISOString() || '',

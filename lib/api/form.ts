@@ -31,6 +31,16 @@ function mapFormThemeFromProto(theme: ProtoFormTheme): FormTheme {
 
 // Convert proto Form to app Form type
 function fromProtoForm(proto: any): Form {
+  // Map progress bar style enum to string
+  let progressBarStyle: 'none' | 'linear' | 'steps' | 'circular' = 'none'
+  switch (proto.progressBarStyle) {
+    case 1: progressBarStyle = 'none'; break
+    case 2: progressBarStyle = 'linear'; break
+    case 3: progressBarStyle = 'steps'; break
+    case 4: progressBarStyle = 'circular'; break
+    default: progressBarStyle = 'none';
+  }
+
   return {
     id: proto.id,
     userId: proto.userId,
@@ -41,7 +51,7 @@ function fromProtoForm(proto: any): Form {
     isAcceptingResponses: proto.isAcceptingResponses,
     requireLogin: proto.requireLogin,
     allowMultipleSubmissions: proto.allowMultipleSubmissions,
-    showProgressBar: proto.showProgressBar,
+    progressBarStyle: progressBarStyle,
     customThankYouMessage: proto.customThankYouMessage,
     redirectUrl: proto.redirectUrl,
     settings: proto.settings,

@@ -536,8 +536,8 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
   }
 
   // Determine which progress style to use based on question count
-  const progressStyle = questions.length <= 8 ? 'steps' : 'linear'
-  const hasProgressBar = form.show_progress_bar !== false
+  const progressStyle = form.progress_bar_style || 'none'
+  const hasProgressBar = progressStyle !== 'none'
 
   return (
     <div
@@ -563,7 +563,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
               currentQuestion={currentIndex}
               totalQuestions={questions.length}
               theme={theme}
-              style="linear"
+              style={progressStyle === 'circular' ? 'circular' : 'linear'}
             />
           )}
         </>

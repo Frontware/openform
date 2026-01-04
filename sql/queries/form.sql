@@ -2,12 +2,12 @@
 INSERT INTO form.forms (
     user_id, title, description, theme, is_published,
     is_accepting_responses, require_login, allow_multiple_submissions,
-    show_progress_bar, custom_thank_you_message, redirect_url, settings
+    progress_bar_style, custom_thank_you_message, redirect_url, settings
 )
 VALUES (
     @user_id::uuid, @title::text, @description::text, @theme::text, @is_published::boolean,
     @is_accepting_responses::boolean, @require_login::boolean, @allow_multiple_submissions::boolean,
-    @show_progress_bar::boolean, @custom_thank_you_message::text, @redirect_url::text, @settings::jsonb
+    @progress_bar_style::form.progress_bar_style, @custom_thank_you_message::text, @redirect_url::text, @settings::jsonb
 )
 RETURNING *;
 
@@ -31,7 +31,7 @@ SET
     is_accepting_responses = COALESCE(@is_accepting_responses::boolean, is_accepting_responses),
     require_login = COALESCE(@require_login::boolean, require_login),
     allow_multiple_submissions = COALESCE(@allow_multiple_submissions::boolean, allow_multiple_submissions),
-    show_progress_bar = COALESCE(@show_progress_bar::boolean, show_progress_bar),
+    progress_bar_style = COALESCE(@progress_bar_style::form.progress_bar_style, progress_bar_style),
     custom_thank_you_message = COALESCE(@custom_thank_you_message::text, custom_thank_you_message),
     redirect_url = COALESCE(@redirect_url::text, redirect_url),
     force_captcha = COALESCE(@force_captcha::boolean, force_captcha),

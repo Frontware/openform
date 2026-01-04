@@ -365,5 +365,18 @@
     "slugInvalid": "L'URL du formulaire ne peut contenir que des lettres, des chiffres et des tirets",
     "questionRequired": "Veuillez ajouter au moins une question",
     "atLeastOneQuestion": "Ajoutez au moins une question avant de publier"
+  },
+  "formBuilder": {
+    "progressBarStyle": "Indicateur de progression",
+    "progressBarStyleDesc": "Choisissez comment afficher la progression",
+    "progressBarNone": "Aucun",
+    "progressBarNoneDesc": "Aucun indicateur de progression affiché",
+    "progressBarLinear": "Barre linéaire",
+    "progressBarLinearDesc": "Barre horizontale en haut avec pourcentage",
+    "progressBarSteps": "Indicateurs d'étapes",
+    "progressBarStepsDesc": "Chronologie visuelle avec coches",
+    "progressBarCircular": "Circulaire",
+    "progressBarCircularDesc": "Cercle compact dans le coin",
+    "livePreview": "Aperçu en direct"
   }
 }

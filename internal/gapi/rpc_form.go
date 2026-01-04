@@ -66,7 +66,7 @@ func (s *FormServerImpl) convertFormWithQuestions(form sqlc.FormForm, questions 
 		IsAcceptingResponses:  form.IsAcceptingResponses,
 		RequireLogin:          form.RequireLogin,
 		AllowMultipleSubmissions: form.AllowMultipleSubmissions,
-		ShowProgressBar:       form.ShowProgressBar,
+		ProgressBarStyle:      mapProgressBarStyleFromDB(form.ProgressBarStyle),
 		CustomThankYouMessage: form.CustomThankYouMessage.String,
 		RedirectUrl:           form.RedirectUrl.String,
 		ForceCaptcha:          form.ForceCaptcha,
@@ -194,7 +194,7 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 			IsAcceptingResponses:     true,
 			RequireLogin:             false,
 			AllowMultipleSubmissions: false,
-			ShowProgressBar:          true,
+			ProgressBarStyle:         mapProgressBarStyleToDB(req.ProgressBarStyle),
 			Settings:                 settingsJSON,
 		}
 
@@ -315,7 +315,7 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 		IsAcceptingResponses:     currentForm.IsAcceptingResponses,
 		RequireLogin:             currentForm.RequireLogin,
 		AllowMultipleSubmissions: currentForm.AllowMultipleSubmissions,
-		ShowProgressBar:          currentForm.ShowProgressBar,
+		ProgressBarStyle:         currentForm.ProgressBarStyle,
 		CustomThankYouMessage:    currentForm.CustomThankYouMessage.String,
 		RedirectUrl:              currentForm.RedirectUrl.String,
 		ForceCaptcha:             currentForm.ForceCaptcha,
@@ -351,8 +351,10 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 	if req.AllowMultipleSubmissions != nil {
 		params.AllowMultipleSubmissions = *req.AllowMultipleSubmissions
 	}
-	if req.ShowProgressBar != nil {
-		params.ShowProgressBar = *req.ShowProgressBar
+	if req.ProgressBarStyle != nil {
+		if *req.ProgressBarStyle != pb.ProgressBarStyle_PROGRESS_BAR_STYLE_UNSPECIFIED {
+			params.ProgressBarStyle = mapProgressBarStyleToDB(*req.ProgressBarStyle)
+		}
 	}
 	if req.CustomThankYouMessage != nil {
 		params.CustomThankYouMessage = *req.CustomThankYouMessage
@@ -491,7 +493,7 @@ func (s *FormServerImpl) ListForms(ctx context.Context, req *pb.ListFormsRequest
 			IsAcceptingResponses:     f.IsAcceptingResponses,
 			RequireLogin:             f.RequireLogin,
 			AllowMultipleSubmissions: f.AllowMultipleSubmissions,
-			ShowProgressBar:          f.ShowProgressBar,
+			ProgressBarStyle:        f.ProgressBarStyle,
 			CustomThankYouMessage:    f.CustomThankYouMessage,
 			RedirectUrl:              f.RedirectUrl,
 			ForceCaptcha:             f.ForceCaptcha,
@@ -990,5 +992,33 @@ func mapThemeToDB(theme pb.FormTheme) string {
 		return "desert"
 	default:
 		return "minimal"
+	}
+}
+
+// Helper to map ProgressBarStyle enum to DB string
+func mapProgressBarStyleToDB(style pb.ProgressBarStyle) sqlc.FormProgressBarStyle {
+	switch style {
+	case pb.ProgressBarStyle_PROGRESS_BAR_STYLE_LINEAR:
+		return sqlc.FormProgressBarStyleLinear
+	case pb.ProgressBarStyle_PROGRESS_BAR_STYLE_STEPS:
+		return sqlc.FormProgressBarStyleSteps
+	case pb.ProgressBarStyle_PROGRESS_BAR_STYLE_CIRCULAR:
+		return sqlc.FormProgressBarStyleCircular
+	default:
+		return sqlc.FormProgressBarStyleNone
+	}
+}
+
+// Helper to map DB string to ProgressBarStyle enum
+func mapProgressBarStyleFromDB(style sqlc.FormProgressBarStyle) pb.ProgressBarStyle {
+	switch style {
+	case sqlc.FormProgressBarStyleLinear:
+		return pb.ProgressBarStyle_PROGRESS_BAR_STYLE_LINEAR
+	case sqlc.FormProgressBarStyleSteps:
+		return pb.ProgressBarStyle_PROGRESS_BAR_STYLE_STEPS
+	case sqlc.FormProgressBarStyleCircular:
+		return pb.ProgressBarStyle_PROGRESS_BAR_STYLE_CIRCULAR
+	default:
+		return pb.ProgressBarStyle_PROGRESS_BAR_STYLE_NONE
 	}
 }

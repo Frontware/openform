@@ -5,12 +5,58 @@
 package sqlc
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"net/netip"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type FormProgressBarStyle string
+
+const (
+	FormProgressBarStyleNone     FormProgressBarStyle = "none"
+	FormProgressBarStyleLinear   FormProgressBarStyle = "linear"
+	FormProgressBarStyleSteps    FormProgressBarStyle = "steps"
+	FormProgressBarStyleCircular FormProgressBarStyle = "circular"
+)
+
+func (e *FormProgressBarStyle) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = FormProgressBarStyle(s)
+	case string:
+		*e = FormProgressBarStyle(s)
+	default:
+		return fmt.Errorf("unsupported scan type for FormProgressBarStyle: %T", src)
+	}
+	return nil
+}
+
+type NullFormProgressBarStyle struct {
+	FormProgressBarStyle FormProgressBarStyle `json:"formProgressBarStyle"`
+	Valid                bool                 `json:"valid"` // Valid is true if FormProgressBarStyle is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullFormProgressBarStyle) Scan(value interface{}) error {
+	if value == nil {
+		ns.FormProgressBarStyle, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.FormProgressBarStyle.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullFormProgressBarStyle) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.FormProgressBarStyle), nil
+}
 
 type FormAnswer struct {
 	ID            uuid.UUID      `db:"id" json:"id"`
@@ -58,26 +104,26 @@ type FormFileUpload struct {
 }
 
 type FormForm struct {
-	ID                       uuid.UUID   `db:"id" json:"id"`
-	UserID                   uuid.UUID   `db:"user_id" json:"userId"`
-	Title                    string      `db:"title" json:"title"`
-	Description              pgtype.Text `db:"description" json:"description"`
-	Slug                     pgtype.Text `db:"slug" json:"slug"`
-	Theme                    string      `db:"theme" json:"theme"`
-	IsPublished              bool        `db:"is_published" json:"isPublished"`
-	IsAcceptingResponses     bool        `db:"is_accepting_responses" json:"isAcceptingResponses"`
-	RequireLogin             bool        `db:"require_login" json:"requireLogin"`
-	AllowMultipleSubmissions bool        `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
-	ShowProgressBar          bool        `db:"show_progress_bar" json:"showProgressBar"`
-	ForceCaptcha             bool        `db:"force_captcha" json:"forceCaptcha"`
-	CustomThankYouMessage    pgtype.Text `db:"custom_thank_you_message" json:"customThankYouMessage"`
-	RedirectUrl              pgtype.Text `db:"redirect_url" json:"redirectUrl"`
-	Settings                 []byte      `db:"settings" json:"settings"`
-	ViewCount                pgtype.Int4 `db:"view_count" json:"viewCount"`
-	ResponseCount            pgtype.Int4 `db:"response_count" json:"responseCount"`
-	CompletionCount          pgtype.Int4 `db:"completion_count" json:"completionCount"`
-	CreatedAt                time.Time   `db:"created_at" json:"createdAt"`
-	UpdatedAt                time.Time   `db:"updated_at" json:"updatedAt"`
+	ID                       uuid.UUID            `db:"id" json:"id"`
+	UserID                   uuid.UUID            `db:"user_id" json:"userId"`
+	Title                    string               `db:"title" json:"title"`
+	Description              pgtype.Text          `db:"description" json:"description"`
+	Slug                     pgtype.Text          `db:"slug" json:"slug"`
+	Theme                    string               `db:"theme" json:"theme"`
+	IsPublished              bool                 `db:"is_published" json:"isPublished"`
+	IsAcceptingResponses     bool                 `db:"is_accepting_responses" json:"isAcceptingResponses"`
+	RequireLogin             bool                 `db:"require_login" json:"requireLogin"`
+	AllowMultipleSubmissions bool                 `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
+	ProgressBarStyle         FormProgressBarStyle `db:"progress_bar_style" json:"progressBarStyle"`
+	ForceCaptcha             bool                 `db:"force_captcha" json:"forceCaptcha"`
+	CustomThankYouMessage    pgtype.Text          `db:"custom_thank_you_message" json:"customThankYouMessage"`
+	RedirectUrl              pgtype.Text          `db:"redirect_url" json:"redirectUrl"`
+	Settings                 []byte               `db:"settings" json:"settings"`
+	ViewCount                pgtype.Int4          `db:"view_count" json:"viewCount"`
+	ResponseCount            pgtype.Int4          `db:"response_count" json:"responseCount"`
+	CompletionCount          pgtype.Int4          `db:"completion_count" json:"completionCount"`
+	CreatedAt                time.Time            `db:"created_at" json:"createdAt"`
+	UpdatedAt                time.Time            `db:"updated_at" json:"updatedAt"`
 }
 
 type FormFormView struct {

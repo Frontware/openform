@@ -365,5 +365,18 @@
     "slugInvalid": "URL แบบฟอร์มสามารถประกอบด้วยตัวอักษร ตัวเลข และยัติภังค์เท่านั้น",
     "questionRequired": "กรุณาเพิ่มอย่างน้อยหนึ่งคำถาม",
     "atLeastOneQuestion": "เพิ่มอย่างน้อยหนึ่งคำถามก่อนเผยแพร่"
+  },
+  "formBuilder": {
+    "progressBarStyle": "ตัวบ่งชี้ความคืบหน้า",
+    "progressBarStyleDesc": "เลือกวิธีแสดงความคืบหน้าให้ผู้ตอบ",
+    "progressBarNone": "ไม่มี",
+    "progressBarNoneDesc": "ไม่แสดงตัวบ่งชี้ความคืบหน้า",
+    "progressBarLinear": "แถบแนวนอน",
+    "progressBarLinearDesc": "แถบแนวนอนด้านบนพร้อมเปอร์เซ็นต์",
+    "progressBarSteps": "ตัวบ่งชี้ขั้นตอน",
+    "progressBarStepsDesc": "ไทม์ไลน์ภาพพร้อมเครื่องหมายถูก",
+    "progressBarCircular": "วงกลม",
+    "progressBarCircularDesc": "วงกลมขนาดกะทัดรัดที่มุม",
+    "livePreview": "ดูตัวอย่างสด"
   }
 }

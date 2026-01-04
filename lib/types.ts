@@ -23,6 +23,8 @@ export type QuestionType =
   | "QUESTION_TYPE_FILE_UPLOAD"
   | "QUESTION_TYPE_URL";
 
+export type ProgressBarStyle = 'none' | 'linear' | 'steps' | 'circular';
+
 export interface Form {
   id: string;
   userId: string;
@@ -33,7 +35,7 @@ export interface Form {
   isAcceptingResponses: boolean;
   requireLogin: boolean;
   allowMultipleSubmissions: boolean;
-  showProgressBar: boolean;
+  progressBarStyle: ProgressBarStyle;
   customThankYouMessage: string;
   redirectUrl: string;
   settings: Record<string, any>;

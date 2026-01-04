@@ -41,6 +41,17 @@ BEFORE UPDATE ON form.users
 FOR EACH ROW EXECUTE FUNCTION form.update_updated_at_column();
 
 -- ============================================================
+-- Enum Types
+-- ============================================================
+
+CREATE TYPE form.progress_bar_style AS ENUM (
+  'none',
+  'linear',
+  'steps',
+  'circular'
+);
+
+-- ============================================================
 -- Forms
 -- ============================================================
 
@@ -62,7 +73,7 @@ CREATE TABLE IF NOT EXISTS form.forms (
     is_accepting_responses BOOLEAN NOT NULL DEFAULT true,
     require_login BOOLEAN NOT NULL DEFAULT false,
     allow_multiple_submissions BOOLEAN NOT NULL DEFAULT false,
-    show_progress_bar BOOLEAN NOT NULL DEFAULT true,
+    progress_bar_style form.progress_bar_style NOT NULL DEFAULT 'none',
     force_captcha BOOLEAN NOT NULL DEFAULT false,
 
     custom_thank_you_message TEXT,
@@ -80,6 +91,7 @@ CREATE TABLE IF NOT EXISTS form.forms (
 
 CREATE INDEX IF NOT EXISTS idx_forms_user_id ON form.forms(user_id);
 CREATE INDEX IF NOT EXISTS idx_forms_is_published ON form.forms(is_published);
+CREATE INDEX IF NOT EXISTS idx_forms_progress_style ON form.forms(progress_bar_style);
 
 DROP TRIGGER IF EXISTS update_forms_updated_at ON form.forms;
 CREATE TRIGGER update_forms_updated_at

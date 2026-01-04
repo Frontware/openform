@@ -180,6 +180,8 @@ export enum QuestionType {
   YES_NO = 11,
 
   /**
+   * Only for enterprise plans
+   *
    * @generated from enum value: QUESTION_TYPE_FILE_UPLOAD = 12;
    */
   FILE_UPLOAD = 12,
@@ -190,11 +192,15 @@ export enum QuestionType {
   URL = 13,
 
   /**
+   * Not available to SME plans
+   *
    * @generated from enum value: QUESTION_TYPE_MATRIX = 14;
    */
   MATRIX = 14,
 
   /**
+   * Only for enterprise plans
+   *
    * @generated from enum value: QUESTION_TYPE_RANKING = 15;
    */
   RANKING = 15,
@@ -217,6 +223,44 @@ proto3.util.setEnumType(QuestionType, "weladee.form.v1.QuestionType", [
   { no: 13, name: "QUESTION_TYPE_URL" },
   { no: 14, name: "QUESTION_TYPE_MATRIX" },
   { no: 15, name: "QUESTION_TYPE_RANKING" },
+]);
+
+/**
+ * @generated from enum weladee.form.v1.ProgressBarStyle
+ */
+export enum ProgressBarStyle {
+  /**
+   * @generated from enum value: PROGRESS_BAR_STYLE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: PROGRESS_BAR_STYLE_NONE = 1;
+   */
+  NONE = 1,
+
+  /**
+   * @generated from enum value: PROGRESS_BAR_STYLE_LINEAR = 2;
+   */
+  LINEAR = 2,
+
+  /**
+   * @generated from enum value: PROGRESS_BAR_STYLE_STEPS = 3;
+   */
+  STEPS = 3,
+
+  /**
+   * @generated from enum value: PROGRESS_BAR_STYLE_CIRCULAR = 4;
+   */
+  CIRCULAR = 4,
+}
+// Retrieve enum metadata with: proto3.getEnumType(ProgressBarStyle)
+proto3.util.setEnumType(ProgressBarStyle, "weladee.form.v1.ProgressBarStyle", [
+  { no: 0, name: "PROGRESS_BAR_STYLE_UNSPECIFIED" },
+  { no: 1, name: "PROGRESS_BAR_STYLE_NONE" },
+  { no: 2, name: "PROGRESS_BAR_STYLE_LINEAR" },
+  { no: 3, name: "PROGRESS_BAR_STYLE_STEPS" },
+  { no: 4, name: "PROGRESS_BAR_STYLE_CIRCULAR" },
 ]);
 
 /**
@@ -478,9 +522,9 @@ export class Form extends Message<Form> {
   allowMultipleSubmissions = false;
 
   /**
-   * @generated from field: bool show_progress_bar = 10;
+   * @generated from field: weladee.form.v1.ProgressBarStyle progress_bar_style = 10;
    */
-  showProgressBar = false;
+  progressBarStyle = ProgressBarStyle.UNSPECIFIED;
 
   /**
    * @generated from field: string custom_thank_you_message = 11;
@@ -534,7 +578,7 @@ export class Form extends Message<Form> {
     { no: 7, name: "is_accepting_responses", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "require_login", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 9, name: "allow_multiple_submissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "show_progress_bar", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "progress_bar_style", kind: "enum", T: proto3.getEnumType(ProgressBarStyle) },
     { no: 11, name: "custom_thank_you_message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 12, name: "redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 13, name: "force_captcha", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -632,12 +676,17 @@ export class CreateFormRequest extends Message<CreateFormRequest> {
   theme = FormTheme.UNSPECIFIED;
 
   /**
-   * @generated from field: repeated weladee.form.v1.Question questions = 4;
+   * @generated from field: weladee.form.v1.ProgressBarStyle progress_bar_style = 4;
+   */
+  progressBarStyle = ProgressBarStyle.UNSPECIFIED;
+
+  /**
+   * @generated from field: repeated weladee.form.v1.Question questions = 5;
    */
   questions: Question[] = [];
 
   /**
-   * @generated from field: google.protobuf.Struct settings = 5;
+   * @generated from field: google.protobuf.Struct settings = 6;
    */
   settings?: Struct;
 
@@ -652,8 +701,9 @@ export class CreateFormRequest extends Message<CreateFormRequest> {
     { no: 1, name: "title", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "theme", kind: "enum", T: proto3.getEnumType(FormTheme) },
-    { no: 4, name: "questions", kind: "message", T: Question, repeated: true },
-    { no: 5, name: "settings", kind: "message", T: Struct },
+    { no: 4, name: "progress_bar_style", kind: "enum", T: proto3.getEnumType(ProgressBarStyle) },
+    { no: 5, name: "questions", kind: "message", T: Question, repeated: true },
+    { no: 6, name: "settings", kind: "message", T: Struct },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateFormRequest {
@@ -909,9 +959,9 @@ export class UpdateFormRequest extends Message<UpdateFormRequest> {
   allowMultipleSubmissions?: boolean;
 
   /**
-   * @generated from field: optional bool show_progress_bar = 9;
+   * @generated from field: optional weladee.form.v1.ProgressBarStyle progress_bar_style = 9;
    */
-  showProgressBar?: boolean;
+  progressBarStyle?: ProgressBarStyle;
 
   /**
    * @generated from field: optional string custom_thank_you_message = 10;
@@ -949,7 +999,7 @@ export class UpdateFormRequest extends Message<UpdateFormRequest> {
     { no: 6, name: "is_accepting_responses", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 7, name: "require_login", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 8, name: "allow_multiple_submissions", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
-    { no: 9, name: "show_progress_bar", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 9, name: "progress_bar_style", kind: "enum", T: proto3.getEnumType(ProgressBarStyle), opt: true },
     { no: 10, name: "custom_thank_you_message", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 11, name: "redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 12, name: "force_captcha", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },

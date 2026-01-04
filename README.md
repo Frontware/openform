@@ -510,7 +510,7 @@ protoc --go_out=. --go_opt=paths=source_relative \
 - `user_id` (UUID)
 - `title`, `description`, `theme`
 - `is_published`, `is_accepting_responses`, `require_login`, `allow_multiple_submissions`
-- `show_progress_bar`
+- `progress_bar_style` (enum: none, linear, steps, circular)
 - `custom_thank_you_message`, `redirect_url`
 - `settings` (JSONB)
 - `created_at`, `updated_at`

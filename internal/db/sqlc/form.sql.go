@@ -31,29 +31,29 @@ const createForm = `-- name: CreateForm :one
 INSERT INTO form.forms (
     user_id, title, description, theme, is_published,
     is_accepting_responses, require_login, allow_multiple_submissions,
-    show_progress_bar, custom_thank_you_message, redirect_url, settings
+    progress_bar_style, custom_thank_you_message, redirect_url, settings
 )
 VALUES (
     $1::uuid, $2::text, $3::text, $4::text, $5::boolean,
     $6::boolean, $7::boolean, $8::boolean,
-    $9::boolean, $10::text, $11::text, $12::jsonb
+    $9::form.progress_bar_style, $10::text, $11::text, $12::jsonb
 )
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
 `
 
 type CreateFormParams struct {
-	UserID                   uuid.UUID       `db:"user_id" json:"userId"`
-	Title                    string          `db:"title" json:"title"`
-	Description              string          `db:"description" json:"description"`
-	Theme                    string          `db:"theme" json:"theme"`
-	IsPublished              bool            `db:"is_published" json:"isPublished"`
-	IsAcceptingResponses     bool            `db:"is_accepting_responses" json:"isAcceptingResponses"`
-	RequireLogin             bool            `db:"require_login" json:"requireLogin"`
-	AllowMultipleSubmissions bool            `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
-	ShowProgressBar          bool            `db:"show_progress_bar" json:"showProgressBar"`
-	CustomThankYouMessage    string          `db:"custom_thank_you_message" json:"customThankYouMessage"`
-	RedirectUrl              string          `db:"redirect_url" json:"redirectUrl"`
-	Settings                 json.RawMessage `db:"settings" json:"settings"`
+	UserID                   uuid.UUID            `db:"user_id" json:"userId"`
+	Title                    string               `db:"title" json:"title"`
+	Description              string               `db:"description" json:"description"`
+	Theme                    string               `db:"theme" json:"theme"`
+	IsPublished              bool                 `db:"is_published" json:"isPublished"`
+	IsAcceptingResponses     bool                 `db:"is_accepting_responses" json:"isAcceptingResponses"`
+	RequireLogin             bool                 `db:"require_login" json:"requireLogin"`
+	AllowMultipleSubmissions bool                 `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
+	ProgressBarStyle         FormProgressBarStyle `db:"progress_bar_style" json:"progressBarStyle"`
+	CustomThankYouMessage    string               `db:"custom_thank_you_message" json:"customThankYouMessage"`
+	RedirectUrl              string               `db:"redirect_url" json:"redirectUrl"`
+	Settings                 json.RawMessage      `db:"settings" json:"settings"`
 }
 
 func (q *Queries) CreateForm(ctx context.Context, arg CreateFormParams) (FormForm, error) {
@@ -66,7 +66,7 @@ func (q *Queries) CreateForm(ctx context.Context, arg CreateFormParams) (FormFor
 		arg.IsAcceptingResponses,
 		arg.RequireLogin,
 		arg.AllowMultipleSubmissions,
-		arg.ShowProgressBar,
+		arg.ProgressBarStyle,
 		arg.CustomThankYouMessage,
 		arg.RedirectUrl,
 		arg.Settings,
@@ -83,7 +83,7 @@ func (q *Queries) CreateForm(ctx context.Context, arg CreateFormParams) (FormFor
 		&i.IsAcceptingResponses,
 		&i.RequireLogin,
 		&i.AllowMultipleSubmissions,
-		&i.ShowProgressBar,
+		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
@@ -113,7 +113,7 @@ func (q *Queries) DeleteForm(ctx context.Context, arg DeleteFormParams) error {
 }
 
 const getForm = `-- name: GetForm :one
-SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at FROM form.forms
 WHERE id = $1::uuid
 `
 
@@ -131,7 +131,7 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 		&i.IsAcceptingResponses,
 		&i.RequireLogin,
 		&i.AllowMultipleSubmissions,
-		&i.ShowProgressBar,
+		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
@@ -146,7 +146,7 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 }
 
 const getFormBySlug = `-- name: GetFormBySlug :one
-SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at FROM form.forms
 WHERE $1::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND id = $1::uuid
    OR slug = $1::text
 `
@@ -166,7 +166,7 @@ func (q *Queries) GetFormBySlug(ctx context.Context, slug string) (FormForm, err
 		&i.IsAcceptingResponses,
 		&i.RequireLogin,
 		&i.AllowMultipleSubmissions,
-		&i.ShowProgressBar,
+		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
@@ -215,7 +215,7 @@ func (q *Queries) GetFormStats(ctx context.Context, formID uuid.UUID) (GetFormSt
 
 const getFormWithQuestions = `-- name: GetFormWithQuestions :one
 SELECT
-    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.force_captcha, f.custom_thank_you_message, f.redirect_url, f.settings, f.view_count, f.response_count, f.completion_count, f.created_at, f.updated_at,
+    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.progress_bar_style, f.force_captcha, f.custom_thank_you_message, f.redirect_url, f.settings, f.view_count, f.response_count, f.completion_count, f.created_at, f.updated_at,
     q.id as question_id,
     q.type as question_type,
     q.label as question_label,
@@ -235,38 +235,38 @@ ORDER BY q.order_index
 `
 
 type GetFormWithQuestionsRow struct {
-	ID                       uuid.UUID          `db:"id" json:"id"`
-	UserID                   uuid.UUID          `db:"user_id" json:"userId"`
-	Title                    string             `db:"title" json:"title"`
-	Description              pgtype.Text        `db:"description" json:"description"`
-	Slug                     pgtype.Text        `db:"slug" json:"slug"`
-	Theme                    string             `db:"theme" json:"theme"`
-	IsPublished              bool               `db:"is_published" json:"isPublished"`
-	IsAcceptingResponses     bool               `db:"is_accepting_responses" json:"isAcceptingResponses"`
-	RequireLogin             bool               `db:"require_login" json:"requireLogin"`
-	AllowMultipleSubmissions bool               `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
-	ShowProgressBar          bool               `db:"show_progress_bar" json:"showProgressBar"`
-	ForceCaptcha             bool               `db:"force_captcha" json:"forceCaptcha"`
-	CustomThankYouMessage    pgtype.Text        `db:"custom_thank_you_message" json:"customThankYouMessage"`
-	RedirectUrl              pgtype.Text        `db:"redirect_url" json:"redirectUrl"`
-	Settings                 []byte             `db:"settings" json:"settings"`
-	ViewCount                pgtype.Int4        `db:"view_count" json:"viewCount"`
-	ResponseCount            pgtype.Int4        `db:"response_count" json:"responseCount"`
-	CompletionCount          pgtype.Int4        `db:"completion_count" json:"completionCount"`
-	CreatedAt                time.Time          `db:"created_at" json:"createdAt"`
-	UpdatedAt                time.Time          `db:"updated_at" json:"updatedAt"`
-	QuestionID               pgtype.UUID        `db:"question_id" json:"questionId"`
-	QuestionType             pgtype.Text        `db:"question_type" json:"questionType"`
-	QuestionLabel            pgtype.Text        `db:"question_label" json:"questionLabel"`
-	QuestionDescription      pgtype.Text        `db:"question_description" json:"questionDescription"`
-	QuestionPlaceholder      pgtype.Text        `db:"question_placeholder" json:"questionPlaceholder"`
-	QuestionRequired         pgtype.Bool        `db:"question_required" json:"questionRequired"`
-	QuestionOrder            pgtype.Int4        `db:"question_order" json:"questionOrder"`
-	QuestionOptions          []byte             `db:"question_options" json:"questionOptions"`
-	QuestionValidationRules  []byte             `db:"question_validation_rules" json:"questionValidationRules"`
-	QuestionSettings         []byte             `db:"question_settings" json:"questionSettings"`
-	QuestionCreatedAt        pgtype.Timestamptz `db:"question_created_at" json:"questionCreatedAt"`
-	QuestionUpdatedAt        pgtype.Timestamptz `db:"question_updated_at" json:"questionUpdatedAt"`
+	ID                       uuid.UUID            `db:"id" json:"id"`
+	UserID                   uuid.UUID            `db:"user_id" json:"userId"`
+	Title                    string               `db:"title" json:"title"`
+	Description              pgtype.Text          `db:"description" json:"description"`
+	Slug                     pgtype.Text          `db:"slug" json:"slug"`
+	Theme                    string               `db:"theme" json:"theme"`
+	IsPublished              bool                 `db:"is_published" json:"isPublished"`
+	IsAcceptingResponses     bool                 `db:"is_accepting_responses" json:"isAcceptingResponses"`
+	RequireLogin             bool                 `db:"require_login" json:"requireLogin"`
+	AllowMultipleSubmissions bool                 `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
+	ProgressBarStyle         FormProgressBarStyle `db:"progress_bar_style" json:"progressBarStyle"`
+	ForceCaptcha             bool                 `db:"force_captcha" json:"forceCaptcha"`
+	CustomThankYouMessage    pgtype.Text          `db:"custom_thank_you_message" json:"customThankYouMessage"`
+	RedirectUrl              pgtype.Text          `db:"redirect_url" json:"redirectUrl"`
+	Settings                 []byte               `db:"settings" json:"settings"`
+	ViewCount                pgtype.Int4          `db:"view_count" json:"viewCount"`
+	ResponseCount            pgtype.Int4          `db:"response_count" json:"responseCount"`
+	CompletionCount          pgtype.Int4          `db:"completion_count" json:"completionCount"`
+	CreatedAt                time.Time            `db:"created_at" json:"createdAt"`
+	UpdatedAt                time.Time            `db:"updated_at" json:"updatedAt"`
+	QuestionID               pgtype.UUID          `db:"question_id" json:"questionId"`
+	QuestionType             pgtype.Text          `db:"question_type" json:"questionType"`
+	QuestionLabel            pgtype.Text          `db:"question_label" json:"questionLabel"`
+	QuestionDescription      pgtype.Text          `db:"question_description" json:"questionDescription"`
+	QuestionPlaceholder      pgtype.Text          `db:"question_placeholder" json:"questionPlaceholder"`
+	QuestionRequired         pgtype.Bool          `db:"question_required" json:"questionRequired"`
+	QuestionOrder            pgtype.Int4          `db:"question_order" json:"questionOrder"`
+	QuestionOptions          []byte               `db:"question_options" json:"questionOptions"`
+	QuestionValidationRules  []byte               `db:"question_validation_rules" json:"questionValidationRules"`
+	QuestionSettings         []byte               `db:"question_settings" json:"questionSettings"`
+	QuestionCreatedAt        pgtype.Timestamptz   `db:"question_created_at" json:"questionCreatedAt"`
+	QuestionUpdatedAt        pgtype.Timestamptz   `db:"question_updated_at" json:"questionUpdatedAt"`
 }
 
 func (q *Queries) GetFormWithQuestions(ctx context.Context, id uuid.UUID) (GetFormWithQuestionsRow, error) {
@@ -283,7 +283,7 @@ func (q *Queries) GetFormWithQuestions(ctx context.Context, id uuid.UUID) (GetFo
 		&i.IsAcceptingResponses,
 		&i.RequireLogin,
 		&i.AllowMultipleSubmissions,
-		&i.ShowProgressBar,
+		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
@@ -391,7 +391,7 @@ const listUserForms = `-- name: ListUserForms :many
  * @return The list of forms that match the filter criteria.
  */
 SELECT 
-    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.show_progress_bar, f.force_captcha, f.custom_thank_you_message, f.redirect_url, f.settings, f.view_count, f.response_count, f.completion_count, f.created_at, f.updated_at,
+    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.progress_bar_style, f.force_captcha, f.custom_thank_you_message, f.redirect_url, f.settings, f.view_count, f.response_count, f.completion_count, f.created_at, f.updated_at,
     COUNT(r.id)::bigint as response_count
 FROM form.forms f
 LEFT JOIN form.responses r ON f.id = r.form_id
@@ -426,27 +426,27 @@ type ListUserFormsParams struct {
 }
 
 type ListUserFormsRow struct {
-	ID                       uuid.UUID   `db:"id" json:"id"`
-	UserID                   uuid.UUID   `db:"user_id" json:"userId"`
-	Title                    string      `db:"title" json:"title"`
-	Description              pgtype.Text `db:"description" json:"description"`
-	Slug                     pgtype.Text `db:"slug" json:"slug"`
-	Theme                    string      `db:"theme" json:"theme"`
-	IsPublished              bool        `db:"is_published" json:"isPublished"`
-	IsAcceptingResponses     bool        `db:"is_accepting_responses" json:"isAcceptingResponses"`
-	RequireLogin             bool        `db:"require_login" json:"requireLogin"`
-	AllowMultipleSubmissions bool        `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
-	ShowProgressBar          bool        `db:"show_progress_bar" json:"showProgressBar"`
-	ForceCaptcha             bool        `db:"force_captcha" json:"forceCaptcha"`
-	CustomThankYouMessage    pgtype.Text `db:"custom_thank_you_message" json:"customThankYouMessage"`
-	RedirectUrl              pgtype.Text `db:"redirect_url" json:"redirectUrl"`
-	Settings                 []byte      `db:"settings" json:"settings"`
-	ViewCount                pgtype.Int4 `db:"view_count" json:"viewCount"`
-	ResponseCount            pgtype.Int4 `db:"response_count" json:"responseCount"`
-	CompletionCount          pgtype.Int4 `db:"completion_count" json:"completionCount"`
-	CreatedAt                time.Time   `db:"created_at" json:"createdAt"`
-	UpdatedAt                time.Time   `db:"updated_at" json:"updatedAt"`
-	ResponseCount_2          int64       `db:"response_count_2" json:"responseCount2"`
+	ID                       uuid.UUID            `db:"id" json:"id"`
+	UserID                   uuid.UUID            `db:"user_id" json:"userId"`
+	Title                    string               `db:"title" json:"title"`
+	Description              pgtype.Text          `db:"description" json:"description"`
+	Slug                     pgtype.Text          `db:"slug" json:"slug"`
+	Theme                    string               `db:"theme" json:"theme"`
+	IsPublished              bool                 `db:"is_published" json:"isPublished"`
+	IsAcceptingResponses     bool                 `db:"is_accepting_responses" json:"isAcceptingResponses"`
+	RequireLogin             bool                 `db:"require_login" json:"requireLogin"`
+	AllowMultipleSubmissions bool                 `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
+	ProgressBarStyle         FormProgressBarStyle `db:"progress_bar_style" json:"progressBarStyle"`
+	ForceCaptcha             bool                 `db:"force_captcha" json:"forceCaptcha"`
+	CustomThankYouMessage    pgtype.Text          `db:"custom_thank_you_message" json:"customThankYouMessage"`
+	RedirectUrl              pgtype.Text          `db:"redirect_url" json:"redirectUrl"`
+	Settings                 []byte               `db:"settings" json:"settings"`
+	ViewCount                pgtype.Int4          `db:"view_count" json:"viewCount"`
+	ResponseCount            pgtype.Int4          `db:"response_count" json:"responseCount"`
+	CompletionCount          pgtype.Int4          `db:"completion_count" json:"completionCount"`
+	CreatedAt                time.Time            `db:"created_at" json:"createdAt"`
+	UpdatedAt                time.Time            `db:"updated_at" json:"updatedAt"`
+	ResponseCount_2          int64                `db:"response_count_2" json:"responseCount2"`
 }
 
 func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([]ListUserFormsRow, error) {
@@ -477,7 +477,7 @@ func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([
 			&i.IsAcceptingResponses,
 			&i.RequireLogin,
 			&i.AllowMultipleSubmissions,
-			&i.ShowProgressBar,
+			&i.ProgressBarStyle,
 			&i.ForceCaptcha,
 			&i.CustomThankYouMessage,
 			&i.RedirectUrl,
@@ -512,7 +512,7 @@ const publishForm = `-- name: PublishForm :one
 UPDATE form.forms
 SET is_published = true
 WHERE id = $1::uuid AND user_id = $2::uuid
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
 `
 
 type PublishFormParams struct {
@@ -534,7 +534,7 @@ func (q *Queries) PublishForm(ctx context.Context, arg PublishFormParams) (FormF
 		&i.IsAcceptingResponses,
 		&i.RequireLogin,
 		&i.AllowMultipleSubmissions,
-		&i.ShowProgressBar,
+		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
@@ -558,30 +558,30 @@ SET
     is_accepting_responses = COALESCE($5::boolean, is_accepting_responses),
     require_login = COALESCE($6::boolean, require_login),
     allow_multiple_submissions = COALESCE($7::boolean, allow_multiple_submissions),
-    show_progress_bar = COALESCE($8::boolean, show_progress_bar),
+    progress_bar_style = COALESCE($8::form.progress_bar_style, progress_bar_style),
     custom_thank_you_message = COALESCE($9::text, custom_thank_you_message),
     redirect_url = COALESCE($10::text, redirect_url),
     force_captcha = COALESCE($11::boolean, force_captcha),
     settings = COALESCE($12::jsonb, settings)
 WHERE id = $13::uuid AND user_id = $14::uuid
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, show_progress_bar, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
 `
 
 type UpdateFormParams struct {
-	Title                    string          `db:"title" json:"title"`
-	Description              string          `db:"description" json:"description"`
-	Theme                    string          `db:"theme" json:"theme"`
-	IsPublished              bool            `db:"is_published" json:"isPublished"`
-	IsAcceptingResponses     bool            `db:"is_accepting_responses" json:"isAcceptingResponses"`
-	RequireLogin             bool            `db:"require_login" json:"requireLogin"`
-	AllowMultipleSubmissions bool            `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
-	ShowProgressBar          bool            `db:"show_progress_bar" json:"showProgressBar"`
-	CustomThankYouMessage    string          `db:"custom_thank_you_message" json:"customThankYouMessage"`
-	RedirectUrl              string          `db:"redirect_url" json:"redirectUrl"`
-	ForceCaptcha             bool            `db:"force_captcha" json:"forceCaptcha"`
-	Settings                 json.RawMessage `db:"settings" json:"settings"`
-	ID                       uuid.UUID       `db:"id" json:"id"`
-	UserID                   uuid.UUID       `db:"user_id" json:"userId"`
+	Title                    string               `db:"title" json:"title"`
+	Description              string               `db:"description" json:"description"`
+	Theme                    string               `db:"theme" json:"theme"`
+	IsPublished              bool                 `db:"is_published" json:"isPublished"`
+	IsAcceptingResponses     bool                 `db:"is_accepting_responses" json:"isAcceptingResponses"`
+	RequireLogin             bool                 `db:"require_login" json:"requireLogin"`
+	AllowMultipleSubmissions bool                 `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
+	ProgressBarStyle         FormProgressBarStyle `db:"progress_bar_style" json:"progressBarStyle"`
+	CustomThankYouMessage    string               `db:"custom_thank_you_message" json:"customThankYouMessage"`
+	RedirectUrl              string               `db:"redirect_url" json:"redirectUrl"`
+	ForceCaptcha             bool                 `db:"force_captcha" json:"forceCaptcha"`
+	Settings                 json.RawMessage      `db:"settings" json:"settings"`
+	ID                       uuid.UUID            `db:"id" json:"id"`
+	UserID                   uuid.UUID            `db:"user_id" json:"userId"`
 }
 
 func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormForm, error) {
@@ -593,7 +593,7 @@ func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormFor
 		arg.IsAcceptingResponses,
 		arg.RequireLogin,
 		arg.AllowMultipleSubmissions,
-		arg.ShowProgressBar,
+		arg.ProgressBarStyle,
 		arg.CustomThankYouMessage,
 		arg.RedirectUrl,
 		arg.ForceCaptcha,
@@ -613,7 +613,7 @@ func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormFor
 		&i.IsAcceptingResponses,
 		&i.RequireLogin,
 		&i.AllowMultipleSubmissions,
-		&i.ShowProgressBar,
+		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,

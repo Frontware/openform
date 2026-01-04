@@ -52,6 +52,14 @@ enum QuestionType {
   QUESTION_TYPE_RANKING = 15;
 }
 
+enum ProgressBarStyle {
+  PROGRESS_BAR_STYLE_UNSPECIFIED = 0;
+  PROGRESS_BAR_STYLE_NONE = 1;
+  PROGRESS_BAR_STYLE_LINEAR = 2;
+  PROGRESS_BAR_STYLE_STEPS = 3;
+  PROGRESS_BAR_STYLE_CIRCULAR = 4;
+}
+
 // Messages
 message Question {
   string id = 1;
@@ -79,7 +87,7 @@ message Form {
   bool is_accepting_responses = 7;
   bool require_login = 8;
   bool allow_multiple_submissions = 9;
-  bool show_progress_bar = 10;
+  ProgressBarStyle progress_bar_style = 10;
   string custom_thank_you_message = 11;
   string redirect_url = 12;
   bool force_captcha = 13;
@@ -100,8 +108,9 @@ message CreateFormRequest {
   string title = 1;
   string description = 2;
   FormTheme theme = 3;
-  repeated Question questions = 4;
-  google.protobuf.Struct settings = 5;
+  ProgressBarStyle progress_bar_style = 4;
+  repeated Question questions = 5;
+  google.protobuf.Struct settings = 6;
 }
 
 message CreateFormResponse {
@@ -134,7 +143,7 @@ message UpdateFormRequest {
   optional bool is_accepting_responses = 6;
   optional bool require_login = 7;
   optional bool allow_multiple_submissions = 8;
-  optional bool show_progress_bar = 9;
+  optional ProgressBarStyle progress_bar_style = 9;
   optional string custom_thank_you_message = 10;
   optional string redirect_url = 11;
   optional bool force_captcha = 12;

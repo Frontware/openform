@@ -15,7 +15,7 @@ Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 qu
 **Key Features:**
 - **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit)
 - **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (app/(form-player)/f/[slug])
-- **Progress Bar** - Visual progress indicators with three styles: linear bar (for 9+ questions), step indicator (for 2-8 questions), and circular progress (optional)
+- **Progress Bar** - User-selectable progress indicators with 4 styles: none, linear bar, step indicator, and circular progress
 - **Response Dashboard** - View, search, filter, and export responses to CSV/JSON/Excel (app/(main)/dashboard/forms/[id]/responses)
 - **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
 - **Authentication** - JWT token validation with RSA key support (RS256)
@@ -365,6 +365,7 @@ export S3_ENDPOINT="https://your-endpoint.com"
 Frontend:
 - `components/ui/` - shadcn/ui base components (Radix UI primitives)
 - `components/form-builder/` - Form creation/editing UI
+  - `settings/progress-bar-settings.tsx` - Progress bar style selector with live preview
 - `components/form-player/` - Public form display with one-question-at-a-time navigation, progress bar components
 - `components/dashboard/` - Dashboard-specific components
 - `components/responses/` - Response management UI with search/filter/export
@@ -410,7 +411,7 @@ Backend:
 - `title`, `description` (text)
 - `theme` (enum: midnight, ocean, sunset, forest, lavender, weladee, minimal)
 - `is_published`, `is_accepting_responses`, `require_login`, `allow_multiple_submissions`
-- `show_progress_bar`
+- `progress_bar_style` (enum: none, linear, steps, circular)
 - `custom_thank_you_message`, `redirect_url`
 - `settings` (JSONB)
 - `created_at`, `updated_at`
@@ -535,18 +536,23 @@ The form player (`components/form-player/`) supports:
 
 ## Progress Bar (Form Player)
 
-The form player includes visual progress indicators that show respondents how far they've progressed through the form. The progress bar respects the `show_progress_bar` form setting and automatically selects the best display style based on the number of questions.
+The form player includes visual progress indicators that show respondents how far they've progressed through the form. Users can select their preferred progress bar style in the form builder settings.
 
-**Progress Styles:**
-- **Linear Bar** (9+ questions): Thin top bar with question count and percentage
-- **Step Indicator** (2-8 questions): Visual timeline with numbered circles and checkmarks
-- **Circular Progress** (optional): Compact corner indicator with percentage (can be enabled by changing `style` prop)
+**Progress Styles (User-Selectable):**
+- **None** - No progress indicator shown (clean, minimal)
+- **Linear** - Horizontal bar at top with question count and percentage
+- **Steps** - Step-by-step visual timeline with numbered circles and checkmarks
+- **Circular** - Compact circle indicator in the corner with percentage
 
-**Components:**
+**Form Builder Component:**
+- `components/form-builder/settings/progress-bar-settings.tsx` - UI for selecting progress bar style with live preview
+
+**Form Player Components:**
 - `components/form-player/progress-bar.tsx` - Linear and circular progress bar implementations
-- `components/form-player/step-indicator.tsx` - Step-by-step visual indicator for shorter forms
+- `components/form-player/step-indicator.tsx` - Step-by-step visual indicator
 
 **Features:**
+- User-selectable style in form builder with visual preview
 - Theme-aware colors (uses form's primary color)
 - Smooth 500ms transitions with shimmer animation
 - Responsive design (compact on mobile, full info on desktop)
@@ -555,14 +561,27 @@ The form player includes visual progress indicators that show respondents how fa
 - Dark mode support
 
 **Database Field:**
-- `form.forms.show_progress_bar` (boolean) - Controls whether progress is shown
-- When `true`: Shows step indicator for ≤8 questions, linear bar for ≥9 questions
-- When `false`: No progress indicators displayed
+- `form.forms.progress_bar_style` (enum: `none`, `linear`, `steps`, `circular`)
+- Default value is `'none'`
+- User selects style in form builder settings
+
+**Database Migration:**
+See `sql/migrations/001_add_progress_bar_style.sql` for the migration that converted `show_progress_bar` (boolean) to `progress_bar_style` (enum).
+
+**Usage in Form Builder** (`components/form-builder/settings/progress-bar-settings.tsx`):
+```tsx
+import { ProgressBarSettings } from '@/components/form-builder/settings/progress-bar-settings'
+
+<ProgressBarSettings
+  value={form.progress_bar_style || 'none'}
+  onChange={(value) => updateForm({ progress_bar_style: value })}
+/>
+```
 
 **Usage in Form Player** (`components/form-player/form-player.tsx`):
 ```tsx
-const progressStyle = questions.length <= 8 ? 'steps' : 'linear'
-const hasProgressBar = form.show_progress_bar !== false
+const progressStyle = form.progress_bar_style || 'none'
+const hasProgressBar = progressStyle !== 'none'
 
 {hasProgressBar && (
   <>
@@ -577,7 +596,7 @@ const hasProgressBar = form.show_progress_bar !== false
         currentQuestion={currentIndex}
         totalQuestions={questions.length}
         theme={theme}
-        style="linear"
+        style={progressStyle === 'circular' ? 'circular' : 'linear'}
       />
     )}
   </>
@@ -591,12 +610,18 @@ const hasProgressBar = form.show_progress_bar !== false
 
 **Translations** (added to `messages/*.json`):
 ```json
-"formPlayer": {
-  "progress": {
-    "questionOf": "Question {current} of {total}",
-    "complete": "{percent}% Complete",
-    "step": "Step {number}"
-  }
+"formBuilder": {
+  "progressBarStyle": "Progress Indicator",
+  "progressBarStyleDesc": "Choose how to show progress to respondents",
+  "progressBarNone": "None",
+  "progressBarNoneDesc": "No progress indicator shown",
+  "progressBarLinear": "Linear Bar",
+  "progressBarLinearDesc": "Horizontal bar at top with percentage",
+  "progressBarSteps": "Step Indicators",
+  "progressBarStepsDesc": "Visual timeline with checkmarks",
+  "progressBarCircular": "Circular",
+  "progressBarCircularDesc": "Compact circle in corner",
+  "livePreview": "Live Preview"
 }
 ```
 
