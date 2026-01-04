@@ -75,6 +75,8 @@ message CompletionFunnel {
 
 message GetCompletionFunnelRequest {
   string form_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
 }
 
 message GetCompletionFunnelResponse {

@@ -605,6 +605,8 @@ func (x *CompletionFunnel) GetOverallCompletionRate() float64 {
 type GetCompletionFunnelRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FormId        string                 `protobuf:"bytes,1,opt,name=form_id,json=formId,proto3" json:"form_id,omitempty"`
+	StartDate     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate       *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -644,6 +646,20 @@ func (x *GetCompletionFunnelRequest) GetFormId() string {
 		return x.FormId
 	}
 	return ""
+}
+
+func (x *GetCompletionFunnelRequest) GetStartDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.StartDate
+	}
+	return nil
+}
+
+func (x *GetCompletionFunnelRequest) GetEndDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.EndDate
+	}
+	return nil
 }
 
 type GetCompletionFunnelResponse struct {
@@ -2219,9 +2235,12 @@ const file_proto_analytics_proto_rawDesc = "" +
 	"\x05count\x18\x02 \x01(\x03R\x05count\x12\x1e\n" +
 	"\n" +
 	"percentage\x18\x03 \x01(\x01R\n" +
-	"percentage\"5\n" +
+	"percentage\"\xa7\x01\n" +
 	"\x1aGetCompletionFunnelRequest\x12\x17\n" +
-	"\aform_id\x18\x01 \x01(\tR\x06formId\"X\n" +
+	"\aform_id\x18\x01 \x01(\tR\x06formId\x129\n" +
+	"\n" +
+	"start_date\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tstartDate\x125\n" +
+	"\bend_date\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\aendDate\"X\n" +
 	"\x1bGetCompletionFunnelResponse\x129\n" +
 	"\x06funnel\x18\x01 \x01(\v2!.weladee.form.v1.CompletionFunnelR\x06funnel\"\x9c\x03\n" +
 	"\x11QuestionAnalytics\x12\x1f\n" +
@@ -2411,47 +2430,49 @@ var file_proto_analytics_proto_depIdxs = []int32{
 	3,  // 3: weladee.form.v1.GetResponseTrendResponse.data_points:type_name -> weladee.form.v1.ResponseTrendPoint
 	6,  // 4: weladee.form.v1.GetDeviceBreakdownResponse.devices:type_name -> weladee.form.v1.DeviceStats
 	36, // 5: weladee.form.v1.CompletionFunnel.stages:type_name -> weladee.form.v1.CompletionFunnel.Stage
-	9,  // 6: weladee.form.v1.GetCompletionFunnelResponse.funnel:type_name -> weladee.form.v1.CompletionFunnel
-	13, // 7: weladee.form.v1.QuestionAnalytics.choice_stats:type_name -> weladee.form.v1.ChoiceStats
-	14, // 8: weladee.form.v1.QuestionAnalytics.rating_stats:type_name -> weladee.form.v1.RatingStats
-	15, // 9: weladee.form.v1.QuestionAnalytics.nps_stats:type_name -> weladee.form.v1.NPSStats
-	16, // 10: weladee.form.v1.QuestionAnalytics.text_stats:type_name -> weladee.form.v1.TextStats
-	12, // 11: weladee.form.v1.GetQuestionAnalyticsResponse.questions:type_name -> weladee.form.v1.QuestionAnalytics
-	19, // 12: weladee.form.v1.GetQuestionDropOffResponse.questions:type_name -> weladee.form.v1.QuestionDropOff
-	23, // 13: weladee.form.v1.GeographicStats.cities:type_name -> weladee.form.v1.CityStats
-	22, // 14: weladee.form.v1.GetGeographicDistributionResponse.countries:type_name -> weladee.form.v1.GeographicStats
-	37, // 15: weladee.form.v1.GetTimeDistributionRequest.start_date:type_name -> google.protobuf.Timestamp
-	26, // 16: weladee.form.v1.GetTimeDistributionResponse.hourly:type_name -> weladee.form.v1.HourlyStats
-	27, // 17: weladee.form.v1.GetTimeDistributionResponse.daily:type_name -> weladee.form.v1.DayOfWeekStats
-	37, // 18: weladee.form.v1.ExportAnalyticsRequest.start_date:type_name -> google.protobuf.Timestamp
-	37, // 19: weladee.form.v1.ExportAnalyticsRequest.end_date:type_name -> google.protobuf.Timestamp
-	1,  // 20: weladee.form.v1.AnalyticsService.GetOverviewStats:input_type -> weladee.form.v1.GetOverviewStatsRequest
-	4,  // 21: weladee.form.v1.AnalyticsService.GetResponseTrend:input_type -> weladee.form.v1.GetResponseTrendRequest
-	7,  // 22: weladee.form.v1.AnalyticsService.GetDeviceBreakdown:input_type -> weladee.form.v1.GetDeviceBreakdownRequest
-	10, // 23: weladee.form.v1.AnalyticsService.GetCompletionFunnel:input_type -> weladee.form.v1.GetCompletionFunnelRequest
-	17, // 24: weladee.form.v1.AnalyticsService.GetQuestionAnalytics:input_type -> weladee.form.v1.GetQuestionAnalyticsRequest
-	20, // 25: weladee.form.v1.AnalyticsService.GetQuestionDropOff:input_type -> weladee.form.v1.GetQuestionDropOffRequest
-	24, // 26: weladee.form.v1.AnalyticsService.GetGeographicDistribution:input_type -> weladee.form.v1.GetGeographicDistributionRequest
-	28, // 27: weladee.form.v1.AnalyticsService.GetTimeDistribution:input_type -> weladee.form.v1.GetTimeDistributionRequest
-	30, // 28: weladee.form.v1.AnalyticsService.TrackView:input_type -> weladee.form.v1.TrackViewRequest
-	32, // 29: weladee.form.v1.AnalyticsService.TrackResponseStart:input_type -> weladee.form.v1.TrackResponseStartRequest
-	34, // 30: weladee.form.v1.AnalyticsService.ExportAnalytics:input_type -> weladee.form.v1.ExportAnalyticsRequest
-	2,  // 31: weladee.form.v1.AnalyticsService.GetOverviewStats:output_type -> weladee.form.v1.GetOverviewStatsResponse
-	5,  // 32: weladee.form.v1.AnalyticsService.GetResponseTrend:output_type -> weladee.form.v1.GetResponseTrendResponse
-	8,  // 33: weladee.form.v1.AnalyticsService.GetDeviceBreakdown:output_type -> weladee.form.v1.GetDeviceBreakdownResponse
-	11, // 34: weladee.form.v1.AnalyticsService.GetCompletionFunnel:output_type -> weladee.form.v1.GetCompletionFunnelResponse
-	18, // 35: weladee.form.v1.AnalyticsService.GetQuestionAnalytics:output_type -> weladee.form.v1.GetQuestionAnalyticsResponse
-	21, // 36: weladee.form.v1.AnalyticsService.GetQuestionDropOff:output_type -> weladee.form.v1.GetQuestionDropOffResponse
-	25, // 37: weladee.form.v1.AnalyticsService.GetGeographicDistribution:output_type -> weladee.form.v1.GetGeographicDistributionResponse
-	29, // 38: weladee.form.v1.AnalyticsService.GetTimeDistribution:output_type -> weladee.form.v1.GetTimeDistributionResponse
-	31, // 39: weladee.form.v1.AnalyticsService.TrackView:output_type -> weladee.form.v1.TrackViewResponse
-	33, // 40: weladee.form.v1.AnalyticsService.TrackResponseStart:output_type -> weladee.form.v1.TrackResponseStartResponse
-	35, // 41: weladee.form.v1.AnalyticsService.ExportAnalytics:output_type -> weladee.form.v1.ExportAnalyticsResponse
-	31, // [31:42] is the sub-list for method output_type
-	20, // [20:31] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	37, // 6: weladee.form.v1.GetCompletionFunnelRequest.start_date:type_name -> google.protobuf.Timestamp
+	37, // 7: weladee.form.v1.GetCompletionFunnelRequest.end_date:type_name -> google.protobuf.Timestamp
+	9,  // 8: weladee.form.v1.GetCompletionFunnelResponse.funnel:type_name -> weladee.form.v1.CompletionFunnel
+	13, // 9: weladee.form.v1.QuestionAnalytics.choice_stats:type_name -> weladee.form.v1.ChoiceStats
+	14, // 10: weladee.form.v1.QuestionAnalytics.rating_stats:type_name -> weladee.form.v1.RatingStats
+	15, // 11: weladee.form.v1.QuestionAnalytics.nps_stats:type_name -> weladee.form.v1.NPSStats
+	16, // 12: weladee.form.v1.QuestionAnalytics.text_stats:type_name -> weladee.form.v1.TextStats
+	12, // 13: weladee.form.v1.GetQuestionAnalyticsResponse.questions:type_name -> weladee.form.v1.QuestionAnalytics
+	19, // 14: weladee.form.v1.GetQuestionDropOffResponse.questions:type_name -> weladee.form.v1.QuestionDropOff
+	23, // 15: weladee.form.v1.GeographicStats.cities:type_name -> weladee.form.v1.CityStats
+	22, // 16: weladee.form.v1.GetGeographicDistributionResponse.countries:type_name -> weladee.form.v1.GeographicStats
+	37, // 17: weladee.form.v1.GetTimeDistributionRequest.start_date:type_name -> google.protobuf.Timestamp
+	26, // 18: weladee.form.v1.GetTimeDistributionResponse.hourly:type_name -> weladee.form.v1.HourlyStats
+	27, // 19: weladee.form.v1.GetTimeDistributionResponse.daily:type_name -> weladee.form.v1.DayOfWeekStats
+	37, // 20: weladee.form.v1.ExportAnalyticsRequest.start_date:type_name -> google.protobuf.Timestamp
+	37, // 21: weladee.form.v1.ExportAnalyticsRequest.end_date:type_name -> google.protobuf.Timestamp
+	1,  // 22: weladee.form.v1.AnalyticsService.GetOverviewStats:input_type -> weladee.form.v1.GetOverviewStatsRequest
+	4,  // 23: weladee.form.v1.AnalyticsService.GetResponseTrend:input_type -> weladee.form.v1.GetResponseTrendRequest
+	7,  // 24: weladee.form.v1.AnalyticsService.GetDeviceBreakdown:input_type -> weladee.form.v1.GetDeviceBreakdownRequest
+	10, // 25: weladee.form.v1.AnalyticsService.GetCompletionFunnel:input_type -> weladee.form.v1.GetCompletionFunnelRequest
+	17, // 26: weladee.form.v1.AnalyticsService.GetQuestionAnalytics:input_type -> weladee.form.v1.GetQuestionAnalyticsRequest
+	20, // 27: weladee.form.v1.AnalyticsService.GetQuestionDropOff:input_type -> weladee.form.v1.GetQuestionDropOffRequest
+	24, // 28: weladee.form.v1.AnalyticsService.GetGeographicDistribution:input_type -> weladee.form.v1.GetGeographicDistributionRequest
+	28, // 29: weladee.form.v1.AnalyticsService.GetTimeDistribution:input_type -> weladee.form.v1.GetTimeDistributionRequest
+	30, // 30: weladee.form.v1.AnalyticsService.TrackView:input_type -> weladee.form.v1.TrackViewRequest
+	32, // 31: weladee.form.v1.AnalyticsService.TrackResponseStart:input_type -> weladee.form.v1.TrackResponseStartRequest
+	34, // 32: weladee.form.v1.AnalyticsService.ExportAnalytics:input_type -> weladee.form.v1.ExportAnalyticsRequest
+	2,  // 33: weladee.form.v1.AnalyticsService.GetOverviewStats:output_type -> weladee.form.v1.GetOverviewStatsResponse
+	5,  // 34: weladee.form.v1.AnalyticsService.GetResponseTrend:output_type -> weladee.form.v1.GetResponseTrendResponse
+	8,  // 35: weladee.form.v1.AnalyticsService.GetDeviceBreakdown:output_type -> weladee.form.v1.GetDeviceBreakdownResponse
+	11, // 36: weladee.form.v1.AnalyticsService.GetCompletionFunnel:output_type -> weladee.form.v1.GetCompletionFunnelResponse
+	18, // 37: weladee.form.v1.AnalyticsService.GetQuestionAnalytics:output_type -> weladee.form.v1.GetQuestionAnalyticsResponse
+	21, // 38: weladee.form.v1.AnalyticsService.GetQuestionDropOff:output_type -> weladee.form.v1.GetQuestionDropOffResponse
+	25, // 39: weladee.form.v1.AnalyticsService.GetGeographicDistribution:output_type -> weladee.form.v1.GetGeographicDistributionResponse
+	29, // 40: weladee.form.v1.AnalyticsService.GetTimeDistribution:output_type -> weladee.form.v1.GetTimeDistributionResponse
+	31, // 41: weladee.form.v1.AnalyticsService.TrackView:output_type -> weladee.form.v1.TrackViewResponse
+	33, // 42: weladee.form.v1.AnalyticsService.TrackResponseStart:output_type -> weladee.form.v1.TrackResponseStartResponse
+	35, // 43: weladee.form.v1.AnalyticsService.ExportAnalytics:output_type -> weladee.form.v1.ExportAnalyticsResponse
+	33, // [33:44] is the sub-list for method output_type
+	22, // [22:33] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_proto_analytics_proto_init() }

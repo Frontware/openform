@@ -1,7 +1,10 @@
 package auth
 
 import (
+	"crypto/rsa"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -22,17 +25,36 @@ type WeladeeUserClaims struct {
 
 // JWTValidator validates JWT tokens
 type JWTValidator struct {
-	secret []byte
+	secret    []byte
+	publicKey *rsa.PublicKey
 }
 
 // NewJWTValidator creates a new JWT validator
-func NewJWTValidator(secret string) *JWTValidator {
+func NewJWTValidator(secret string, publicKeyPath string) *JWTValidator {
 	if secret == "" {
 		secret = "weladee-form-secret-change-in-production"
 	}
-	return &JWTValidator{
+
+	validator := &JWTValidator{
 		secret: []byte(secret),
 	}
+
+	if publicKeyPath != "" {
+		keyBytes, err := os.ReadFile(publicKeyPath)
+		if err != nil {
+			log.Printf("⚠️ Failed to read JWT public key: %v", err)
+		} else {
+			publicKey, err := jwt.ParseRSAPublicKeyFromPEM(keyBytes)
+			if err != nil {
+				log.Printf("⚠️ Failed to parse JWT public key: %v", err)
+			} else {
+				validator.publicKey = publicKey
+				log.Println("✓ JWT asymmetric validation enabled (RS256)")
+			}
+		}
+	}
+
+	return validator
 }
 
 // ValidateToken validates a JWT token and returns the user claims
@@ -53,11 +75,20 @@ func (j *JWTValidator) ValidateToken(token string) (*WeladeeUserClaims, error) {
 
 	// Parse and validate JWT
 	parsedToken, err := jwt.ParseWithClaims(token, &WeladeeUserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		// Validate signing method
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		// Check for RS256 first
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); ok {
+			if j.publicKey != nil {
+				return j.publicKey, nil
+			}
+			return nil, fmt.Errorf("RS256 token received but no public key configured")
 		}
-		return j.secret, nil
+
+		// Fallback to HMAC
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); ok {
+			return j.secret, nil
+		}
+
+		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 	})
 
 	if err != nil {
@@ -79,7 +110,7 @@ func (j *JWTValidator) ValidateToken(token string) (*WeladeeUserClaims, error) {
 
 // GenerateToken generates a JWT token for testing purposes
 // In production, this would be done by the auth service
-func GenerateToken(userID int, email, displayName, role string, secret string, expiration time.Duration) (string, error) {
+func GenerateToken(userID int, email, displayName, role string, secret string, privateKeyPath string, expiration time.Duration) (string, error) {
 	if secret == "" {
 		secret = "weladee-form-secret-change-in-production"
 	}
@@ -97,6 +128,23 @@ func GenerateToken(userID int, email, displayName, role string, secret string, e
 		},
 	}
 
+	// Try RS256 if private key is provided
+	if privateKeyPath != "" {
+		keyBytes, err := os.ReadFile(privateKeyPath)
+		if err != nil {
+			return "", fmt.Errorf("failed to read private key: %w", err)
+		}
+
+		privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(keyBytes)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse private key: %w", err)
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+		return token.SignedString(privateKey)
+	}
+
+	// Fallback to HS256
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
 }

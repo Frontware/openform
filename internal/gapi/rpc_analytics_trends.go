@@ -2,6 +2,7 @@ package gapi
 
 import (
     "context"
+    "time"
 
     "github.com/google/uuid"
     "google.golang.org/grpc/codes"
@@ -176,8 +177,23 @@ func (server *AnalyticsServerImpl) GetCompletionFunnel(
         return nil, status.Errorf(codes.PermissionDenied, "not authorized")
     }
 
-    // Get funnel data
-    funnelData, err := server.db.Queries.GetCompletionFunnel(ctx, formID)
+    // Handle date filtering - default to all time if not provided
+    startDate := time.Now().AddDate(-50, 0, 0) // ~50 years ago for "all time"
+    endDate := time.Now()
+
+    if req.StartDate != nil {
+        startDate = req.StartDate.AsTime()
+    }
+    if req.EndDate != nil {
+        endDate = req.EndDate.AsTime()
+    }
+
+    // Get funnel data with date filtering
+    funnelData, err := server.db.Queries.GetCompletionFunnel(ctx, sqlc.GetCompletionFunnelParams{
+        FormID:    formID,
+        StartDate: startDate,
+        EndDate:   endDate,
+    })
     if err != nil {
         return nil, status.Errorf(codes.Internal, "failed to get funnel data: %v", err)
     }

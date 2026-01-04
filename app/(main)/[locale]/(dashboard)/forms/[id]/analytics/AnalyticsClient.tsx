@@ -77,7 +77,11 @@ export default function AnalyticsClient() {
           endDate: { seconds: BigInt(Math.floor(endDate.getTime() / 1000)), nanos: 0 }
         }),
         analyticsClient.getDeviceBreakdown({ formId }),
-        analyticsClient.getCompletionFunnel({ formId }),
+        analyticsClient.getCompletionFunnel({
+          formId,
+          startDate: { seconds: BigInt(Math.floor(startDate.getTime() / 1000)), nanos: 0 },
+          endDate: { seconds: BigInt(Math.floor(endDate.getTime() / 1000)), nanos: 0 }
+        }),
         analyticsClient.getQuestionAnalytics({ formId }),
         analyticsClient.getQuestionDropOff({ formId })
       ]);

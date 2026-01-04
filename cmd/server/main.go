@@ -327,7 +327,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 	log.Println("✓ Connected to PostgreSQL")
 
 	// Setup JWT token validator
-	tokenValidator := auth.NewJWTValidator(cfg.JWTSecret)
+	tokenValidator := auth.NewJWTValidator(cfg.JWTSecret, cfg.JWTPublicKeyPath)
 	log.Println("✓ JWT token validator initialized")
 
 	// Setup S3 storage
@@ -581,7 +581,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		secret = "weladee-form-secret-change-in-production"
 	}
 
-	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", secret, 2*time.Hour)
+	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", secret, cfg.JWTPrivateKeyPath, 2*time.Hour)
 	if err != nil {
 		log.Printf("⚠️ Failed to generate JWT token: %v", err)
 		log.Printf("💡 To get a valid JWT token, run: go run ./cmd/server create-jwt")
@@ -629,18 +629,25 @@ func runCreateJWT(cmd *cobra.Command, args []string) error {
 		secret = "weladee-form-secret-change-in-production"
 	}
 
+	privateKeyPath := os.Getenv("JWT_PRIVATE_KEY_PATH")
+
 	// Use pre-configured credentials for eric
 	name := "eric"
 	email := "eric.fairon@gmail.com"
 
 	// Generate JWT token with eric's credentials
-	token, err := auth.GenerateToken(1, email, name, "admin", secret, 2*time.Hour)
+	token, err := auth.GenerateToken(1, email, name, "admin", secret, privateKeyPath, 2*time.Hour)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT token: %w", err)
 	}
 
 	fmt.Println("JWT Token generated successfully for eric:")
 	fmt.Println(token)
+	if privateKeyPath != "" {
+		fmt.Println("Algorithm: RS256 (Asymmetric)")
+	} else {
+		fmt.Println("Algorithm: HS256 (Symmetric)")
+	}
 	fmt.Printf("User: %s (%s) - Role: admin\n", name, email)
 	fmt.Println("Token expires in 2 hours.")
 	return nil

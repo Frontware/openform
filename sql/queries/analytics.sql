@@ -82,11 +82,11 @@ ORDER BY count DESC;
 
 -- name: GetCompletionFunnel :one
 SELECT
-    (SELECT COUNT(*) FROM form.form_views WHERE form_id = @form_id::uuid)::int8 as total_views,
-    (SELECT COUNT(DISTINCT session_id) FROM form.form_views WHERE form_id = @form_id::uuid)::int8 as unique_views,
-    (SELECT COUNT(*) FROM form.response_starts WHERE form_id = @form_id::uuid)::int8 as total_starts,
-    (SELECT COUNT(*) FROM form.responses WHERE form_id = @form_id::uuid)::int8 as total_responses,
-    (SELECT COUNT(*) FROM form.responses WHERE form_id = @form_id::uuid AND completed = true)::int8 as total_completions;
+    (SELECT COUNT(*) FROM form.form_views WHERE form_id = @form_id::uuid AND viewed_at >= @start_date::timestamptz AND viewed_at <= @end_date::timestamptz)::int8 as total_views,
+    (SELECT COUNT(DISTINCT session_id) FROM form.form_views WHERE form_id = @form_id::uuid AND viewed_at >= @start_date::timestamptz AND viewed_at <= @end_date::timestamptz)::int8 as unique_views,
+    (SELECT COUNT(*) FROM form.response_starts WHERE form_id = @form_id::uuid AND created_at >= @start_date::timestamptz AND created_at <= @end_date::timestamptz)::int8 as total_starts,
+    (SELECT COUNT(*) FROM form.responses WHERE form_id = @form_id::uuid AND created_at >= @start_date::timestamptz AND created_at <= @end_date::timestamptz)::int8 as total_responses,
+    (SELECT COUNT(*) FROM form.responses WHERE form_id = @form_id::uuid AND completed = true AND submitted_at >= @start_date::timestamptz AND submitted_at <= @end_date::timestamptz)::int8 as total_completions;
 
 -- name: GetQuestionDropOff :many
 SELECT

@@ -24,7 +24,7 @@ type Querier interface {
 	DeleteQuestion(ctx context.Context, id uuid.UUID) error
 	DeleteResponse(ctx context.Context, id uuid.UUID) error
 	GetChoiceQuestionStats(ctx context.Context, questionID uuid.UUID) ([]GetChoiceQuestionStatsRow, error)
-	GetCompletionFunnel(ctx context.Context, formID uuid.UUID) (GetCompletionFunnelRow, error)
+	GetCompletionFunnel(ctx context.Context, arg GetCompletionFunnelParams) (GetCompletionFunnelRow, error)
 	GetCompletionStatsForDate(ctx context.Context, arg GetCompletionStatsForDateParams) ([]GetCompletionStatsForDateRow, error)
 	GetDailyStatsRange(ctx context.Context, arg GetDailyStatsRangeParams) ([]FormDailyStat, error)
 	GetDayOfWeekDistribution(ctx context.Context, arg GetDayOfWeekDistributionParams) ([]GetDayOfWeekDistributionRow, error)

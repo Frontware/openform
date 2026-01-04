@@ -12,7 +12,9 @@ import (
 type Config struct {
 	GRPCPort    string `mapstructure:"grpc_port" yaml:"grpc_port"`
 	DatabaseURL string `mapstructure:"database_url" yaml:"database_url"`
-	JWTSecret   string `mapstructure:"jwt_secret" yaml:"jwt_secret"`
+	JWTSecret          string `mapstructure:"jwt_secret" yaml:"jwt_secret"`
+	JWTPrivateKeyPath  string `mapstructure:"jwt_private_key_path" yaml:"jwt_private_key_path"`
+	JWTPublicKeyPath   string `mapstructure:"jwt_public_key_path" yaml:"jwt_public_key_path"`
 
 	// S3 Configuration
 	S3Region    string `mapstructure:"s3_region" yaml:"s3_region"`
@@ -65,6 +67,8 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 		"grpc_port":            "GRPC_PORT",
 		"database_url":         "DATABASE_URL",
 		"jwt_secret":           "JWT_SECRET",
+		"jwt_private_key_path": "JWT_PRIVATE_KEY_PATH",
+		"jwt_public_key_path":  "JWT_PUBLIC_KEY_PATH",
 		"s3_region":            "S3_REGION",
 		"s3_bucket":            "S3_BUCKET",
 		"s3_access_key":        "S3_ACCESS_KEY",
@@ -100,6 +104,8 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 			"grpc-port":            "grpc_port",
 			"database-url":         "database_url",
 			"jwt-secret":           "jwt_secret",
+			"jwt-private-key-path": "jwt_private_key_path",
+			"jwt-public_key-path":  "jwt_public_key_path",
 			"s3-region":            "s3_region",
 			"s3-bucket":            "s3_bucket",
 			"s3-access-key":        "s3_access_key",
@@ -186,6 +192,8 @@ func AddFlags(cmd *cobra.Command) {
 		{"grpc-port", "p", "50051", "gRPC server port"},
 		{"database-url", "d", "", "PostgreSQL database URL (required)"},
 		{"jwt-secret", "", "", "JWT secret key (default: weladee-form-secret-change-in-production)"},
+		{"jwt-private-key-path", "", "", "Path to JWT private key (for RS256 signing)"},
+		{"jwt-public-key-path", "", "", "Path to JWT public key (for RS256 validation)"},
 		{"s3-region", "", "auto", "S3 region"},
 		{"s3-bucket", "", "", "S3 bucket name"},
 		{"s3-access-key", "", "", "S3 access key"},

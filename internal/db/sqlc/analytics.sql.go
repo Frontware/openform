@@ -58,12 +58,18 @@ func (q *Queries) GetChoiceQuestionStats(ctx context.Context, questionID uuid.UU
 
 const getCompletionFunnel = `-- name: GetCompletionFunnel :one
 SELECT
-    (SELECT COUNT(*) FROM form.form_views WHERE form_id = $1::uuid)::int8 as total_views,
-    (SELECT COUNT(DISTINCT session_id) FROM form.form_views WHERE form_id = $1::uuid)::int8 as unique_views,
-    (SELECT COUNT(*) FROM form.response_starts WHERE form_id = $1::uuid)::int8 as total_starts,
-    (SELECT COUNT(*) FROM form.responses WHERE form_id = $1::uuid)::int8 as total_responses,
-    (SELECT COUNT(*) FROM form.responses WHERE form_id = $1::uuid AND completed = true)::int8 as total_completions
+    (SELECT COUNT(*) FROM form.form_views WHERE form_id = $1::uuid AND viewed_at >= $2::timestamptz AND viewed_at <= $3::timestamptz)::int8 as total_views,
+    (SELECT COUNT(DISTINCT session_id) FROM form.form_views WHERE form_id = $1::uuid AND viewed_at >= $2::timestamptz AND viewed_at <= $3::timestamptz)::int8 as unique_views,
+    (SELECT COUNT(*) FROM form.response_starts WHERE form_id = $1::uuid AND created_at >= $2::timestamptz AND created_at <= $3::timestamptz)::int8 as total_starts,
+    (SELECT COUNT(*) FROM form.responses WHERE form_id = $1::uuid AND created_at >= $2::timestamptz AND created_at <= $3::timestamptz)::int8 as total_responses,
+    (SELECT COUNT(*) FROM form.responses WHERE form_id = $1::uuid AND completed = true AND submitted_at >= $2::timestamptz AND submitted_at <= $3::timestamptz)::int8 as total_completions
 `
+
+type GetCompletionFunnelParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	StartDate time.Time `db:"start_date" json:"startDate"`
+	EndDate   time.Time `db:"end_date" json:"endDate"`
+}
 
 type GetCompletionFunnelRow struct {
 	TotalViews       int64 `db:"total_views" json:"totalViews"`
@@ -73,8 +79,8 @@ type GetCompletionFunnelRow struct {
 	TotalCompletions int64 `db:"total_completions" json:"totalCompletions"`
 }
 
-func (q *Queries) GetCompletionFunnel(ctx context.Context, formID uuid.UUID) (GetCompletionFunnelRow, error) {
-	row := q.db.QueryRow(ctx, getCompletionFunnel, formID)
+func (q *Queries) GetCompletionFunnel(ctx context.Context, arg GetCompletionFunnelParams) (GetCompletionFunnelRow, error) {
+	row := q.db.QueryRow(ctx, getCompletionFunnel, arg.FormID, arg.StartDate, arg.EndDate)
 	var i GetCompletionFunnelRow
 	err := row.Scan(
 		&i.TotalViews,
