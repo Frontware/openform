@@ -202,7 +202,7 @@ export default async function HomePage({
           
           <TooltipProvider>
             <div className="flex flex-wrap justify-center gap-3">
-              {t.raw('questionTypes.types').map((type: { name: string, description: string, plan: string }) => (
+              {t.raw('questionTypes.types').map((type: { name: string, description: string, plans: string[] }) => (
                 <Tooltip key={type.name}>
                   <TooltipTrigger asChild>
                     <span
@@ -214,15 +214,22 @@ export default async function HomePage({
                   <TooltipContent className="max-w-xs p-3">
                     <p className="font-semibold mb-1">{type.name}</p>
                     <p className="text-slate-200 mb-2">{type.description}</p>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] uppercase tracking-wider opacity-70">Plan:</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                        type.plan === 'SME' ? 'bg-slate-700' :
-                        type.plan === 'Standard' ? 'bg-blue-700' :
-                        'bg-purple-700'
-                      }`}>
-                        {type.plan}
-                      </span>
+                    <div>
+                      <span className="text-[10px] uppercase tracking-wider opacity-70">Plans:</span>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {type.plans.map((plan) => (
+                          <span
+                            key={plan}
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                              plan === 'SME' ? 'bg-slate-700' :
+                              plan === 'Standard' ? 'bg-blue-700' :
+                              'bg-purple-700'
+                            }`}
+                          >
+                            {plan}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </TooltipContent>
                 </Tooltip>
