@@ -72,6 +72,39 @@ func (fs *FileSystem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
+		// Special handling for Next.js internal files in dynamic routes
+		// e.g., /f/[slug]/__next._tree.txt -> serve f/form/__next._tree.txt
+		if strings.Contains(filePath, "/__next._tree.txt") {
+			newPath := filePath
+			// Handle /f/[slug]/__next._tree.txt
+			if strings.HasPrefix(filePath, "f/") {
+				parts := strings.Split(filePath, "/")
+				if len(parts) >= 3 {
+					// Replace slug with "form"
+					newPath = "f/form/" + strings.Join(parts[2:], "/")
+				}
+			} else {
+				// Handle /[locale]/forms/[id]/.../__next._tree.txt
+				parts := strings.Split(filePath, "/")
+				if len(parts) >= 4 && parts[1] == "forms" && parts[2] != "new" && parts[2] != "__dynamic__" {
+					// Replace ID with "__dynamic__"
+					newPath = parts[0] + "/forms/__dynamic__/" + strings.Join(parts[3:], "/")
+				}
+			}
+
+			if newPath != filePath {
+				if fNext, errNext := fs.root.Open(newPath); errNext == nil {
+					fNext.Close()
+					f, err = fs.root.Open(newPath)
+					if err == nil {
+						filePath = newPath
+						defer f.Close()
+						goto serveFile
+					}
+				}
+			}
+		}
+
 		// Special handling for dynamic form IDs (/[locale]/forms/[id]/edit or /responses)
 		// Try to serve a generic template for these routes
 		if strings.Count(filePath, "/") == 3 { // e.g., "en/forms/xxx/edit" or "en/forms/xxx/responses"

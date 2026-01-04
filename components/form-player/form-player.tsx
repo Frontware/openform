@@ -5,10 +5,11 @@ import { Form, QuestionConfig, Json } from '@/lib/database.types'
 import { getTheme, getThemeCSSVariables } from '@/lib/themes'
 import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { ChevronUp, ChevronDown, Check, ArrowRight } from 'lucide-react'
 import { QuestionRenderer } from './question-renderer'
+import { ProgressBar } from './progress-bar'
+import { StepIndicator } from './step-indicator'
 import { toast } from 'sonner'
 import { responseClient, analyticsClient } from '@/lib/grpc-client'
 import { AnswerInput } from '@/lib/proto/proto/response_pb'
@@ -534,34 +535,42 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
     }),
   }
 
+  // Determine which progress style to use based on question count
+  const progressStyle = questions.length <= 8 ? 'steps' : 'linear'
+  const hasProgressBar = form.show_progress_bar !== false
+
   return (
-    <div 
+    <div
       ref={containerRef}
       className="min-h-screen flex flex-col"
-      style={{ 
+      style={{
         ...themeStyles,
         backgroundColor: theme.backgroundColor,
         fontFamily: theme.fontFamily,
       }}
     >
       {/* Progress bar - shown only if enabled in form settings */}
-      {form.show_progress_bar !== false && (
-        <div className="fixed top-0 left-0 right-0 z-50">
-          <Progress
-            value={progress}
-            className="h-1 rounded-none"
-            style={{
-              backgroundColor: `${theme.primaryColor}20`,
-            }}
-            indicatorStyle={{
-              backgroundColor: theme.primaryColor,
-            }}
-          />
-        </div>
+      {hasProgressBar && (
+        <>
+          {progressStyle === 'steps' ? (
+            <StepIndicator
+              currentQuestion={currentIndex}
+              totalQuestions={questions.length}
+              theme={theme}
+            />
+          ) : (
+            <ProgressBar
+              currentQuestion={currentIndex}
+              totalQuestions={questions.length}
+              theme={theme}
+              style="linear"
+            />
+          )}
+        </>
       )}
 
       {/* Main content */}
-      <main className="flex-1 flex items-center justify-center p-6 pt-12">
+      <main className={`flex-1 flex items-center justify-center p-6 ${hasProgressBar ? 'pt-20 md:pt-24' : 'pt-12'}`}>
         <div className="w-full max-w-2xl">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div

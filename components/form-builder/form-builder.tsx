@@ -669,19 +669,229 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
 
-  const copyFormLink = () => {
+    const copyFormLink = () => {
 
 
-    const link = `${window.location.origin}/f/${form.slug}`
 
 
-    navigator.clipboard.writeText(link)
+
+      const link = `${window.location.origin}/f/${form.slug}`
 
 
-    toast.success(tCommon('success'))
 
 
-  }
+
+      
+
+
+
+
+
+      // Fallback for insecure contexts or browsers without clipboard API
+
+
+
+
+
+      if (!navigator.clipboard) {
+
+
+
+
+
+        const textArea = document.createElement('textarea')
+
+
+
+
+
+        textArea.value = link
+
+
+
+
+
+        textArea.style.position = 'fixed'
+
+
+
+
+
+        textArea.style.left = '-9999px'
+
+
+
+
+
+        textArea.style.top = '0'
+
+
+
+
+
+        document.body.appendChild(textArea)
+
+
+
+
+
+        textArea.focus()
+
+
+
+
+
+        textArea.select()
+
+
+
+
+
+        
+
+
+
+
+
+        try {
+
+
+
+
+
+          const successful = document.execCommand('copy')
+
+
+
+
+
+          if (successful) {
+
+
+
+
+
+            toast.success(tCommon('success'))
+
+
+
+
+
+          } else {
+
+
+
+
+
+            toast.error(tCommon('error'))
+
+
+
+
+
+          }
+
+
+
+
+
+        } catch (err) {
+
+
+
+
+
+          console.error('Fallback: Oops, unable to copy', err)
+
+
+
+
+
+          toast.error(tCommon('error'))
+
+
+
+
+
+        }
+
+
+
+
+
+        
+
+
+
+
+
+        document.body.removeChild(textArea)
+
+
+
+
+
+        return
+
+
+
+
+
+      }
+
+
+
+
+
+  
+
+
+
+
+
+      navigator.clipboard.writeText(link)
+
+
+
+
+
+        .then(() => toast.success(tCommon('success')))
+
+
+
+
+
+        .catch((err) => {
+
+
+
+
+
+          console.error('Failed to copy link:', err)
+
+
+
+
+
+          toast.error(tCommon('error'))
+
+
+
+
+
+        })
+
+
+
+
+
+    }
+
+
+
+
+
+  
 
 
 

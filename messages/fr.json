@@ -256,6 +256,13 @@
     "typeYourAnswer": "Tapez votre réponse ici...",
     "yes": "Oui",
     "no": "Non",
+    "progress": {
+      "questionOf": "Question {current} sur {total}",
+      "complete": "{percent}% Terminé",
+      "step": "Étape {number}"
+    },
+    "alreadySubmitted": "Déjà Soumis",
+    "alreadySubmittedMessage": "Vous avez déjà soumis ce formulaire. Merci pour votre réponse !",
     "validation": {
       "required": "Ce champ est obligatoire",
       "selectAtLeastOne": "Veuillez sélectionner au moins une option",

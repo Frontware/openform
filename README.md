@@ -8,6 +8,7 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 
 - **7 beautiful themes** - Midnight, Ocean, Sunset, Forest, Lavender, Weladee, Minimal
 - **Keyboard navigation** - Navigate with Enter, arrow keys, and scroll wheel
+- **Visual progress indicators** - Linear bar, step indicator, or circular progress with theme-aware colors
 - **Mobile-first forms** - Responsive form-taking experience
 - **Secure authentication** - JWT token validation with RSA key support
 - **Customer-based feature tiers** - SME, Standard, and Enterprise with different capabilities

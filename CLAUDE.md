@@ -15,6 +15,7 @@ Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 qu
 **Key Features:**
 - **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit)
 - **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (app/(form-player)/f/[slug])
+- **Progress Bar** - Visual progress indicators with three styles: linear bar (for 9+ questions), step indicator (for 2-8 questions), and circular progress (optional)
 - **Response Dashboard** - View, search, filter, and export responses to CSV/JSON/Excel (app/(main)/dashboard/forms/[id]/responses)
 - **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
 - **Authentication** - JWT token validation with RSA key support (RS256)
@@ -364,7 +365,7 @@ export S3_ENDPOINT="https://your-endpoint.com"
 Frontend:
 - `components/ui/` - shadcn/ui base components (Radix UI primitives)
 - `components/form-builder/` - Form creation/editing UI
-- `components/form-player/` - Public form display with one-question-at-a-time navigation
+- `components/form-player/` - Public form display with one-question-at-a-time navigation, progress bar components
 - `components/dashboard/` - Dashboard-specific components
 - `components/responses/` - Response management UI with search/filter/export
 - `lib/questions.ts` - Question type definitions and helper functions
@@ -531,6 +532,73 @@ The form player (`components/form-player/`) supports:
 - **Enter** - Submit answer and move to next question
 - **Arrow keys** - Navigate between questions
 - **Scroll wheel** - Navigate between questions
+
+## Progress Bar (Form Player)
+
+The form player includes visual progress indicators that show respondents how far they've progressed through the form. The progress bar respects the `show_progress_bar` form setting and automatically selects the best display style based on the number of questions.
+
+**Progress Styles:**
+- **Linear Bar** (9+ questions): Thin top bar with question count and percentage
+- **Step Indicator** (2-8 questions): Visual timeline with numbered circles and checkmarks
+- **Circular Progress** (optional): Compact corner indicator with percentage (can be enabled by changing `style` prop)
+
+**Components:**
+- `components/form-player/progress-bar.tsx` - Linear and circular progress bar implementations
+- `components/form-player/step-indicator.tsx` - Step-by-step visual indicator for shorter forms
+
+**Features:**
+- Theme-aware colors (uses form's primary color)
+- Smooth 500ms transitions with shimmer animation
+- Responsive design (compact on mobile, full info on desktop)
+- Question counter ("Question X of Y")
+- Percentage completion display
+- Dark mode support
+
+**Database Field:**
+- `form.forms.show_progress_bar` (boolean) - Controls whether progress is shown
+- When `true`: Shows step indicator for ≤8 questions, linear bar for ≥9 questions
+- When `false`: No progress indicators displayed
+
+**Usage in Form Player** (`components/form-player/form-player.tsx`):
+```tsx
+const progressStyle = questions.length <= 8 ? 'steps' : 'linear'
+const hasProgressBar = form.show_progress_bar !== false
+
+{hasProgressBar && (
+  <>
+    {progressStyle === 'steps' ? (
+      <StepIndicator
+        currentQuestion={currentIndex}
+        totalQuestions={questions.length}
+        theme={theme}
+      />
+    ) : (
+      <ProgressBar
+        currentQuestion={currentIndex}
+        totalQuestions={questions.length}
+        theme={theme}
+        style="linear"
+      />
+    )}
+  </>
+)}
+```
+
+**Design Specifications:**
+- **Linear Bar:** 6px height, fixed top position, backdrop-blur background, shimmer effect
+- **Step Indicator:** 32-40px circles, checkmarks for completed steps, active step scaled 125%
+- **Circular Progress:** 64-80px diameter, SVG-based, stroke animation
+
+**Translations** (added to `messages/*.json`):
+```json
+"formPlayer": {
+  "progress": {
+    "questionOf": "Question {current} of {total}",
+    "complete": "{percent}% Complete",
+    "step": "Step {number}"
+  }
+}
+```
 
 ## File Upload Flow
 

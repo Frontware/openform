@@ -256,6 +256,13 @@
     "typeYourAnswer": "พิมพ์คำตอบของคุณที่นี่...",
     "yes": "ใช่",
     "no": "ไม่",
+    "progress": {
+      "questionOf": "คำถาม {current} จาก {total}",
+      "complete": "เสร็จสมบูรณ์ {percent}%",
+      "step": "ขั้นตอนที่ {number}"
+    },
+    "alreadySubmitted": "ส่งแล้ว",
+    "alreadySubmittedMessage": "คุณได้ส่งแบบฟอร์มนี้แล้ว ขอบคุณสำหรับคำตอบของคุณ!",
     "validation": {
       "required": "จำเป็นต้องกรอกข้อมูลนี้",
       "selectAtLeastOne": "กรุณาเลือกอย่างน้อยหนึ่งตัวเลือก",

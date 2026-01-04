@@ -256,6 +256,13 @@
     "typeYourAnswer": "Type your answer here...",
     "yes": "Yes",
     "no": "No",
+    "progress": {
+      "questionOf": "Question {current} of {total}",
+      "complete": "{percent}% Complete",
+      "step": "Step {number}"
+    },
+    "alreadySubmitted": "Already Submitted",
+    "alreadySubmittedMessage": "You have already submitted this form. Thank you for your response!",
     "validation": {
       "required": "This field is required",
       "selectAtLeastOne": "Please select at least one option",
