@@ -10,8 +10,20 @@ import { BarChart3 } from 'lucide-react';
 
 export default function AnalyticsClient() {
   const params = useParams();
-  // Read form ID from URL path if not in params (happens with static export)
-  const formId = (params?.id as string) || (typeof window !== 'undefined' ? window.location.pathname.split('/').at(-2) : '');
+  
+  // Resolve formId robustly
+  let formId = params?.id as string;
+  
+  // Handle static export case or when params aren't ready
+  if (!formId || formId === '__dynamic__') {
+    if (typeof window !== 'undefined') {
+      const pathParts = window.location.pathname.split('/');
+      const formsIndex = pathParts.indexOf('forms');
+      if (formsIndex >= 0 && formsIndex + 1 < pathParts.length) {
+        formId = pathParts[formsIndex + 1];
+      }
+    }
+  }
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
