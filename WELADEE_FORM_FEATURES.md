@@ -52,6 +52,7 @@ The JWT payload must contain the following custom claims:
   "display_name": "Acme Corp",     // Used as Company Name for Enterprise
   "role": "admin",                 // usually "admin" or "user"
   "customer_type": "enterprise",   // "sme", "standard", or "enterprise"
+  "language": "en",                // Language preference: "en", "fr", or "th" (default: "en")
   "logo_url": "https://example.com/logo.png", // Optional, for Enterprise
   "iss": "weladee-form",
   "exp": 1735689600
@@ -83,6 +84,7 @@ type WeladeeUserClaims struct {
 	DisplayName  string `json:"display_name"`
 	Role         string `json:"role"`
 	CustomerType string `json:"customer_type"` // enterprise, standard, sme
+	Language     string `json:"language"`      // Language preference: en, fr, th (default: en)
 	LogoURL      string `json:"logo_url"`
 	jwt.RegisteredClaims
 }
@@ -126,6 +128,7 @@ func main() {
 		DisplayName:  companyName,
 		Role:         "admin",
 		CustomerType: customerType,
+		Language:     "en", // Default language
 		LogoURL:      logoURL,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "weladee-portal",

@@ -597,7 +597,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		secret = "weladee-form-secret-change-in-production"
 	}
 
-	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", "enterprise", "", secret, cfg.JWTPrivateKeyPath, 2*time.Hour)
+	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", "enterprise", "", "en", secret, cfg.JWTPrivateKeyPath, 2*time.Hour)
 	if err != nil {
 		log.Printf("⚠️ Failed to generate JWT token: %v", err)
 		log.Printf("💡 To get a valid JWT token, run: go run ./cmd/server create-jwt")
@@ -677,7 +677,7 @@ func runCreateJWT(cmd *cobra.Command, args []string) error {
 	logoURL, _ := cmd.Flags().GetString("logo-url")
 
 	// Generate JWT token
-	token, err := auth.GenerateToken(1, email, name, "admin", customerType, logoURL, cfg.JWTSecret, cfg.JWTPrivateKeyPath, 2*time.Hour)
+	token, err := auth.GenerateToken(1, email, name, "admin", customerType, logoURL, "en", cfg.JWTSecret, cfg.JWTPrivateKeyPath, 2*time.Hour)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT token: %w", err)
 	}

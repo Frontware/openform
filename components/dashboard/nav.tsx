@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import {
@@ -33,8 +32,8 @@ interface DashboardNavProps {
 }
 
 export function DashboardNav({ user }: DashboardNavProps) {
-  const router = useRouter()
   const locale = useLocale()
+  const t = useTranslations('nav')
 
   const handleSignOut = async () => {
     authSignOut()
@@ -51,18 +50,18 @@ export function DashboardNav({ user }: DashboardNavProps) {
           <Logo href={`/${locale}/dashboard`} />
           <div className="hidden md:flex items-center gap-6">
             <Link 
-              href={`/${locale}/dashboard`}
+              href="/dashboard"
               className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
             >
-              My Forms
+              {t('forms')}
             </Link>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <Link href={`/${locale}/forms/new`}>
+          <Link href="/forms/new">
             <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
-              Create Form
+              {t('create')}
             </Button>
           </Link>
 
@@ -91,15 +90,15 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/dashboard`} className="cursor-pointer">
+                  <Link href="/dashboard" className="cursor-pointer">
                     <UserIcon className="mr-2 h-4 w-4" />
-                    My Forms
+                    {t('forms')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/settings`} className="cursor-pointer">
+                  <Link href="/settings" className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
-                    Settings
+                    {t('settings')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -109,7 +108,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
+                  {t('signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

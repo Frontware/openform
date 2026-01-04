@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { setToken } from '@/lib/auth/weladee';
+import { setToken, parseJWT } from '@/lib/auth/weladee';
 
 export function TokenHandler() {
   const searchParams = useSearchParams();
@@ -16,13 +16,20 @@ export function TokenHandler() {
       setToken(token);
       console.log('[TokenHandler] Token stored to localStorage');
 
-      // Get current locale from URL path
-      const pathLocale = window.location.pathname.split('/')[1];
-      const locale = ['en', 'fr', 'th'].includes(pathLocale) ? pathLocale : 'en';
+      // Parse JWT to get language preference
+      const user = parseJWT(token);
+      let targetLocale = 'en'; // Default language
 
-      console.log('[TokenHandler] Redirecting to:', `/${locale}/dashboard`);
+      if (user && user.language && ['en', 'fr', 'th'].includes(user.language)) {
+        targetLocale = user.language;
+        console.log('[TokenHandler] Language from JWT:', targetLocale);
+      } else {
+        console.log('[TokenHandler] No valid language in JWT, using default: en');
+      }
+
+      console.log('[TokenHandler] Redirecting to:', `/${targetLocale}/dashboard`);
       // Use window.location for redirect instead of Next.js router (works better with static export)
-      window.location.href = `/${locale}/dashboard`;
+      window.location.href = `/${targetLocale}/dashboard`;
     } else {
       console.log('[TokenHandler] Checking localStorage for existing token...');
       const storedToken = localStorage.getItem('weladee_token');

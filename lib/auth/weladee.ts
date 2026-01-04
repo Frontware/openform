@@ -7,6 +7,7 @@ export interface WeladeeUser {
   role: string
   customerType: 'sme' | 'standard' | 'enterprise'
   logoUrl?: string
+  language?: string
 }
 
 export function getToken(): string | null {
@@ -71,6 +72,7 @@ export function parseJWT(token: string): WeladeeUser | null {
       role: 'admin',
       customerType: 'enterprise',
       logoUrl: 'https://weladee.com/logo.png',
+      language: 'en',
     }
   }
 
@@ -96,6 +98,7 @@ export function parseJWT(token: string): WeladeeUser | null {
       role: claims.role || 'user',
       customerType: claims.customer_type || 'sme',
       logoUrl: claims.logo_url,
+      language: claims.language || 'en',
     }
   } catch {
     return null

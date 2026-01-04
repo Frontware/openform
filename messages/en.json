@@ -109,6 +109,45 @@
   "dashboard": {
     "title": "My Forms",
     "subtitle": "Create and manage your forms",
+    "filters": {
+      "title": "Filters & Search",
+      "expand": "Click to expand filter options",
+      "collapse": "Click to collapse",
+      "active": "active",
+      "searchPlaceholder": "Search forms...",
+      "sortBy": "Sort by...",
+      "showing": "Showing",
+      "forms": "forms",
+      "form": "form",
+      "filteredBy": "Filtered by:",
+      "viewing": "Viewing",
+      "search": "Search",
+      "sortedBy": "Sorted by",
+      "status": {
+        "all": "All",
+        "draft": "Draft",
+        "published": "Published",
+        "closed": "Closed"
+      },
+      "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first",
+        "az": "A-Z",
+        "za": "Z-A",
+        "mostResponses": "Most responses",
+        "fewestResponses": "Fewest responses"
+      }
+    },
+    "deleteDialog": {
+      "trigger": "Delete",
+      "title": "Are you sure?",
+      "description": "This will permanently delete \"{title}\" and all its responses. This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "success": "Form deleted successfully",
+      "error": "Failed to delete form"
+    },
     "createFirst": {
       "title": "Create your first form",
       "description": "Build beautiful, engaging forms that people actually want to fill out. One question at a time.",
@@ -122,6 +161,7 @@
       "edit": "Edit",
       "view": "View form",
       "responses": "Responses",
+      "stats": "Stats",
       "copyLink": "Copy link",
       "shareLink": "Share link",
       "more": "More"

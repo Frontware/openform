@@ -109,6 +109,45 @@
   "dashboard": {
     "title": "Mes formulaires",
     "subtitle": "Créez et gérez vos formulaires",
+    "filters": {
+      "title": "Filtres et recherche",
+      "expand": "Cliquez pour voir les options",
+      "collapse": "Cliquez pour masquer",
+      "active": "actif",
+      "searchPlaceholder": "Rechercher des formulaires...",
+      "sortBy": "Trier par...",
+      "showing": "Affichage de",
+      "forms": "formulaires",
+      "form": "formulaire",
+      "filteredBy": "Filtré par :",
+      "viewing": "Affichage",
+      "search": "Recherche",
+      "sortedBy": "Trié par",
+      "status": {
+        "all": "Tous",
+        "draft": "Brouillon",
+        "published": "Publié",
+        "closed": "Fermé"
+      },
+      "sort": {
+        "newest": "Plus récents",
+        "oldest": "Plus anciens",
+        "az": "A-Z",
+        "za": "Z-A",
+        "mostResponses": "Plus de réponses",
+        "fewestResponses": "Moins de réponses"
+      }
+    },
+    "deleteDialog": {
+      "trigger": "Supprimer",
+      "title": "Êtes-vous sûr ?",
+      "description": "Cela supprimera définitivement \"{title}\" et toutes ses réponses. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer",
+      "deleting": "Suppression...",
+      "success": "Formulaire supprimé avec succès",
+      "error": "Échec de la suppression du formulaire"
+    },
     "createFirst": {
       "title": "Créez votre premier formulaire",
       "description": "Construisez de beaux formulaires engageants que les gens ont vraiment envie de remplir. Une question à la fois.",
@@ -122,6 +161,7 @@
       "edit": "Modifier",
       "view": "Voir le formulaire",
       "responses": "Réponses",
+      "stats": "Statistiques",
       "copyLink": "Copier le lien",
       "shareLink": "Partager le lien",
       "more": "Plus"

@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import Link from 'next/link'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Plus, FileText, Loader2 } from 'lucide-react'
@@ -44,6 +44,7 @@ function mapPbFormToDBForm(pbForm: PbForm): DBForm {
 
 export function DashboardClient() {
   const locale = useLocale()
+  const t = useTranslations('dashboard')
   const [forms, setForms] = useState<DBForm[]>([])
   const [loading, setLoading] = useState(true)
   const [responseCounts, setResponseCounts] = useState<Map<string, number>>(new Map())
@@ -144,13 +145,13 @@ export function DashboardClient() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Forms</h1>
-          <p className="text-slate-600 mt-1">Create and manage your forms</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('title')}</h1>
+          <p className="text-slate-600 mt-1">{t('subtitle')}</p>
         </div>
-        <Link href={`/${locale}/forms/new`}>
+        <Link href="/forms/new">
           <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
             <Plus className="w-4 h-4 mr-2" />
-            Create Form
+            {t('createFirst.button')}
           </Button>
         </Link>
       </div>
@@ -171,14 +172,14 @@ export function DashboardClient() {
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-100 to-sky-100 flex items-center justify-center shadow-lg shadow-blue-500/10">
             <FileText className="w-10 h-10 text-blue-500" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Create your first form</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">{t('createFirst.title')}</h2>
           <p className="text-slate-600 mb-8 max-w-md mx-auto leading-relaxed">
-            Build beautiful, engaging forms that people actually want to fill out. One question at a time.
+            {t('createFirst.description')}
           </p>
-          <Link href={`/${locale}/forms/new`}>
+          <Link href="/forms/new">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/25 transition-all hover:shadow-blue-600/35 hover:-translate-y-0.5">
               <Plus className="w-5 h-5 mr-2" />
-              Create your first form
+              {t('createFirst.button')}
             </Button>
           </Link>
         </Card>

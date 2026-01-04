@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Trash2, Loader2 } from 'lucide-react'
 import {
   AlertDialog,
@@ -15,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { formClient } from '@/lib/grpc-client'
 
@@ -25,7 +25,7 @@ interface DeleteFormButtonProps {
 }
 
 export function DeleteFormButton({ formId, formTitle, onDelete }: DeleteFormButtonProps) {
-  const router = useRouter()
+  const t = useTranslations('dashboard.deleteDialog')
   const [isDeleting, setIsDeleting] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -33,7 +33,7 @@ export function DeleteFormButton({ formId, formTitle, onDelete }: DeleteFormButt
     setIsDeleting(true)
     try {
       await formClient.deleteForm({ id: formId })
-      toast.success('Form deleted successfully')
+      toast.success(t('success'))
       setOpen(false)
       // Call the onDelete callback to update parent state
       if (onDelete) {
@@ -41,7 +41,7 @@ export function DeleteFormButton({ formId, formTitle, onDelete }: DeleteFormButt
       }
     } catch (error) {
       console.error('Delete error:', error)
-      toast.error('Failed to delete form')
+      toast.error(t('error'))
     } finally {
       setIsDeleting(false)
     }
@@ -55,19 +55,18 @@ export function DeleteFormButton({ formId, formTitle, onDelete }: DeleteFormButt
           className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
         >
           <Trash2 className="mr-2 h-4 w-4" />
-          Delete
+          {t('trigger')}
         </DropdownMenuItem>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{t('title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete "{formTitle}" and all its responses.
-            This action cannot be undone.
+            {t('description', { title: formTitle })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>{t('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()
@@ -79,10 +78,10 @@ export function DeleteFormButton({ formId, formTitle, onDelete }: DeleteFormButt
             {isDeleting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
+                {t('deleting')}
               </>
             ) : (
-              'Delete'
+              t('confirm')
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

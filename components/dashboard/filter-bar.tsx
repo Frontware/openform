@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Search, ChevronDown, ChevronUp, X, SortAsc } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -31,22 +32,23 @@ export function FilterBar({
   onSortChange,
   resultCount,
 }: FilterBarProps) {
+  const t = useTranslations('dashboard.filters')
   const [isFilterExpanded, setIsFilterExpanded] = useState(true)
 
   const statusOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'draft', label: 'Draft' },
-    { value: 'published', label: 'Published' },
-    { value: 'closed', label: 'Closed' },
+    { value: 'all', label: t('status.all') },
+    { value: 'draft', label: t('status.draft') },
+    { value: 'published', label: t('status.published') },
+    { value: 'closed', label: t('status.closed') },
   ]
 
   const sortOptions = [
-    { value: 'updated_at_desc', label: 'Newest first' },
-    { value: 'updated_at_asc', label: 'Oldest first' },
-    { value: 'title_asc', label: 'A-Z' },
-    { value: 'title_desc', label: 'Z-A' },
-    { value: 'response_count_desc', label: 'Most responses' },
-    { value: 'response_count_asc', label: 'Fewest responses' },
+    { value: 'updated_at_desc', label: t('sort.newest') },
+    { value: 'updated_at_asc', label: t('sort.oldest') },
+    { value: 'title_asc', label: t('sort.az') },
+    { value: 'title_desc', label: t('sort.za') },
+    { value: 'response_count_desc', label: t('sort.mostResponses') },
+    { value: 'response_count_asc', label: t('sort.fewestResponses') },
   ]
 
   const activeFilterCount = [searchQuery ? 1 : 0, statusFilter !== 'all' ? 1 : 0].reduce((a, b) => a + b, 0)
@@ -71,10 +73,10 @@ export function FilterBar({
             </div>
             <div className="text-left">
               <h3 className="text-sm font-semibold text-gray-900">
-                Filters & Search
+                {t('title')}
               </h3>
               <p className="text-xs text-gray-500">
-                {isFilterExpanded ? 'Click to collapse' : 'Click to expand filter options'}
+                {isFilterExpanded ? t('collapse') : t('expand')}
               </p>
             </div>
           </div>
@@ -82,11 +84,11 @@ export function FilterBar({
             {/* Show active filter count */}
             {activeFilterCount > 0 && (
               <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                {activeFilterCount} active
+                {activeFilterCount} {t('active')}
               </span>
             )}
             <span className="text-sm text-gray-500">
-              {isFilterExpanded ? 'Collapse' : 'Expand'}
+              {isFilterExpanded ? t('collapse') : t('expand')}
             </span>
           </div>
         </button>
@@ -106,7 +108,7 @@ export function FilterBar({
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
                   type="text"
-                  placeholder="Search forms..."
+                  placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   className="w-full pl-12 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -127,7 +129,7 @@ export function FilterBar({
                 <div className="relative">
                   <Select value={sortBy} onValueChange={onSortChange}>
                     <SelectTrigger className="appearance-none pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-gray-100 transition-colors w-[180px]">
-                      <SelectValue placeholder="Sort by..." />
+                      <SelectValue placeholder={t('sortBy')} />
                     </SelectTrigger>
                     <SelectContent>
                       {sortOptions.map((option) => (
@@ -165,11 +167,11 @@ export function FilterBar({
           {/* Results Summary */}
           <div className="px-6 py-3 bg-gray-50 flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Showing <span className="font-semibold text-gray-900">{resultCount} form{resultCount !== 1 ? 's' : ''}</span>
+              {t('showing')} <span className="font-semibold text-gray-900">{resultCount} {resultCount === 1 ? t('form') : t('forms')}</span>
             </div>
             {searchQuery && (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Filtered by:</span>
+                <span className="text-sm text-gray-600">{t('filteredBy')}</span>
                 <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-gray-200">
                   <span className="text-sm font-medium text-gray-700">
                     "{searchQuery}"
@@ -191,18 +193,18 @@ export function FilterBar({
       {!isFilterExpanded && (
         <div className="mb-6 flex items-center gap-4 px-4 py-3 bg-white rounded-xl border border-gray-200">
           <span className="text-sm text-gray-600">
-            Viewing: <span className="font-semibold text-gray-900">{statusOptions.find(o => o.value === statusFilter)?.label}</span>
+            {t('viewing')}: <span className="font-semibold text-gray-900">{statusOptions.find(o => o.value === statusFilter)?.label}</span>
           </span>
           {searchQuery && (
             <span className="text-sm text-gray-600">
-              | Search: <span className="font-semibold text-gray-900">"{searchQuery}"</span>
+              | {t('search')}: <span className="font-semibold text-gray-900">"{searchQuery}"</span>
             </span>
           )}
           <span className="text-sm text-gray-600">
-            | Sorted by: <span className="font-semibold text-gray-900">{sortOptions.find(o => o.value === sortBy)?.label}</span>
+            | {t('sortedBy')}: <span className="font-semibold text-gray-900">{sortOptions.find(o => o.value === sortBy)?.label}</span>
           </span>
           <span className="text-sm text-gray-600">
-            | <span className="font-semibold text-gray-900">{resultCount} form{resultCount !== 1 ? 's' : ''}</span>
+            | <span className="font-semibold text-gray-900">{resultCount} {resultCount === 1 ? t('form') : t('forms')}</span>
           </span>
         </div>
       )}

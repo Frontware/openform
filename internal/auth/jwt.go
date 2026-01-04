@@ -25,6 +25,7 @@ type WeladeeUserClaims struct {
 	Role         string `json:"role"`
 	CustomerType string `json:"customer_type"` // enterprise, standard, sme
 	LogoURL      string `json:"logo_url"`
+	Language     string `json:"language"`      // Language preference: en, fr, th (default: en)
 	jwt.RegisteredClaims
 }
 
@@ -117,9 +118,14 @@ func (j *JWTValidator) ValidateToken(token string) (*WeladeeUserClaims, error) {
 
 // GenerateToken generates a JWT token for testing purposes
 // In production, this would be done by the auth service
-func GenerateToken(userID int, email, displayName, role, customerType, logoURL string, secret string, privateKeyPath string, expiration time.Duration) (string, error) {
+func GenerateToken(userID int, email, displayName, role, customerType, logoURL, language string, secret string, privateKeyPath string, expiration time.Duration) (string, error) {
 	if secret == "" {
 		secret = "weladee-form-secret-change-in-production"
+	}
+
+	// Set default language if not provided
+	if language == "" {
+		language = "en"
 	}
 
 	now := time.Now()
@@ -130,6 +136,7 @@ func GenerateToken(userID int, email, displayName, role, customerType, logoURL s
 		Role:         role,
 		CustomerType: customerType,
 		LogoURL:      logoURL,
+		Language:     language,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(expiration)),
 			IssuedAt:  jwt.NewNumericDate(now),
