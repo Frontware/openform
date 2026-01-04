@@ -6,6 +6,7 @@ import { Link } from '@/i18n/navigation'
 import { Form, Response, QuestionConfig, Json } from '@/lib/database.types'
 import { responseClient } from '@/lib/grpc-client'
 import { deleteResponse } from '@/lib/api/response'
+import { getToken, parseJWT } from '@/lib/auth/weladee'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -48,6 +49,7 @@ import {
   File,
   Eye,
   FileJson,
+  FileSpreadsheet,
   LineChart,
 } from 'lucide-react'
 
@@ -129,6 +131,13 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
   const [filePreview, setFilePreview] = useState<FileUpload | null>(null)
   const [isExporting, setIsExporting] = useState(false)
 
+  // Get user's customer type
+  const customerType = useMemo(() => {
+    const token = getToken()
+    const user = token ? parseJWT(token) : null
+    return user?.customerType || 'sme'
+  }, [])
+
   // Filter responses based on search query
   const filteredResponses = useMemo(() => {
     if (!searchQuery.trim()) return responses
@@ -196,13 +205,39 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
     toast.success('CSV exported successfully')
   }
 
-  const handleExport = async (format: 'csv' | 'json') => {
+  const handleExport = async (format: 'csv' | 'json' | 'excel') => {
     if (responses.length === 0) {
       toast.error('No responses to export')
       return
     }
 
-    // Client-side for < 1000 responses
+    // Excel export uses server-side (backend has Excel export utility)
+    if (format === 'excel') {
+      setIsExporting(true)
+      try {
+        const result = await responseClient.exportResponses({
+          formId: form.id,
+          format: format
+        })
+
+        const blob = new Blob([result.data], { type: result.mimeType })
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = result.filename
+        link.click()
+        URL.revokeObjectURL(link.href)
+
+        toast.success('Excel exported successfully')
+      } catch (error) {
+        console.error('Failed to export:', error)
+        toast.error('Failed to export Excel')
+      } finally {
+        setIsExporting(false)
+      }
+      return
+    }
+
+    // Client-side for CSV and JSON with < 1000 responses
     if (responses.length < 1000) {
       if (format === 'csv') {
         exportToCSV()
@@ -212,7 +247,7 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
       return
     }
 
-    // Server-side for >= 1000 responses
+    // Server-side for >= 1000 responses (CSV/JSON)
     setIsExporting(true)
     try {
       const result = await responseClient.exportResponses({
@@ -416,6 +451,12 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
                   <FileJson className="w-4 h-4 mr-2" />
                   Export as JSON
                 </DropdownMenuItem>
+                {customerType === 'enterprise' && (
+                  <DropdownMenuItem onClick={() => handleExport('excel')} disabled={isExporting}>
+                    <FileSpreadsheet className="w-4 h-4 mr-2" />
+                    Export as Excel
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

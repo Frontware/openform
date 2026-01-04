@@ -362,3 +362,77 @@ func ExportResponsesToJSON(questions []sqlc.FormQuestion, rows []sqlc.GetFormRes
 
 	return json.MarshalIndent(output, "", "  ")
 }
+
+// ExportResponsesToExcel exports form responses to Excel format
+func ExportResponsesToExcel(questions []sqlc.FormQuestion, rows []sqlc.GetFormResponsesWithAnswersRow) ([]byte, error) {
+	exporter := NewExcelExporter("Responses")
+
+	// Create header row
+	headers := []string{"Response ID", "Submitted At", "Respondent Email", "Respondent Name"}
+	for _, q := range questions {
+		headers = append(headers, q.Label)
+	}
+	if err := exporter.WriteHeader(headers); err != nil {
+		return nil, err
+	}
+
+	// Group answers by response
+	responseMap := make(map[uuid.UUID]map[uuid.UUID]string)
+	for _, row := range rows {
+		if _, ok := responseMap[row.ResponseID]; !ok {
+			responseMap[row.ResponseID] = make(map[uuid.UUID]string)
+		}
+
+		// Convert answer to string
+		var answerStr string
+		if row.AnswerText.Valid {
+			answerStr = row.AnswerText.String
+		} else if row.AnswerNumber.Valid {
+			flt, _ := row.AnswerNumber.Float64Value()
+			answerStr = strconv.FormatFloat(flt.Float64, 'f', -1, 64)
+		} else if row.AnswerDate.Valid {
+			answerStr = row.AnswerDate.Time.Format("2006-01-02")
+		} else if row.AnswerTime.Valid {
+			micros := row.AnswerTime.Microseconds
+			t := time.Date(0, 0, 0, 0, 0, int(micros), 0, time.UTC)
+			answerStr = t.Format("15:04:05")
+		} else if len(row.AnswerChoices) > 0 {
+			answerStr = string(row.AnswerChoices)
+		}
+
+		// Convert pgtype.UUID to uuid.UUID for map key
+		questionUUID, _ := uuid.FromBytes(row.QuestionID.Bytes[:])
+		responseMap[row.ResponseID][questionUUID] = answerStr
+	}
+
+	// Write rows
+	seenResponses := make(map[uuid.UUID]bool)
+	for _, row := range rows {
+		if seenResponses[row.ResponseID] {
+			continue
+		}
+		seenResponses[row.ResponseID] = true
+
+		record := []string{
+			row.ResponseID.String(),
+			row.SubmittedAt.Time.Format(time.RFC3339),
+			row.RespondentEmail.String,
+			row.RespondentName.String,
+		}
+
+		// Add answers in question order
+		for _, q := range questions {
+			if answers, ok := responseMap[row.ResponseID]; ok {
+				record = append(record, answers[q.ID])
+			} else {
+				record = append(record, "")
+			}
+		}
+
+		if err := exporter.WriteRow(record); err != nil {
+			return nil, err
+		}
+	}
+
+	return exporter.GetBytes()
+}

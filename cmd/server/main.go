@@ -271,6 +271,14 @@ func (a *connectAnalyticsServiceAdapter) ExportAnalytics(ctx context.Context, re
 	return connect.NewResponse(resp), nil
 }
 
+// serveEmbeddedFiles serves the embedded Next.js frontend files
+// This is a placeholder that returns 404 - full implementation would use go:embed
+func serveEmbeddedFiles(w http.ResponseWriter, r *http.Request) {
+	// For now, return 404 since embedded files are not configured
+	// In production, this would serve files from an embedded filesystem
+	http.NotFound(w, r)
+}
+
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "weladee-form",

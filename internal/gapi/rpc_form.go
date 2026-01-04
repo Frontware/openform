@@ -138,6 +138,35 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 		return nil, err
 	}
 
+	// Check form limit based on customer_type
+	claims, err := auth.GetUserClaims(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get user claims: %v", err)
+	}
+
+	// Get user's current form count
+	count, err := s.db.Queries.CountUserForms(ctx, user.ID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to count forms: %v", err)
+	}
+
+	var maxForms int
+	switch claims.CustomerType {
+	case "enterprise":
+		maxForms = -1 // Unlimited
+	case "standard":
+		maxForms = 15
+	case "sme":
+		maxForms = 5
+	default:
+		maxForms = 5 // Default to SME limit
+	}
+
+	if maxForms > 0 && count >= int64(maxForms) {
+		return nil, status.Errorf(codes.ResourceExhausted,
+			"form limit reached for %s customer: maximum %d forms", claims.CustomerType, maxForms)
+	}
+
 	var createdFormID uuid.UUID
 
 	err = s.db.ExecTx(ctx, func(q *sqlc.Queries) error {
@@ -563,6 +592,19 @@ func (s *FormServerImpl) CreateQuestion(ctx context.Context, req *pb.CreateQuest
 	form, err := s.db.Queries.GetForm(ctx, formID)
 	if err != nil || form.UserID != user.ID {
 		return nil, status.Errorf(codes.PermissionDenied, "not form owner")
+	}
+
+	// Check if file_upload question type - Enterprise only
+	if req.Type == pb.QuestionType_QUESTION_TYPE_FILE_UPLOAD {
+		claims, err := auth.GetUserClaims(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to get user claims: %v", err)
+		}
+
+		if claims.CustomerType != "enterprise" {
+			return nil, status.Errorf(codes.PermissionDenied,
+				"file upload questions are only available for Enterprise customers")
+		}
 	}
 
 	// Validate question type - reject UNSPECIFIED

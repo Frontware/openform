@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Form, QuestionConfig, ThemePreset, FormStatus } from '@/lib/database.types'
 import { questionTypes, createDefaultQuestion } from '@/lib/questions'
@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
+import { getToken, parseJWT } from '@/lib/auth/weladee'
 import {
   Dialog,
   DialogContent,
@@ -127,6 +128,16 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
   const [showAddQuestion, setShowAddQuestion] = useState(false)
   const [activeTab, setActiveTab] = useState('questions')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+  // Get user's customer type and filter available question types
+  const availableQuestionTypes = useMemo(() => {
+    const token = getToken()
+    const user = token ? parseJWT(token) : null
+    const customerType = user?.customerType || 'sme'
+
+    // Hide file_upload for non-enterprise users
+    return questionTypes.filter(qt => qt.type !== 'file_upload' || customerType === 'enterprise')
+  }, [])
 
   const selectedQuestion = questions.find(q => q.id === selectedQuestionId)
 
@@ -662,7 +673,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-3 gap-3 py-4">
-            {questionTypes.map((qt) => (
+            {availableQuestionTypes.map((qt) => (
               <button
                 key={qt.type}
                 onClick={() => addQuestion(qt.type)}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { Form, QuestionConfig, Json } from '@/lib/database.types'
 import { getTheme, getThemeCSSVariables } from '@/lib/themes'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,6 +11,7 @@ import { QuestionRenderer } from './question-renderer'
 import { toast } from 'sonner'
 import { responseClient, analyticsClient } from '@/lib/grpc-client'
 import { AnswerInput } from '@/lib/proto/proto/response_pb'
+import { getToken, parseJWT } from '@/lib/auth/weladee'
 
 interface FormPlayerProps {
   form: Form & { force_captcha?: boolean }
@@ -45,6 +46,12 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
 
   const containerRef = useRef<HTMLDivElement>(null)
   const skipNextValidationRef = useRef(false)
+
+  // Get user claims for company branding (Enterprise only)
+  const userClaims = useMemo(() => {
+    const token = getToken()
+    return token ? parseJWT(token) : null
+  }, [])
 
   const currentQuestion = questions[currentIndex]
   const isLastQuestion = currentIndex === questions.length - 1
@@ -330,23 +337,41 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
             Your response has been recorded.
           </p>
           
-          {/* Weladee Form branding */}
+          {/* Company branding (Enterprise) or Weladee Form branding */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
             className="mt-12"
           >
-            <a 
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm opacity-50 hover:opacity-70 transition-opacity"
-              style={{ color: theme.textColor }}
-            >
-              <span>Made with</span>
-              <span className="font-semibold">Weladee Form</span>
-            </a>
+            {userClaims?.customerType === 'enterprise' ? (
+              <div className="inline-flex items-center gap-2 text-sm opacity-70">
+                {userClaims.logoUrl && (
+                  <img
+                    src={userClaims.logoUrl}
+                    alt="Company Logo"
+                    className="h-6 w-auto object-contain"
+                  />
+                )}
+                <span
+                  className="font-semibold"
+                  style={{ color: theme.textColor }}
+                >
+                  {userClaims.displayName}
+                </span>
+              </div>
+            ) : (
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm opacity-50 hover:opacity-70 transition-opacity"
+                style={{ color: theme.textColor }}
+              >
+                <span>Made with</span>
+                <span className="font-semibold">Weladee Form</span>
+              </a>
+            )}
           </motion.div>
         </motion.div>
       </div>
@@ -576,16 +601,31 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
           </Button>
         </div>
 
-        {/* Weladee Form branding */}
-        <a 
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm opacity-50 hover:opacity-70 transition-opacity"
-          style={{ color: theme.textColor }}
-        >
-          Powered by <span className="font-semibold">Weladee Form</span>
-        </a>
+        {/* Company branding (Enterprise) or Weladee Form branding */}
+        {userClaims?.customerType === 'enterprise' ? (
+          <div className="flex items-center gap-2 text-sm opacity-70">
+            {userClaims.logoUrl && (
+              <img
+                src={userClaims.logoUrl}
+                alt="Company Logo"
+                className="h-6 w-auto object-contain"
+              />
+            )}
+            <span className="font-medium" style={{ color: theme.textColor }}>
+              {userClaims.displayName}
+            </span>
+          </div>
+        ) : (
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm opacity-50 hover:opacity-70 transition-opacity"
+            style={{ color: theme.textColor }}
+          >
+            Powered by <span className="font-semibold">Weladee Form</span>
+          </a>
+        )}
       </footer>
     </div>
   )

@@ -475,6 +475,20 @@ func (s *ResponseServerImpl) ExportResponses(ctx context.Context, req *pb.Export
 		return nil, err
 	}
 
+	// Check customer_type for Excel export access (Enterprise only)
+	format := strings.ToLower(req.Format)
+	if format == "excel" {
+		claims, err := auth.GetUserClaims(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to get user claims: %v", err)
+		}
+
+		if claims.CustomerType != "enterprise" {
+			return nil, status.Errorf(codes.PermissionDenied,
+				"Excel export is only available for Enterprise customers")
+		}
+	}
+
 	// Fetch questions (for headers/order)
 	questions, err := s.db.Queries.ListFormQuestions(ctx, formID)
 	if err != nil {
@@ -491,7 +505,6 @@ func (s *ResponseServerImpl) ExportResponses(ctx context.Context, req *pb.Export
 	var mimeType string
 	var filename string
 
-	format := strings.ToLower(req.Format)
 	timestamp := time.Now().Format("20060102-150405")
 
 	switch format {
@@ -511,8 +524,16 @@ func (s *ResponseServerImpl) ExportResponses(ctx context.Context, req *pb.Export
 		mimeType = "application/json"
 		filename = fmt.Sprintf("weladee-form-%s-responses-%s.json", formID.String()[:8], timestamp)
 
+	case "excel":
+		data, err = utils.ExportResponsesToExcel(questions, rows)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to generate Excel: %v", err)
+		}
+		mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+		filename = fmt.Sprintf("weladee-form-%s-responses-%s.xlsx", formID.String()[:8], timestamp)
+
 	default:
-		return nil, status.Errorf(codes.InvalidArgument, "unsupported format: %s (supported: csv, json)", req.Format)
+		return nil, status.Errorf(codes.InvalidArgument, "unsupported format: %s (supported: csv, json, excel)", req.Format)
 	}
 
 	return &pb.ExportResponsesResponse{

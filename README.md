@@ -9,11 +9,32 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - **7 beautiful themes** - Midnight, Ocean, Sunset, Forest, Lavender, Weladee, Minimal
 - **Keyboard navigation** - Navigate with Enter, arrow keys, and scroll wheel
 - **Mobile-first forms** - Responsive form-taking experience
-- **Secure authentication** - JWT token validation
-- **Response dashboard** - View, search, filter, and export to CSV/JSON
-- **13 question types** - Text, multiple choice, rating, file upload, and more
+- **Secure authentication** - JWT token validation with RSA key support
+- **Customer-based feature tiers** - SME, Standard, and Enterprise with different capabilities
+- **Company branding** - Enterprise users can add their logo to forms
+- **Response dashboard** - View, search, filter, and export to CSV/JSON/Excel
+- **13 question types** - Text, multiple choice, rating, file upload (Enterprise), and more
 - **Internationalization** - Support for English, Thai, and French with in-app language switcher
 - **Bot protection** - Optional Google reCAPTCHA v3 for form submissions
+
+## Customer Type Features
+
+Weladee Form supports three customer tiers with different feature sets:
+
+| Feature | SME | Standard | Enterprise |
+|:---|:---:|:---:|:---:|
+| Max Forms | 5 | 15 | Unlimited |
+| File Upload Questions | ❌ | ❌ | ✅ |
+| Company Branding | ❌ | ❌ | ✅ |
+| Export to CSV | ✅ | ✅ | ✅ |
+| Export to Excel | ❌ | ❌ | ✅ |
+
+### Feature Enforcement
+
+Feature restrictions are enforced at both backend and frontend levels:
+
+- **Backend**: gRPC services validate customer type before allowing restricted operations
+- **Frontend**: UI hides/disables options based on the user's customer type from their JWT token
 
 ## Question types
 

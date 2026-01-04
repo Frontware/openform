@@ -5,6 +5,8 @@ export interface WeladeeUser {
   email: string
   displayName: string
   role: string
+  customerType: 'sme' | 'standard' | 'enterprise'
+  logoUrl?: string
 }
 
 export function getToken(): string | null {
@@ -67,6 +69,8 @@ export function parseJWT(token: string): WeladeeUser | null {
       email: 'test@weladee.com',
       displayName: 'Test User',
       role: 'admin',
+      customerType: 'enterprise',
+      logoUrl: 'https://weladee.com/logo.png',
     }
   }
 
@@ -90,6 +94,8 @@ export function parseJWT(token: string): WeladeeUser | null {
       email: claims.email || '',
       displayName: claims.display_name || claims.name || '',
       role: claims.role || 'user',
+      customerType: claims.customer_type || 'sme',
+      logoUrl: claims.logo_url,
     }
   } catch {
     return null
