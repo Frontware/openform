@@ -39,11 +39,21 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	// Set up Viper
 	v := viper.New()
 
-	// Set config file name and paths
-	v.SetConfigName("config")
-	v.SetConfigType("yaml")
-	v.AddConfigPath(".")
-	v.AddConfigPath("./config")
+	// Handle config file
+	cfgFile := ""
+	if cmd != nil {
+		cfgFile, _ = cmd.Flags().GetString("config")
+	}
+
+	if cfgFile != "" {
+		v.SetConfigFile(cfgFile)
+	} else {
+		// Set config file name and paths
+		v.SetConfigName("config")
+		v.SetConfigType("yaml")
+		v.AddConfigPath(".")
+		v.AddConfigPath("./config")
+	}
 
 	// Enable reading from environment variables
 	v.SetEnvPrefix("WeladeeForm")
@@ -75,20 +85,37 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	// Read config file (ignore error if file doesn't exist)
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, fmt.Errorf("failed to read config file: %w", err)
+			// If config file was explicitly specified but not found, return error
+			if cfgFile != "" {
+				return nil, fmt.Errorf("failed to read config file: %w", err)
+			}
+			// Otherwise continue (might get config from env or flags)
 		}
 	}
 
 	// Bind command line flags (highest priority)
 	if cmd != nil {
-		flags := []string{
-			"grpc-port", "database-url", "jwt-secret",
-			"s3-region", "s3-bucket", "s3-access-key", "s3-secret-key", "s3-endpoint",
-			"recaptcha-enabled", "recaptcha-site-key", "recaptcha-secret-key", "recaptcha-threshold",
+		// Map flag names to Viper configuration keys (matching mapstructure tags)
+		flagBindings := map[string]string{
+			"grpc-port":            "grpc_port",
+			"database-url":         "database_url",
+			"jwt-secret":           "jwt_secret",
+			"s3-region":            "s3_region",
+			"s3-bucket":            "s3_bucket",
+			"s3-access-key":        "s3_access_key",
+			"s3-secret-key":        "s3_secret_key",
+			"s3-endpoint":          "s3_endpoint",
+			"recaptcha-enabled":    "recaptcha.enabled",
+			"recaptcha-site-key":   "recaptcha.site_key",
+			"recaptcha-secret-key": "recaptcha.secret_key",
+			"recaptcha-threshold":  "recaptcha.threshold",
 		}
-		for _, flag := range flags {
-			if err := v.BindPFlag(flag, cmd.Flags().Lookup(flag)); err != nil {
-				return nil, fmt.Errorf("failed to bind flag %s: %w", flag, err)
+
+		for flagName, configKey := range flagBindings {
+			if f := cmd.Flags().Lookup(flagName); f != nil {
+				if err := v.BindPFlag(configKey, f); err != nil {
+					return nil, fmt.Errorf("failed to bind flag %s: %w", flagName, err)
+				}
 			}
 		}
 	}
@@ -155,6 +182,7 @@ func AddFlags(cmd *cobra.Command) {
 		defaultValue string
 		description  string
 	}{
+		{"config", "c", "", "config file (default is ./config.yaml)"},
 		{"grpc-port", "p", "50051", "gRPC server port"},
 		{"database-url", "d", "", "PostgreSQL database URL (required)"},
 		{"jwt-secret", "", "", "JWT secret key (default: weladee-form-secret-change-in-production)"},

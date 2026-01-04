@@ -10,7 +10,24 @@ import { ConnectError } from "@bufbuild/connect";
 // The base URL for the gRPC-Web server
 // Use empty string for same-origin requests (embedded build where frontend is served from same Go binary)
 // Set NEXT_PUBLIC_GRPC_URL during build for external API configuration
-const baseUrl = process.env.NEXT_PUBLIC_GRPC_URL || "";
+const getBaseUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_GRPC_URL || "";
+  
+  if (typeof window !== 'undefined') {
+    // If the baked-in URL is localhost but the page is accessed via a real IP/hostname,
+    // default to the current origin (same-origin)
+    const isLocalhostEnv = envUrl.includes('localhost') || envUrl.includes('127.0.0.1');
+    const isLocalhostPage = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    if (isLocalhostEnv && !isLocalhostPage) {
+      return ""; // Use relative URL (same origin)
+    }
+  }
+  
+  return envUrl;
+};
+
+const baseUrl = getBaseUrl();
 
 const transport = createGrpcWebTransport({
   baseUrl,

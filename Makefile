@@ -397,5 +397,5 @@ deploy: build-linux ## Deploy Linux binary to remote server
 		echo "Linux binary not found. Run 'make build-linux' first"; \
 		exit 1; \
 	fi
-	scp $(BINARY_DIR)/$(BINARY_NAME)-linux frontware@192.168.1.28:/media/data/grpc/
+	rsync $(BINARY_DIR)/$(BINARY_NAME)-linux frontware@192.168.1.28:/media/data/grpc/
 	@echo "Deployment completed successfully!"
