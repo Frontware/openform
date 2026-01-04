@@ -28,8 +28,10 @@ type AuthInterceptor struct {
 func NewAuthInterceptor(validator *JWTValidator) *AuthInterceptor {
 	// Methods that don't require authentication
 	publicMethods := map[string]bool{
-		"/weladee.form.v1.FormService/GetFormBySlug":      true, // Public forms
-		"/weladee.form.v1.ResponseService/SubmitResponse": true, // Allow anonymous responses
+		"/weladee.form.v1.FormService/GetFormBySlug":       true, // Public forms
+		"/weladee.form.v1.ResponseService/SubmitResponse":  true, // Allow anonymous responses
+		"/weladee.form.v1.AnalyticsService/TrackView":      true, // Track public form views
+		"/weladee.form.v1.AnalyticsService/TrackResponseStart": true, // Track public form starts
 	}
 
 	return &AuthInterceptor{
@@ -142,8 +144,10 @@ func (w *wrappedServerStream) Context() context.Context {
 func NewConnectAuthInterceptor(validator *JWTValidator) connect.UnaryInterceptorFunc {
 	// Methods that don't require authentication (same as gRPC interceptor)
 	publicMethods := map[string]bool{
-		"/weladee.form.v1.FormService/GetFormBySlug":      true,
-		"/weladee.form.v1.ResponseService/SubmitResponse": true,
+		"/weladee.form.v1.FormService/GetFormBySlug":       true,
+		"/weladee.form.v1.ResponseService/SubmitResponse":  true,
+		"/weladee.form.v1.AnalyticsService/TrackView":      true, // Track public form views
+		"/weladee.form.v1.AnalyticsService/TrackResponseStart": true, // Track public form starts
 	}
 
 	return func(next connect.UnaryFunc) connect.UnaryFunc {

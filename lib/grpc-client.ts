@@ -20,7 +20,9 @@ const transport = createGrpcWebTransport({
       // List of public methods that don't require authentication
       const publicMethods = [
         '/weladee.form.v1.FormService/GetFormBySlug',
-        '/weladee.form.v1.ResponseService/SubmitResponse'
+        '/weladee.form.v1.ResponseService/SubmitResponse',
+        '/weladee.form.v1.AnalyticsService/TrackView',
+        '/weladee.form.v1.AnalyticsService/TrackResponseStart'
       ];
 
       // Check if this is a public method

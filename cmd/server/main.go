@@ -6,15 +6,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
 
+	"connectrpc.com/connect"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
-	"connectrpc.com/connect"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
@@ -295,6 +296,15 @@ func main() {
 	createJWTCmd.Flags().String("email", "", "User email address")
 	rootCmd.AddCommand(createJWTCmd)
 
+	// Add config command
+	var configCmd = &cobra.Command{
+		Use:   "config",
+		Short: "Open configuration file in nano editor",
+		Long:  "Opens the config.yaml file in the nano text editor for easy configuration editing.",
+		RunE:  runConfig,
+	}
+	rootCmd.AddCommand(configCmd)
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalf("Failed to execute command: %v", err)
 	}
@@ -407,7 +417,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		ct := r.Header.Get("Content-Type")
 		// Connect protocol content types
 		return strings.Contains(ct, "application/connect+") ||
-		 strings.Contains(ct, "application/json") && r.Method == "POST"
+			strings.Contains(ct, "application/json") && r.Method == "POST"
 	}
 
 	// Setup CORS
@@ -633,5 +643,56 @@ func runCreateJWT(cmd *cobra.Command, args []string) error {
 	fmt.Println(token)
 	fmt.Printf("User: %s (%s) - Role: admin\n", name, email)
 	fmt.Println("Token expires in 2 hours.")
+	return nil
+}
+
+func runConfig(cmd *cobra.Command, args []string) error {
+	// Check if config.yaml exists
+	configFile := "config.yaml"
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		fmt.Printf("Config file %s not found.\n", configFile)
+		fmt.Println("You can create one by copying config.example.yaml:")
+		fmt.Printf("  cp config.example.yaml %s\n", configFile)
+		return nil
+	}
+
+	// Try to open with nano first
+	editor := "nano"
+	cmdExec := exec.Command(editor, configFile)
+	cmdExec.Stdin = os.Stdin
+	cmdExec.Stdout = os.Stdout
+	cmdExec.Stderr = os.Stderr
+
+	if err := cmdExec.Run(); err != nil {
+		// If nano is not available, try vim
+		fmt.Printf("Failed to open with %s: %v\n", editor, err)
+		fmt.Println("Trying with vim...")
+
+		editor = "vim"
+		cmdExec = exec.Command(editor, configFile)
+		cmdExec.Stdin = os.Stdin
+		cmdExec.Stdout = os.Stdout
+		cmdExec.Stderr = os.Stderr
+
+		if err := cmdExec.Run(); err != nil {
+			// If vim is not available, try vi
+			fmt.Printf("Failed to open with %s: %v\n", editor, err)
+			fmt.Println("Trying with vi...")
+
+			editor = "vi"
+			cmdExec = exec.Command(editor, configFile)
+			cmdExec.Stdin = os.Stdin
+			cmdExec.Stdout = os.Stdout
+			cmdExec.Stderr = os.Stderr
+
+			if err := cmdExec.Run(); err != nil {
+				fmt.Printf("Failed to open with %s: %v\n", editor, err)
+				fmt.Println("Please install a text editor (nano, vim, or vi) to edit the config file.")
+				return fmt.Errorf("failed to open config file with any available editor")
+			}
+		}
+	}
+
+	fmt.Println("Config file closed.")
 	return nil
 }

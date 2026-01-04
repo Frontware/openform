@@ -405,6 +405,7 @@ make help            # Show all available commands
 # Direct Go commands
 ./bin/weladee-form serve                       # Run server
 ./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"  # Generate JWT token
+./bin/weladee-form config                      # Open config.yaml in nano editor
 go build -o bin/weladee-form cmd/server/main.go  # Build binary
 sqlc generate                                  # Generate SQLC code
 ```
