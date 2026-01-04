@@ -686,8 +686,21 @@ func (s *FormServerImpl) UpdateQuestion(ctx context.Context, req *pb.UpdateQuest
 
 	// Override with provided values
 	if req.Type != nil {
+		log.Printf("[UpdateQuestion] req.Type = %d (QUESTION_TYPE_UNSPECIFIED = %d)", *req.Type, pb.QuestionType_QUESTION_TYPE_UNSPECIFIED)
 		if *req.Type != pb.QuestionType_QUESTION_TYPE_UNSPECIFIED {
-			params.Type = mapQuestionTypeToDB(*req.Type)
+			mappedType := mapQuestionTypeToDB(*req.Type)
+			log.Printf("[UpdateQuestion] Mapped type: '%s'", mappedType)
+			if mappedType == "" {
+				log.Printf("[UpdateQuestion] WARNING: mapQuestionTypeToDB returned empty string for enum value %d, keeping existing type", *req.Type)
+				// Keep the existing type by setting params.Type to empty string
+				// The SQL query uses COALESCE(NULLIF(@type::text, ''), type) which will fall back to the existing value
+				params.Type = ""
+			} else {
+				params.Type = mappedType
+			}
+		} else {
+			log.Printf("[UpdateQuestion] Type is UNSPECIFIED, keeping existing type: '%s'", params.Type)
+			params.Type = ""
 		}
 	}
 	if req.Label != nil {

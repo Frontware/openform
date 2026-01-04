@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { Form, Response, QuestionConfig, Json } from '@/lib/database.types'
 import { responseClient } from '@/lib/grpc-client'
 import { deleteResponse } from '@/lib/api/response'

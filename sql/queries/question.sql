@@ -9,10 +9,10 @@ RETURNING *;
 -- name: UpdateQuestion :one
 UPDATE form.questions
 SET
-    type = COALESCE(@type::text, type),
-    label = COALESCE(@label::text, label),
-    description = COALESCE(@description::text, description),
-    placeholder = COALESCE(@placeholder::text, placeholder),
+    type = COALESCE(NULLIF(@type::text, ''), type),
+    label = COALESCE(NULLIF(@label::text, ''), label),
+    description = COALESCE(NULLIF(@description::text, ''), description),
+    placeholder = COALESCE(NULLIF(@placeholder::text, ''), placeholder),
     required = COALESCE(@required::boolean, required),
     order_index = COALESCE(@order_index::int, order_index),
     options = COALESCE(@options::jsonb, options),

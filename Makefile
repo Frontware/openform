@@ -46,6 +46,8 @@ run: ## Run the compiled binary
 .PHONY: build-client
 build-client: ## Build Next.js client for embedding
 	@echo "Building Next.js client..."
+	@echo "Note: For embedded builds, frontend uses same-origin by default."
+	@echo "      Set NEXT_PUBLIC_GRPC_URL or NEXT_PUBLIC_API_URL to use external API."
 	@if command -v npm >/dev/null 2>&1; then \
 		npm run build; \
 	else \

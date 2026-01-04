@@ -67,7 +67,8 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
   // Fetch reCAPTCHA site key when form requires it
   useEffect(() => {
     if (form.force_captcha && !recaptchaSiteKey) {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:50051' : '')
+      // Use same-origin for embedded builds, or set NEXT_PUBLIC_API_URL for external API
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || ""
       fetch(`${apiBase}/api/config/recaptcha`)
         .then(res => {
           if (!res.ok) {

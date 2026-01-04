@@ -95,10 +95,10 @@ func (q *Queries) ReorderQuestions(ctx context.Context, arg ReorderQuestionsPara
 const updateQuestion = `-- name: UpdateQuestion :one
 UPDATE form.questions
 SET
-    type = COALESCE($1::text, type),
-    label = COALESCE($2::text, label),
-    description = COALESCE($3::text, description),
-    placeholder = COALESCE($4::text, placeholder),
+    type = COALESCE(NULLIF($1::text, ''), type),
+    label = COALESCE(NULLIF($2::text, ''), label),
+    description = COALESCE(NULLIF($3::text, ''), description),
+    placeholder = COALESCE(NULLIF($4::text, ''), placeholder),
     required = COALESCE($5::boolean, required),
     order_index = COALESCE($6::int, order_index),
     options = COALESCE($7::jsonb, options),

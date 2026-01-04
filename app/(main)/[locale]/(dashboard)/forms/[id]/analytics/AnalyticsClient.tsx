@@ -6,11 +6,12 @@ import { analyticsClient } from '@/lib/grpc-client';
 import { AnalyticsDashboard } from '@/components/analytics/analytics-dashboard';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorMessage } from '@/components/ui/error';
+import { BarChart3 } from 'lucide-react';
 
 export default function AnalyticsClient() {
   const params = useParams();
   // Read form ID from URL path if not in params (happens with static export)
-  const formId = (params?.id as string) || (typeof window !== 'undefined' ? window.location.pathname.split('/').slice(-2)[0] : '');
+  const formId = (params?.id as string) || (typeof window !== 'undefined' ? window.location.pathname.split('/').at(-2) : '');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,8 +102,20 @@ export default function AnalyticsClient() {
     );
   }
 
+  if (!formId) {
+    return null;
+  }
+
   if (!analyticsData) {
-      return null;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <BarChart3 className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">No analytics data yet</h2>
+          <p className="text-slate-600">Share your form to start collecting analytics</p>
+        </div>
+      </div>
+    );
   }
 
   return (

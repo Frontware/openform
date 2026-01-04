@@ -7,23 +7,38 @@ import { AnalyticsService } from "./proto/proto/analytics_connect";
 import { getToken, clearToken } from "./auth/weladee";
 import { ConnectError } from "@bufbuild/connect";
 
-// The base URL for the gRPC-Web server (Envoy or gRPC server if it supports web)
-// For now, assuming the Go server listens on a port that supports gRPC-Web or we use a proxy.
-const baseUrl = process.env.NEXT_PUBLIC_GRPC_URL || "http://localhost:50051";
+// The base URL for the gRPC-Web server
+// Use empty string for same-origin requests (embedded build where frontend is served from same Go binary)
+// Set NEXT_PUBLIC_GRPC_URL during build for external API configuration
+const baseUrl = process.env.NEXT_PUBLIC_GRPC_URL || "";
 
 const transport = createGrpcWebTransport({
   baseUrl,
   interceptors: [
-    // Auth interceptor: Add token to all requests
+    // Auth interceptor: Add token to all requests except public methods
     (next) => async (req) => {
-      const token = getToken();
-      console.log('[gRPC Interceptor] Token for request:', token ? 'present' : 'MISSING!');
-      if (token) {
-        req.header.set("Authorization", `Bearer ${token}`);
-        console.log('[gRPC Interceptor] Authorization header set');
+      // List of public methods that don't require authentication
+      const publicMethods = [
+        '/weladee.form.v1.FormService/GetFormBySlug',
+        '/weladee.form.v1.ResponseService/SubmitResponse'
+      ];
+
+      // Check if this is a public method
+      const isPublicMethod = publicMethods.includes(req.url);
+      
+      if (!isPublicMethod) {
+        const token = getToken();
+        console.log('[gRPC Interceptor] Token for request:', token ? 'present' : 'MISSING!');
+        if (token) {
+          req.header.set("Authorization", `Bearer ${token}`);
+          console.log('[gRPC Interceptor] Authorization header set');
+        } else {
+          console.log('[gRPC Interceptor] WARNING: No token available!');
+        }
       } else {
-        console.log('[gRPC Interceptor] WARNING: No token available!');
+        console.log('[gRPC Interceptor] Skipping auth for public method:', req.url);
       }
+      
       return await next(req);
     },
     // Error interceptor: Handle auth failures
