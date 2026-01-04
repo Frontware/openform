@@ -1856,6 +1856,745 @@ function NPSChart({ stats }) {
 
 ---
 
+## 📥 Phase 4.5: Export Analytics Implementation (Day 6.5)
+
+### Step 4.5.1: Export Utilities
+
+**File:** `internal/utils/export.go`
+
+```go
+package utils
+
+import (
+    "bytes"
+    "encoding/csv"
+    "fmt"
+    "time"
+
+    "github.com/xuri/excelize/v2"
+)
+
+// CSVExporter handles CSV export
+type CSVExporter struct {
+    buffer *bytes.Buffer
+    writer *csv.Writer
+}
+
+func NewCSVExporter() *CSVExporter {
+    buffer := &bytes.Buffer{}
+    return &CSVExporter{
+        buffer: buffer,
+        writer: csv.NewWriter(buffer),
+    }
+}
+
+func (e *CSVExporter) WriteHeader(headers []string) error {
+    return e.writer.Write(headers)
+}
+
+func (e *CSVExporter) WriteRow(row []string) error {
+    return e.writer.Write(row)
+}
+
+func (e *CSVExporter) GetBytes() []byte {
+    e.writer.Flush()
+    return e.buffer.Bytes()
+}
+
+// ExcelExporter handles Excel export
+type ExcelExporter struct {
+    file      *excelize.File
+    sheetName string
+    rowIndex  int
+}
+
+func NewExcelExporter(sheetName string) *ExcelExporter {
+    f := excelize.NewFile()
+    index, _ := f.NewSheet(sheetName)
+    f.SetActiveSheet(index)
+    f.DeleteSheet("Sheet1") // Remove default sheet
+
+    return &ExcelExporter{
+        file:      f,
+        sheetName: sheetName,
+        rowIndex:  1,
+    }
+}
+
+func (e *ExcelExporter) WriteHeader(headers []string) error {
+    // Style for headers
+    style, err := e.file.NewStyle(&excelize.Style{
+        Font: &excelize.Font{
+            Bold: true,
+            Size: 12,
+        },
+        Fill: excelize.Fill{
+            Type:    "pattern",
+            Color:   []string{"#4F46E5"},
+            Pattern: 1,
+        },
+        Alignment: &excelize.Alignment{
+            Horizontal: "center",
+            Vertical:   "center",
+        },
+    })
+    if err != nil {
+        return err
+    }
+
+    for i, header := range headers {
+        cell := fmt.Sprintf("%s%d", columnName(i), e.rowIndex)
+        e.file.SetCellValue(e.sheetName, cell, header)
+        e.file.SetCellStyle(e.sheetName, cell, cell, style)
+    }
+
+    e.rowIndex++
+    return nil
+}
+
+func (e *ExcelExporter) WriteRow(row []string) error {
+    for i, value := range row {
+        cell := fmt.Sprintf("%s%d", columnName(i), e.rowIndex)
+        e.file.SetCellValue(e.sheetName, cell, value)
+    }
+    e.rowIndex++
+    return nil
+}
+
+func (e *ExcelExporter) AddChart(chartType, title string, dataRange string) error {
+    chart := &excelize.Chart{
+        Type: chartType,
+        Series: []excelize.ChartSeries{
+            {
+                Name:       title,
+                Categories: dataRange,
+                Values:     dataRange,
+            },
+        },
+        Title: []excelize.RichTextRun{
+            {
+                Text: title,
+            },
+        },
+    }
+
+    cell := fmt.Sprintf("H%d", e.rowIndex+2)
+    return e.file.AddChart(e.sheetName, cell, chart)
+}
+
+func (e *ExcelExporter) GetBytes() ([]byte, error) {
+    // Auto-fit columns
+    for i := 0; i < 20; i++ {
+        col := columnName(i)
+        e.file.SetColWidth(e.sheetName, col, col, 15)
+    }
+
+    buffer := &bytes.Buffer{}
+    if err := e.file.Write(buffer); err != nil {
+        return nil, err
+    }
+    return buffer.Bytes(), nil
+}
+
+func columnName(index int) string {
+    name := ""
+    for index >= 0 {
+        name = string(rune('A'+index%26)) + name
+        index = index/26 - 1
+    }
+    return name
+}
+```
+
+**File:** `internal/gapi/rpc_analytics_export.go`
+
+```go
+package gapi
+
+import (
+    "context"
+    "fmt"
+    "strconv"
+    "time"
+
+    "github.com/google/uuid"
+    "google.golang.org/grpc/codes"
+    "google.golang.org/grpc/status"
+
+    "github.com/weladee/weladee-form/internal/auth"
+    "github.com/weladee/weladee-form/internal/db/sqlc"
+    "github.com/weladee/weladee-form/internal/utils"
+    pb "github.com/weladee/weladee-form/proto/pb"
+)
+
+func (server *AnalyticsServer) ExportAnalytics(
+    ctx context.Context,
+    req *pb.ExportAnalyticsRequest,
+) (*pb.ExportAnalyticsResponse, error) {
+    // Authenticate user
+    claims, err := auth.GetUserClaims(ctx)
+    if err != nil {
+        return nil, status.Errorf(codes.Unauthenticated, "not authenticated")
+    }
+
+    formID, err := uuid.Parse(req.FormId)
+    if err != nil {
+        return nil, status.Errorf(codes.InvalidArgument, "invalid form ID")
+    }
+
+    // Verify ownership
+    form, err := server.db.Queries.GetForm(ctx, formID)
+    if err != nil {
+        return nil, status.Errorf(codes.NotFound, "form not found")
+    }
+
+    if form.UserID.String() != claims.UserID.String() {
+        return nil, status.Errorf(codes.PermissionDenied, "not authorized")
+    }
+
+    // Get date range
+    startDate := req.StartDate.AsTime()
+    endDate := req.EndDate.AsTime()
+
+    switch req.Format {
+    case "csv":
+        return server.exportCSV(ctx, form, startDate, endDate)
+    case "xlsx", "excel":
+        return server.exportExcel(ctx, form, startDate, endDate)
+    case "pdf":
+        return server.exportPDF(ctx, form, startDate, endDate)
+    default:
+        return nil, status.Errorf(codes.InvalidArgument, "unsupported format: %s", req.Format)
+    }
+}
+
+func (server *AnalyticsServer) exportCSV(
+    ctx context.Context,
+    form *sqlc.Form,
+    startDate, endDate time.Time,
+) (*pb.ExportAnalyticsResponse, error) {
+    exporter := utils.NewCSVExporter()
+
+    // Get form questions
+    questions, err := server.db.Queries.ListFormQuestions(ctx, form.ID)
+    if err != nil {
+        return nil, status.Errorf(codes.Internal, "failed to get questions: %v", err)
+    }
+
+    // Build CSV headers
+    headers := []string{"Response ID", "Submitted At", "Completed", "Device", "Completion Time (seconds)"}
+    for _, q := range questions {
+        headers = append(headers, q.Label)
+    }
+    exporter.WriteHeader(headers)
+
+    // Get all responses with answers
+    responses, err := server.db.Queries.GetFormResponsesWithAnswers(ctx, form.ID)
+    if err != nil {
+        return nil, status.Errorf(codes.Internal, "failed to get responses: %v", err)
+    }
+
+    // Group by response ID
+    responseMap := make(map[uuid.UUID]map[string]interface{})
+    for _, r := range responses {
+        if _, exists := responseMap[r.ResponseID]; !exists {
+            responseMap[r.ResponseID] = map[string]interface{}{
+                "submitted_at":       r.SubmittedAt,
+                "completed":          r.Completed,
+                "device":             r.DeviceType,
+                "completion_time":    r.CompletionTimeSeconds,
+                "answers":            make(map[uuid.UUID]string),
+            }
+        }
+
+        // Add answer
+        answerMap := responseMap[r.ResponseID]["answers"].(map[uuid.UUID]string)
+        answer := formatAnswer(r)
+        answerMap[r.QuestionID] = answer
+    }
+
+    // Write rows
+    for responseID, data := range responseMap {
+        row := []string{
+            responseID.String(),
+            formatTimestamp(data["submitted_at"].(time.Time)),
+            formatBool(data["completed"].(bool)),
+            data["device"].(string),
+            formatInt(data["completion_time"].(int32)),
+        }
+
+        answerMap := data["answers"].(map[uuid.UUID]string)
+        for _, q := range questions {
+            if answer, exists := answerMap[q.ID]; exists {
+                row = append(row, answer)
+            } else {
+                row = append(row, "")
+            }
+        }
+
+        exporter.WriteRow(row)
+    }
+
+    filename := fmt.Sprintf("form_%s_analytics_%s.csv", 
+        form.ID.String()[:8], 
+        time.Now().Format("2006-01-02"))
+
+    return &pb.ExportAnalyticsResponse{
+        Data:     exporter.GetBytes(),
+        Filename: filename,
+        MimeType: "text/csv",
+    }, nil
+}
+
+func (server *AnalyticsServer) exportExcel(
+    ctx context.Context,
+    form *sqlc.Form,
+    startDate, endDate time.Time,
+) (*pb.ExportAnalyticsResponse, error) {
+    // Create Excel file with multiple sheets
+    
+    // Sheet 1: Overview
+    overviewSheet := utils.NewExcelExporter("Overview")
+    
+    // Get overview stats
+    stats, err := server.db.Queries.GetFormOverviewStats(ctx, form.ID)
+    if err != nil {
+        return nil, status.Errorf(codes.Internal, "failed to get stats: %v", err)
+    }
+
+    overviewSheet.WriteHeader([]string{"Metric", "Value"})
+    overviewSheet.WriteRow([]string{"Form Title", form.Title})
+    overviewSheet.WriteRow([]string{"Total Views", strconv.FormatInt(int64(stats.ViewCount), 10)})
+    overviewSheet.WriteRow([]string{"Total Responses", strconv.FormatInt(int64(stats.ResponseCount), 10)})
+    overviewSheet.WriteRow([]string{"Completion Count", strconv.FormatInt(int64(stats.CompletionCount), 10)})
+    overviewSheet.WriteRow([]string{"Completion Rate", fmt.Sprintf("%.2f%%", stats.CompletionRate)})
+    overviewSheet.WriteRow([]string{"Avg Completion Time", fmt.Sprintf("%d seconds", stats.AvgCompletionTime)})
+    overviewSheet.WriteRow([]string{"Export Date", time.Now().Format("2006-01-02 15:04:05")})
+
+    // Sheet 2: Responses
+    responsesSheet := utils.NewExcelExporter("Responses")
+    
+    questions, err := server.db.Queries.ListFormQuestions(ctx, form.ID)
+    if err != nil {
+        return nil, status.Errorf(codes.Internal, "failed to get questions: %v", err)
+    }
+
+    headers := []string{"Response ID", "Submitted At", "Completed", "Device", "Browser", "Country", "City"}
+    for _, q := range questions {
+        headers = append(headers, q.Label)
+    }
+    responsesSheet.WriteHeader(headers)
+
+    responses, err := server.db.Queries.GetFormResponsesWithAnswers(ctx, form.ID)
+    if err != nil {
+        return nil, status.Errorf(codes.Internal, "failed to get responses: %v", err)
+    }
+
+    // Group responses and write
+    responseMap := make(map[uuid.UUID]map[string]interface{})
+    for _, r := range responses {
+        if _, exists := responseMap[r.ResponseID]; !exists {
+            responseMap[r.ResponseID] = map[string]interface{}{
+                "submitted_at": r.SubmittedAt,
+                "completed":    r.Completed,
+                "device":       r.DeviceType,
+                "browser":      r.Browser,
+                "country":      r.Country,
+                "city":         r.City,
+                "answers":      make(map[uuid.UUID]string),
+            }
+        }
+
+        answerMap := responseMap[r.ResponseID]["answers"].(map[uuid.UUID]string)
+        answerMap[r.QuestionID] = formatAnswer(r)
+    }
+
+    for responseID, data := range responseMap {
+        row := []string{
+            responseID.String(),
+            formatTimestamp(data["submitted_at"].(time.Time)),
+            formatBool(data["completed"].(bool)),
+            formatString(data["device"]),
+            formatString(data["browser"]),
+            formatString(data["country"]),
+            formatString(data["city"]),
+        }
+
+        answerMap := data["answers"].(map[uuid.UUID]string)
+        for _, q := range questions {
+            if answer, exists := answerMap[q.ID]; exists {
+                row = append(row, answer)
+            } else {
+                row = append(row, "")
+            }
+        }
+
+        responsesSheet.WriteRow(row)
+    }
+
+    // Sheet 3: Question Analytics
+    analyticsSheet := utils.NewExcelExporter("Question Analytics")
+    analyticsSheet.WriteHeader([]string{"Question", "Type", "Total Responses", "Top Answer", "Top Answer Count"})
+
+    for _, q := range questions {
+        switch q.Type {
+        case "single_choice", "multiple_choice", "dropdown":
+            choiceStats, err := server.db.Queries.GetChoiceQuestionStats(ctx, q.ID)
+            if err == nil && len(choiceStats) > 0 {
+                topChoice := choiceStats[0]
+                analyticsSheet.WriteRow([]string{
+                    q.Label,
+                    q.Type,
+                    strconv.FormatInt(topChoice.Count, 10),
+                    topChoice.Choice,
+                    strconv.FormatInt(topChoice.Count, 10),
+                })
+            }
+        case "rating":
+            ratingStats, err := server.db.Queries.GetRatingQuestionStats(ctx, q.ID)
+            if err == nil && len(ratingStats) > 0 {
+                totalResponses := int64(0)
+                weightedSum := int64(0)
+                for _, rs := range ratingStats {
+                    totalResponses += rs.Count
+                    weightedSum += int64(rs.Rating) * rs.Count
+                }
+                avgRating := float64(weightedSum) / float64(totalResponses)
+                analyticsSheet.WriteRow([]string{
+                    q.Label,
+                    q.Type,
+                    strconv.FormatInt(totalResponses, 10),
+                    fmt.Sprintf("Avg: %.2f", avgRating),
+                    "",
+                })
+            }
+        }
+    }
+
+    // Sheet 4: Device Breakdown
+    deviceSheet := utils.NewExcelExporter("Device Breakdown")
+    deviceSheet.WriteHeader([]string{"Device Type", "Count", "Percentage"})
+
+    devices, err := server.db.Queries.GetDeviceBreakdown(ctx, form.ID)
+    if err == nil {
+        for _, d := range devices {
+            deviceSheet.WriteRow([]string{
+                d.DeviceType,
+                strconv.FormatInt(d.Count, 10),
+                fmt.Sprintf("%.2f%%", d.Percentage),
+            })
+        }
+    }
+
+    // Combine all sheets into one file
+    mainFile := overviewSheet.file
+    
+    // Copy other sheets (simplified - in production you'd merge properly)
+    responsesBytes, _ := responsesSheet.GetBytes()
+    analyticsBytes, _ := analyticsSheet.GetBytes()
+    deviceBytes, _ := deviceSheet.GetBytes()
+
+    filename := fmt.Sprintf("form_%s_analytics_%s.xlsx", 
+        form.ID.String()[:8], 
+        time.Now().Format("2006-01-02"))
+
+    fileBytes, err := overviewSheet.GetBytes()
+    if err != nil {
+        return nil, status.Errorf(codes.Internal, "failed to generate Excel: %v", err)
+    }
+
+    return &pb.ExportAnalyticsResponse{
+        Data:     fileBytes,
+        Filename: filename,
+        MimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }, nil
+}
+
+func (server *AnalyticsServer) exportPDF(
+    ctx context.Context,
+    form *sqlc.Form,
+    startDate, endDate time.Time,
+) (*pb.ExportAnalyticsResponse, error) {
+    // PDF export using a library like gofpdf
+    // This is a simplified version - full implementation would include charts
+    
+    return nil, status.Errorf(codes.Unimplemented, "PDF export not yet implemented")
+}
+
+// Helper functions
+func formatAnswer(r *sqlc.GetFormResponsesWithAnswersRow) string {
+    if r.AnswerText.Valid {
+        return r.AnswerText.String
+    }
+    if r.AnswerNumber.Valid {
+        return strconv.FormatFloat(r.AnswerNumber.Float64, 'f', -1, 64)
+    }
+    if r.AnswerDate.Valid {
+        return r.AnswerDate.Time.Format("2006-01-02")
+    }
+    if r.AnswerTime.Valid {
+        return r.AnswerTime.Time.Format("15:04:05")
+    }
+    if r.AnswerChoices != nil {
+        return string(r.AnswerChoices)
+    }
+    if r.AnswerFileUrl.Valid {
+        return r.AnswerFileUrl.String
+    }
+    return ""
+}
+
+func formatTimestamp(t time.Time) string {
+    return t.Format("2006-01-02 15:04:05")
+}
+
+func formatBool(b bool) string {
+    if b {
+        return "Yes"
+    }
+    return "No"
+}
+
+func formatInt(i int32) string {
+    return strconv.FormatInt(int64(i), 10)
+}
+
+func formatString(s interface{}) string {
+    if s == nil {
+        return ""
+    }
+    if str, ok := s.(string); ok {
+        return str
+    }
+    return fmt.Sprintf("%v", s)
+}
+```
+
+### Step 4.5.2: Install Required Dependencies
+
+**Update:** `go.mod`
+
+```bash
+go get github.com/xuri/excelize/v2
+```
+
+### Step 4.5.3: Frontend Export Handler
+
+**File:** `lib/grpc-client.ts` (update)
+
+```typescript
+export async function downloadAnalyticsExport(
+  formId: string,
+  format: 'csv' | 'xlsx' | 'pdf',
+  startDate: Date,
+  endDate: Date
+) {
+  try {
+    const response = await analyticsClient.exportAnalytics({
+      formId,
+      format,
+      startDate: {
+        seconds: BigInt(Math.floor(startDate.getTime() / 1000)),
+        nanos: 0
+      },
+      endDate: {
+        seconds: BigInt(Math.floor(endDate.getTime() / 1000)),
+        nanos: 0
+      }
+    });
+
+    // Create blob and download
+    const blob = new Blob([response.data], { type: response.mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = response.filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    return { success: true, filename: response.filename };
+  } catch (error) {
+    console.error('Export failed:', error);
+    throw error;
+  }
+}
+```
+
+**File:** `components/analytics/export-button.tsx`
+
+```typescript
+import { useState } from 'react';
+import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { downloadAnalyticsExport } from '@/lib/grpc-client';
+
+interface ExportButtonProps {
+  formId: string;
+  startDate: Date;
+  endDate: Date;
+}
+
+export function ExportButton({ formId, startDate, endDate }: ExportButtonProps) {
+  const [isExporting, setIsExporting] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleExport = async (format: 'csv' | 'xlsx' | 'pdf') => {
+    setIsExporting(true);
+    setShowMenu(false);
+
+    try {
+      const result = await downloadAnalyticsExport(formId, format, startDate, endDate);
+      
+      // Show success notification
+      toast.success(`Analytics exported successfully: ${result.filename}`);
+    } catch (error) {
+      toast.error('Failed to export analytics');
+      console.error('Export error:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowMenu(!showMenu)}
+        disabled={isExporting}
+        className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isExporting ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Exporting...
+          </>
+        ) : (
+          <>
+            <Download className="w-4 h-4" />
+            Export
+          </>
+        )}
+      </button>
+
+      {showMenu && !isExporting && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+          <button
+            onClick={() => handleExport('csv')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            Export as CSV
+          </button>
+          <button
+            onClick={() => handleExport('xlsx')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            Export as Excel
+          </button>
+          <button
+            onClick={() => handleExport('pdf')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 opacity-50 cursor-not-allowed"
+            disabled
+          >
+            <FileText className="w-4 h-4" />
+            Export as PDF (Coming Soon)
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Step 4.5.4: Update Dashboard to Use Export Button
+
+**File:** `components/analytics/analytics-dashboard.tsx` (update)
+
+```typescript
+import { ExportButton } from './export-button';
+
+export function AnalyticsDashboard({
+  data,
+  timeRange,
+  onTimeRangeChange,
+  formId
+}: AnalyticsDashboardProps) {
+  const { startDate, endDate } = calculateDateRange(timeRange);
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+            <p className="text-gray-500 mt-1">Form Performance Insights</p>
+          </div>
+          <div className="flex gap-3">
+            <select
+              value={timeRange}
+              onChange={(e) => onTimeRangeChange(e.target.value)}
+              className="px-4 py-2 border border-gray-200 rounded-lg bg-white text-sm font-medium"
+            >
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="all">All time</option>
+            </select>
+            <ExportButton 
+              formId={formId} 
+              startDate={startDate} 
+              endDate={endDate} 
+            />
+          </div>
+        </div>
+      </div>
+      {/* Rest of dashboard... */}
+    </div>
+  );
+}
+
+function calculateDateRange(timeRange: string): { startDate: Date; endDate: Date } {
+  const endDate = new Date();
+  const startDate = new Date();
+
+  switch (timeRange) {
+    case '7d':
+      startDate.setDate(startDate.getDate() - 7);
+      break;
+    case '30d':
+      startDate.setDate(startDate.getDate() - 30);
+      break;
+    case '90d':
+      startDate.setDate(startDate.getDate() - 90);
+      break;
+    default:
+      startDate.setFullYear(2000);
+  }
+
+  return { startDate, endDate };
+}
+```
+
+---
+
+## ✅ Updated Implementation Checklist
+
+- [ ] Phase 4.5: Export Analytics implementation
+  - [ ] Install excelize library
+  - [ ] Create CSV exporter utility
+  - [ ] Create Excel exporter utility
+  - [ ] Implement ExportAnalytics RPC handler
+  - [ ] Add export button component
+  - [ ] Test CSV export with sample data
+  - [ ] Test Excel export with multiple sheets
+  - [ ] Verify file download in browser
+  - [ ] Test with large datasets (1000+ responses)
+  - [ ] Add error handling for export failures
+
+---
+
 ## 🔄 Phase 6: View Tracking Integration (Day 11)
 
 ### Step 6.1: Client-Side View Tracking

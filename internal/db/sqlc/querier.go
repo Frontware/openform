@@ -25,6 +25,7 @@ type Querier interface {
 	DeleteResponse(ctx context.Context, id uuid.UUID) error
 	GetChoiceQuestionStats(ctx context.Context, questionID uuid.UUID) ([]GetChoiceQuestionStatsRow, error)
 	GetCompletionFunnel(ctx context.Context, formID uuid.UUID) (GetCompletionFunnelRow, error)
+	GetCompletionStatsForDate(ctx context.Context, arg GetCompletionStatsForDateParams) ([]GetCompletionStatsForDateRow, error)
 	GetDailyStatsRange(ctx context.Context, arg GetDailyStatsRangeParams) ([]FormDailyStat, error)
 	GetDayOfWeekDistribution(ctx context.Context, arg GetDayOfWeekDistributionParams) ([]GetDayOfWeekDistributionRow, error)
 	GetDeviceBreakdown(ctx context.Context, formID uuid.UUID) ([]GetDeviceBreakdownRow, error)
@@ -48,7 +49,9 @@ type Querier interface {
 	GetResponse(ctx context.Context, id uuid.UUID) (FormResponse, error)
 	GetResponseAnswers(ctx context.Context, responseID uuid.UUID) ([]FormAnswer, error)
 	GetResponseCompletionTrend(ctx context.Context, arg GetResponseCompletionTrendParams) ([]GetResponseCompletionTrendRow, error)
+	GetResponseStartsForDate(ctx context.Context, arg GetResponseStartsForDateParams) ([]GetResponseStartsForDateRow, error)
 	GetResponseTrend(ctx context.Context, arg GetResponseTrendParams) ([]GetResponseTrendRow, error)
+	GetViewStatsForDate(ctx context.Context, arg GetViewStatsForDateParams) ([]GetViewStatsForDateRow, error)
 	IncrementFormCompletionCount(ctx context.Context, formID uuid.UUID) error
 	IncrementFormResponseCount(ctx context.Context, formID uuid.UUID) error
 	IncrementFormViewCount(ctx context.Context, formID uuid.UUID) error

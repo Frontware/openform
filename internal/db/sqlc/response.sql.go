@@ -133,7 +133,8 @@ func (q *Queries) CreateAnswer(ctx context.Context, arg CreateAnswerParams) (For
 const createResponse = `-- name: CreateResponse :one
 INSERT INTO form.responses (
     form_id, respondent_user_id, respondent_email, respondent_name,
-    ip_address, user_agent, completed, submitted_at
+    ip_address, user_agent, completed, submitted_at,
+    session_id, device_type, browser, os, country, city, referrer
 )
 VALUES (
     $1::uuid,
@@ -143,7 +144,14 @@ VALUES (
     $5::inet,
     $6::text,
     $7::boolean,
-    COALESCE($8::timestamptz, NOW())
+    COALESCE($8::timestamptz, NOW()),
+    $9::text,
+    $10::text,
+    $11::text,
+    $12::text,
+    $13::text,
+    $14::text,
+    $15::text
 )
 RETURNING id, form_id, respondent_user_id, respondent_email, respondent_name, completed, submitted_at, completion_time_seconds, session_id, device_type, browser, os, country, city, referrer, ip_address, user_agent, created_at, updated_at
 `
@@ -157,6 +165,13 @@ type CreateResponseParams struct {
 	UserAgent        string    `db:"user_agent" json:"userAgent"`
 	Completed        bool      `db:"completed" json:"completed"`
 	SubmittedAt      time.Time `db:"submitted_at" json:"submittedAt"`
+	SessionID        string    `db:"session_id" json:"sessionId"`
+	DeviceType       string    `db:"device_type" json:"deviceType"`
+	Browser          string    `db:"browser" json:"browser"`
+	Os               string    `db:"os" json:"os"`
+	Country          string    `db:"country" json:"country"`
+	City             string    `db:"city" json:"city"`
+	Referrer         string    `db:"referrer" json:"referrer"`
 }
 
 func (q *Queries) CreateResponse(ctx context.Context, arg CreateResponseParams) (FormResponse, error) {
@@ -169,6 +184,13 @@ func (q *Queries) CreateResponse(ctx context.Context, arg CreateResponseParams) 
 		arg.UserAgent,
 		arg.Completed,
 		arg.SubmittedAt,
+		arg.SessionID,
+		arg.DeviceType,
+		arg.Browser,
+		arg.Os,
+		arg.Country,
+		arg.City,
+		arg.Referrer,
 	)
 	var i FormResponse
 	err := row.Scan(

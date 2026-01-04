@@ -61,6 +61,9 @@ func (server *AnalyticsServerImpl) TrackView(
         log.Printf("Failed to increment view count: %v", err)
     }
 
+    // Update daily stats asynchronously (don't block response)
+    go UpdateDailyStats(server.db, formID)
+
     return &pb.TrackViewResponse{Success: true}, nil
 }
 
@@ -81,16 +84,10 @@ func (server *AnalyticsServerImpl) TrackResponseStart(
         return nil, status.Errorf(codes.Internal, "failed to track start: %v", err)
     }
 
-    return &pb.TrackResponseStartResponse{Success: true}, nil
-}
+    // Update daily stats asynchronously (don't block response)
+    go UpdateDailyStats(server.db, formID)
 
-func (server *AnalyticsServerImpl) ExportAnalytics(
-    ctx context.Context,
-    req *pb.ExportAnalyticsRequest,
-) (*pb.ExportAnalyticsResponse, error) {
-    // This is a placeholder for the export analytics RPC
-    // Real implementation would involve generating CSV/PDF/XLSX
-    return nil, status.Errorf(codes.Unimplemented, "ExportAnalytics not yet implemented")
+    return &pb.TrackResponseStartResponse{Success: true}, nil
 }
 
 func (server *AnalyticsServerImpl) GetGeographicDistribution(

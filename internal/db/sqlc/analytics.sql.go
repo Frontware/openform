@@ -86,6 +86,52 @@ func (q *Queries) GetCompletionFunnel(ctx context.Context, formID uuid.UUID) (Ge
 	return i, err
 }
 
+const getCompletionStatsForDate = `-- name: GetCompletionStatsForDate :many
+SELECT
+    id,
+    CASE
+        WHEN submitted_at IS NOT NULL AND created_at IS NOT NULL
+        THEN EXTRACT(EPOCH FROM (submitted_at - created_at))::integer
+        ELSE NULL
+    END as completion_time_seconds
+FROM form.responses
+WHERE form_id = $1::uuid
+    AND completed = true
+    AND submitted_at >= $2::timestamptz
+    AND submitted_at < $3::timestamptz
+`
+
+type GetCompletionStatsForDateParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	StartDate time.Time `db:"start_date" json:"startDate"`
+	EndDate   time.Time `db:"end_date" json:"endDate"`
+}
+
+type GetCompletionStatsForDateRow struct {
+	ID                    uuid.UUID   `db:"id" json:"id"`
+	CompletionTimeSeconds interface{} `db:"completion_time_seconds" json:"completionTimeSeconds"`
+}
+
+func (q *Queries) GetCompletionStatsForDate(ctx context.Context, arg GetCompletionStatsForDateParams) ([]GetCompletionStatsForDateRow, error) {
+	rows, err := q.db.Query(ctx, getCompletionStatsForDate, arg.FormID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCompletionStatsForDateRow{}
+	for rows.Next() {
+		var i GetCompletionStatsForDateRow
+		if err := rows.Scan(&i.ID, &i.CompletionTimeSeconds); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getDailyStatsRange = `-- name: GetDailyStatsRange :many
 SELECT id, form_id, stat_date, total_views, unique_views, total_starts, total_completions, desktop_views, mobile_views, tablet_views, avg_completion_time_seconds, created_at, updated_at
 FROM form.daily_stats
@@ -587,6 +633,46 @@ func (q *Queries) GetResponseCompletionTrend(ctx context.Context, arg GetRespons
 	return items, nil
 }
 
+const getResponseStartsForDate = `-- name: GetResponseStartsForDate :many
+SELECT id, form_id, session_id
+FROM form.response_starts
+WHERE form_id = $1::uuid
+    AND created_at >= $2::timestamptz
+    AND created_at < $3::timestamptz
+`
+
+type GetResponseStartsForDateParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	StartDate time.Time `db:"start_date" json:"startDate"`
+	EndDate   time.Time `db:"end_date" json:"endDate"`
+}
+
+type GetResponseStartsForDateRow struct {
+	ID        uuid.UUID   `db:"id" json:"id"`
+	FormID    uuid.UUID   `db:"form_id" json:"formId"`
+	SessionID pgtype.Text `db:"session_id" json:"sessionId"`
+}
+
+func (q *Queries) GetResponseStartsForDate(ctx context.Context, arg GetResponseStartsForDateParams) ([]GetResponseStartsForDateRow, error) {
+	rows, err := q.db.Query(ctx, getResponseStartsForDate, arg.FormID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetResponseStartsForDateRow{}
+	for rows.Next() {
+		var i GetResponseStartsForDateRow
+		if err := rows.Scan(&i.ID, &i.FormID, &i.SessionID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getResponseTrend = `-- name: GetResponseTrend :many
 SELECT
     DATE(viewed_at) as date,
@@ -622,6 +708,50 @@ func (q *Queries) GetResponseTrend(ctx context.Context, arg GetResponseTrendPara
 	for rows.Next() {
 		var i GetResponseTrendRow
 		if err := rows.Scan(&i.Date, &i.UniqueViews, &i.TotalViews); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getViewStatsForDate = `-- name: GetViewStatsForDate :many
+SELECT
+    session_id,
+    device_type,
+    COUNT(*)::int8 as count
+FROM form.form_views
+WHERE form_id = $1::uuid
+    AND viewed_at >= $2::timestamptz
+    AND viewed_at < $3::timestamptz
+GROUP BY session_id, device_type
+`
+
+type GetViewStatsForDateParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	StartDate time.Time `db:"start_date" json:"startDate"`
+	EndDate   time.Time `db:"end_date" json:"endDate"`
+}
+
+type GetViewStatsForDateRow struct {
+	SessionID  pgtype.Text `db:"session_id" json:"sessionId"`
+	DeviceType pgtype.Text `db:"device_type" json:"deviceType"`
+	Count      int64       `db:"count" json:"count"`
+}
+
+func (q *Queries) GetViewStatsForDate(ctx context.Context, arg GetViewStatsForDateParams) ([]GetViewStatsForDateRow, error) {
+	rows, err := q.db.Query(ctx, getViewStatsForDate, arg.FormID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetViewStatsForDateRow{}
+	for rows.Next() {
+		var i GetViewStatsForDateRow
+		if err := rows.Scan(&i.SessionID, &i.DeviceType, &i.Count); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

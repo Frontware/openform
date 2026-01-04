@@ -25,7 +25,8 @@ RETURNING *;
 -- name: CreateResponse :one
 INSERT INTO form.responses (
     form_id, respondent_user_id, respondent_email, respondent_name,
-    ip_address, user_agent, completed, submitted_at
+    ip_address, user_agent, completed, submitted_at,
+    session_id, device_type, browser, os, country, city, referrer
 )
 VALUES (
     @form_id::uuid,
@@ -35,7 +36,14 @@ VALUES (
     @ip_address::inet,
     @user_agent::text,
     @completed::boolean,
-    COALESCE(@submitted_at::timestamptz, NOW())
+    COALESCE(@submitted_at::timestamptz, NOW()),
+    @session_id::text,
+    @device_type::text,
+    @browser::text,
+    @os::text,
+    @country::text,
+    @city::text,
+    @referrer::text
 )
 RETURNING *;
 

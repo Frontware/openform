@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/mssola/user_agent"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -195,7 +196,7 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 		}
 	}
 
-	// Get client IP and User-Agent from gRPC metadata
+	// Get client IP, User-Agent, Referrer, and Session ID from gRPC metadata
 	md, _ := metadata.FromIncomingContext(ctx)
 	ip := net.IP(net.ParseIP("127.0.0.1")) // fallback
 	if fwd := md.Get("x-forwarded-for"); len(fwd) > 0 {
@@ -205,6 +206,25 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 	if ua := md.Get("user-agent"); len(ua) > 0 {
 		userAgent = ua[0]
 	}
+	referrer := ""
+	if ref := md.Get("referer"); len(ref) > 0 {
+		referrer = ref[0]
+	}
+	sessionID := ""
+	if sid := md.Get("x-session-id"); len(sid) > 0 {
+		sessionID = sid[0]
+	}
+
+	// Parse device metadata from user agent
+	ua := user_agent.New(userAgent)
+	deviceType := "desktop"
+	if ua.Mobile() {
+		deviceType = "mobile"
+	}
+	// Note: The user_agent library doesn't have Tablet() method
+	// Tablet devices will be classified as mobile or desktop based on UA
+	browser, _ := ua.Browser()
+	osInfo := ua.OS()
 
 	var respondentUserUUID uuid.UUID
 	if respondentUser != nil {
@@ -231,6 +251,12 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 			userAgentStr = "Unknown"
 		}
 
+		// Increment response count when creating a new response
+		if err := q.IncrementFormResponseCount(ctx, formID); err != nil {
+			// Log but don't fail the response submission
+			fmt.Printf("Failed to increment response count: %v\n", err)
+		}
+
 		if req.Complete {
 			// Final submission
 			response, err = q.CreateResponse(ctx, sqlc.CreateResponseParams{
@@ -241,7 +267,20 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 				IpAddress:        ip,
 				UserAgent:        userAgentStr,
 				Completed:        true,
+				SessionID:         sessionID,
+				DeviceType:       deviceType,
+				Browser:          browser,
+				Os:               osInfo,
+				Referrer:         referrer,
 			})
+
+			// Increment completion count when response is completed
+			if err == nil {
+				if err2 := q.IncrementFormCompletionCount(ctx, formID); err2 != nil {
+					// Log but don't fail
+					fmt.Printf("Failed to increment completion count: %v\n", err2)
+				}
+			}
 		} else {
 			// Partial save
 			response, err = q.CreateResponse(ctx, sqlc.CreateResponseParams{
@@ -252,6 +291,11 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 				IpAddress:        ip,
 				UserAgent:        userAgentStr,
 				Completed:        false,
+				SessionID:         sessionID,
+				DeviceType:       deviceType,
+				Browser:          browser,
+				Os:               osInfo,
+				Referrer:         referrer,
 			})
 		}
 		if err != nil {
@@ -299,6 +343,11 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to submit response: %v", err)
+	}
+
+	// Update daily stats asynchronously when response is completed
+	if req.Complete {
+		go UpdateDailyStats(s.db, formID)
 	}
 
 	// Fetch full response with answers

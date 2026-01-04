@@ -69,3 +69,42 @@ export const formClient = createPromiseClient(FormService, transport);
 export const responseClient = createPromiseClient(ResponseService, transport);
 export const fileClient = createPromiseClient(FileService, transport);
 export const analyticsClient = createPromiseClient(AnalyticsService, transport);
+
+export async function downloadAnalyticsExport(
+  formId: string,
+  format: 'csv' | 'xlsx' | 'pdf',
+  startDate: Date,
+  endDate: Date
+) {
+  try {
+    const response = await analyticsClient.exportAnalytics({
+      formId,
+      format,
+      startDate: {
+        seconds: BigInt(Math.floor(startDate.getTime() / 1000)),
+        nanos: 0
+      },
+      endDate: {
+        seconds: BigInt(Math.floor(endDate.getTime() / 1000)),
+        nanos: 0
+      }
+    });
+
+    // Create blob and download
+    const blob = new Blob([response.data], { type: response.mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = response.filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    return { success: true, filename: response.filename };
+  } catch (error) {
+    console.error('Export failed:', error);
+    throw error;
+  }
+}

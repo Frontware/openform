@@ -5,305 +5,360 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"sort"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/xuri/excelize/v2"
+
 	"github.com/weladee/weladee-form/internal/db/sqlc"
 )
 
-// ResponseRow represents one row in the export (one response + its answers)
-type ResponseRow struct {
-	ResponseID      uuid.UUID
-	SubmittedAt     time.Time
-	Completed       bool
-	RespondentName  string
-	RespondentEmail string
-	Answers         map[uuid.UUID]string // questionID -> formatted answer
+// CSVExporter handles CSV export
+type CSVExporter struct {
+	buffer *bytes.Buffer
+	writer *csv.Writer
 }
 
-// ExportResponsesToCSV generates a CSV byte slice from a list of responses with answers
-func ExportResponsesToCSV(
-	questions []sqlc.FormQuestion,
-	responsesWithAnswers []sqlc.GetFormResponsesWithAnswersRow,
-) ([]byte, error) {
-	if len(questions) == 0 {
-		return nil, fmt.Errorf("no questions provided")
+func NewCSVExporter() *CSVExporter {
+	buffer := &bytes.Buffer{}
+	return &CSVExporter{
+		buffer: buffer,
+		writer: csv.NewWriter(buffer),
 	}
+}
 
-	// Sort questions by order_index for consistent column order
-	sort.Slice(questions, func(i, j int) bool {
-		return questions[i].OrderIndex < questions[j].OrderIndex
+func (e *CSVExporter) WriteHeader(headers []string) error {
+	return e.writer.Write(headers)
+}
+
+func (e *CSVExporter) WriteRow(row []string) error {
+	return e.writer.Write(row)
+}
+
+func (e *CSVExporter) GetBytes() []byte {
+	e.writer.Flush()
+	return e.buffer.Bytes()
+}
+
+// ExcelExporter handles Excel export
+type ExcelExporter struct {
+	file      *excelize.File
+	sheetName string
+	rowIndex  int
+}
+
+func NewExcelExporter(sheetName string) *ExcelExporter {
+	f := excelize.NewFile()
+	index, _ := f.NewSheet(sheetName)
+	f.SetActiveSheet(index)
+	f.DeleteSheet("Sheet1") // Remove default sheet
+
+	return &ExcelExporter{
+		file:      f,
+		sheetName: sheetName,
+		rowIndex:  1,
+	}
+}
+
+func (e *ExcelExporter) WriteHeader(headers []string) error {
+	// Style for headers
+	style, err := e.file.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+			Size: 12,
+		},
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#4F46E5"},
+			Pattern: 1,
+		},
+		Alignment: &excelize.Alignment{
+			Horizontal: "center",
+			Vertical:   "center",
+		},
 	})
-
-	// Prepare header
-	header := []string{
-		"Response ID",
-		"Submitted At",
-		"Completed",
-		"Respondent Name",
-		"Respondent Email",
+	if err != nil {
+		return err
 	}
 
-	questionMap := make(map[uuid.UUID]string)
-	for _, q := range questions {
-		header = append(header, q.Label)
-		questionMap[q.ID] = q.Label
+	for i, header := range headers {
+		cell := fmt.Sprintf("%s%d", columnName(i), e.rowIndex)
+		e.file.SetCellValue(e.sheetName, cell, header)
+		e.file.SetCellStyle(e.sheetName, cell, cell, style)
 	}
 
-	// Build rows - Group answers by response
-	var rows [][]string
-	_ = rows // Placeholder - we build rows from grouped data below
+	e.rowIndex++
+	return nil
+}
 
-	// Alternative approach: process grouped by response
-	// This is a simplified version assuming you fetch all answers separately
-
-	// For demonstration, we'll assume responsesWithAnswers contains one entry per answer
-	// Group them
-	grouped := make(map[uuid.UUID]ResponseRow)
-	for _, ra := range responsesWithAnswers {
-		respID := ra.ResponseID
-		row, exists := grouped[respID]
-		if !exists {
-			row = ResponseRow{
-				ResponseID:      respID,
-				SubmittedAt:     ra.SubmittedAt.Time,
-				Completed:       ra.Completed,
-				RespondentName:  ra.RespondentName.String,
-				RespondentEmail: ra.RespondentEmail.String,
-				Answers:         make(map[uuid.UUID]string),
-			}
+func (e *ExcelExporter) WriteRow(row []string) error {
+	for i, value := range row {
+		cell := fmt.Sprintf("%s%d", columnName(i), e.rowIndex)
+		// Check if value is numeric and set accordingly to avoid warnings
+		if floatVal, err := strconv.ParseFloat(value, 64); err == nil {
+			e.file.SetCellValue(e.sheetName, cell, floatVal)
+		} else {
+			e.file.SetCellValue(e.sheetName, cell, value)
 		}
+	}
+	e.rowIndex++
+	return nil
+}
 
-		// Format answer based on type
-		answerStr := formatAnswer(ra)
-		// Extract UUID from pgtype.UUID
-		questionID, _ := uuid.FromBytes(ra.QuestionID.Bytes[:16])
-		row.Answers[questionID] = answerStr
+func (e *ExcelExporter) AddChart(chartType, title string, dataRange string) error {
+	chart := &excelize.Chart{
+		Type: excelize.Col, // Default to Column chart
+		Series: []excelize.ChartSeries{
+			{
+				Name:       title,
+				Categories: dataRange,
+				Values:     dataRange,
+			},
+		},
+		Title: []excelize.RichTextRun{
+			{
+				Text: title,
+			},
+		},
+	}
+    // Simple mapping for chart types if needed
+    if chartType == "pie" {
+        chart.Type = excelize.Pie
+    }
 
-		grouped[respID] = row
+	cell := fmt.Sprintf("H%d", e.rowIndex+2)
+	return e.file.AddChart(e.sheetName, cell, chart)
+}
+
+func (e *ExcelExporter) GetBytes() ([]byte, error) {
+	// Auto-fit columns
+	for i := 0; i < 20; i++ {
+		col := columnName(i)
+		e.file.SetColWidth(e.sheetName, col, col, 15)
 	}
 
-	// Convert to CSV rows
-	for _, row := range grouped {
-		csvRow := []string{
-			row.ResponseID.String(),
-			row.SubmittedAt.Format("2006-01-02 15:04:05"),
-			fmt.Sprintf("%t", row.Completed),
-			row.RespondentName,
-			row.RespondentEmail,
-		}
-
-		for _, q := range questions {
-			val, ok := row.Answers[q.ID]
-			if ok {
-				csvRow = append(csvRow, val)
-			} else {
-				csvRow = append(csvRow, "")
-			}
-		}
-		rows = append(rows, csvRow)
-	}
-
-	// Generate CSV
-	buf := &bytes.Buffer{}
-	writer := csv.NewWriter(buf)
-	defer writer.Flush()
-
-	// Write header
-	if err := writer.Write(header); err != nil {
+	buffer := &bytes.Buffer{}
+	if err := e.file.Write(buffer); err != nil {
 		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func columnName(index int) string {
+	name := ""
+	for index >= 0 {
+		name = string(rune('A'+index%26)) + name
+		index = index/26 - 1
+	}
+	return name
+}
+
+// ExportResponsesToCSV exports form responses to CSV format
+func ExportResponsesToCSV(questions []sqlc.FormQuestion, rows []sqlc.GetFormResponsesWithAnswersRow) ([]byte, error) {
+	exporter := NewCSVExporter()
+
+	// Create header row
+	headers := []string{"Response ID", "Submitted At", "Respondent Email", "Respondent Name"}
+	for _, q := range questions {
+		headers = append(headers, q.Label)
+	}
+	if err := exporter.WriteHeader(headers); err != nil {
+		return nil, err
+	}
+
+	// Group answers by response
+	responseMap := make(map[uuid.UUID]map[uuid.UUID]string)
+	for _, row := range rows {
+		if _, ok := responseMap[row.ResponseID]; !ok {
+			responseMap[row.ResponseID] = make(map[uuid.UUID]string)
+		}
+
+		// Convert answer to string based on type
+		var answerStr string
+		if row.AnswerText.Valid {
+			answerStr = row.AnswerText.String
+		} else if row.AnswerNumber.Valid {
+			flt, _ := row.AnswerNumber.Float64Value()
+			answerStr = strconv.FormatFloat(flt.Float64, 'f', -1, 64)
+		} else if row.AnswerDate.Valid {
+			answerStr = row.AnswerDate.Time.Format("2006-01-02")
+		} else if row.AnswerTime.Valid {
+			micros := row.AnswerTime.Microseconds
+			t := time.Date(0, 0, 0, 0, 0, int(micros), 0, time.UTC)
+			answerStr = t.Format("15:04:05")
+		} else if len(row.AnswerChoices) > 0 {
+			answerStr = string(row.AnswerChoices)
+		}
+
+		// Convert pgtype.UUID to uuid.UUID for map key
+		questionUUID, _ := uuid.FromBytes(row.QuestionID.Bytes[:])
+		responseMap[row.ResponseID][questionUUID] = answerStr
 	}
 
 	// Write rows
 	for _, row := range rows {
-		if err := writer.Write(row); err != nil {
+		// Only write once per response (check if we've already written this response)
+		if !row.AnswerID.Valid {
+			// This is a response without answers
+			record := []string{
+				row.ResponseID.String(),
+				row.SubmittedAt.Time.Format(time.RFC3339),
+				row.RespondentEmail.String,
+				row.RespondentName.String,
+			}
+			// Add empty answers for all questions
+			for range questions {
+				record = append(record, "")
+			}
+			if err := exporter.WriteRow(record); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Actually, let's iterate by unique responses
+	seenResponses := make(map[uuid.UUID]bool)
+	for _, row := range rows {
+		if seenResponses[row.ResponseID] {
+			continue
+		}
+		seenResponses[row.ResponseID] = true
+
+		record := []string{
+			row.ResponseID.String(),
+			row.SubmittedAt.Time.Format(time.RFC3339),
+			row.RespondentEmail.String,
+			row.RespondentName.String,
+		}
+
+		// Add answers in question order
+		for _, q := range questions {
+			if answers, ok := responseMap[row.ResponseID]; ok {
+				record = append(record, answers[q.ID])
+			} else {
+				record = append(record, "")
+			}
+		}
+
+		if err := exporter.WriteRow(record); err != nil {
 			return nil, err
 		}
 	}
 
-	return buf.Bytes(), nil
+	return exporter.GetBytes(), nil
 }
 
-// formatAnswer converts an answer to a human-readable string
-func formatAnswer(row sqlc.GetFormResponsesWithAnswersRow) string {
-	if row.AnswerText.Valid {
-		return row.AnswerText.String
-	}
-	if row.AnswerNumber.Valid {
-		flt, err := row.AnswerNumber.Float64Value()
-		if err == nil {
-			return fmt.Sprintf("%.2f", flt.Float64)
-		}
-	}
-	if row.AnswerDate.Valid {
-		return row.AnswerDate.Time.Format("2006-01-02")
-	}
-	if row.AnswerTime.Valid {
-		micros := row.AnswerTime.Microseconds
-		return time.Date(0, 0, 0, 0, 0, int(micros), 0, time.UTC).Format("15:04:05")
-	}
-	if len(row.AnswerChoices) > 0 {
-		// Assuming JSONB with array of selected options
-		// Simple string conversion - improve based on actual structure
-		return string(row.AnswerChoices)
-	}
-	if row.AnswerFileUrl.Valid {
-		return row.AnswerFileUrl.String // or "File uploaded"
-	}
-	return ""
-}
-
-func ExportResponsesToJSON(
-	questions []sqlc.FormQuestion,
-	responsesWithAnswers []sqlc.GetFormResponsesWithAnswersRow,
-	formID uuid.UUID,
-) ([]byte, error) {
-	if len(questions) == 0 {
-		return nil, fmt.Errorf("no questions provided")
-	}
-
-	// Sort questions by order_index
-	sort.Slice(questions, func(i, j int) bool {
-		return questions[i].OrderIndex < questions[j].OrderIndex
-	})
-
-	// Build question lookup
-	type QuestionInfo struct {
-		ID    string `json:"id"`
-		Label string `json:"label"`
-		Type  string `json:"type"`
-	}
-	var questionInfos []QuestionInfo
-	questionIDToLabel := make(map[uuid.UUID]string)
-	for _, q := range questions {
-		info := QuestionInfo{
-			ID:    q.ID.String(),
-			Label: q.Label,
-			Type:  q.Type,
-		}
-		questionInfos = append(questionInfos, info)
-		questionIDToLabel[q.ID] = q.Label
-	}
-
+// ExportResponsesToJSON exports form responses to JSON format
+func ExportResponsesToJSON(questions []sqlc.FormQuestion, rows []sqlc.GetFormResponsesWithAnswersRow, formID uuid.UUID) ([]byte, error) {
 	// Group answers by response
-	type ResponseExport struct {
-		ID              string                 `json:"id"`
-		SubmittedAt     string                 `json:"submitted_at,omitempty"`
-		Completed       bool                   `json:"completed"`
-		RespondentName  string                 `json:"respondent_name,omitempty"`
-		RespondentEmail string                 `json:"respondent_email,omitempty"`
-		Answers         map[string]interface{} `json:"answers"`
-	}
+	responseMap := make(map[uuid.UUID]map[uuid.UUID]interface{})
+	for _, row := range rows {
+		if _, ok := responseMap[row.ResponseID]; !ok {
+			responseMap[row.ResponseID] = make(map[uuid.UUID]interface{})
+		}
 
-	grouped := make(map[uuid.UUID]*ResponseExport)
-	for _, row := range responsesWithAnswers {
-		respID := row.ResponseID
-
-		resp, exists := grouped[respID]
-		if !exists {
-			submitted := ""
-			if row.SubmittedAt.Valid {
-				submitted = row.SubmittedAt.Time.Format(time.RFC3339)
+		// Convert answer to appropriate type
+		var answer interface{}
+		if row.AnswerText.Valid {
+			answer = row.AnswerText.String
+		} else if row.AnswerNumber.Valid {
+			flt, _ := row.AnswerNumber.Float64Value()
+			answer = flt.Float64
+		} else if row.AnswerDate.Valid {
+			answer = row.AnswerDate.Time.Format("2006-01-02")
+		} else if row.AnswerTime.Valid {
+			micros := row.AnswerTime.Microseconds
+			t := time.Date(0, 0, 0, 0, 0, int(micros), 0, time.UTC)
+			answer = t.Format("15:04:05")
+		} else if len(row.AnswerChoices) > 0 {
+			var choices map[string]interface{}
+			if err := json.Unmarshal(row.AnswerChoices, &choices); err == nil {
+				answer = choices
+			} else {
+				answer = string(row.AnswerChoices)
 			}
+		}
 
-			resp = &ResponseExport{
-				ID:              respID.String(),
-				SubmittedAt:     submitted,
-				Completed:       row.Completed,
-				RespondentName:  getTextString(row.RespondentName),
-				RespondentEmail: getTextString(row.RespondentEmail),
-				Answers:         make(map[string]interface{}),
+		// Convert pgtype.UUID to uuid.UUID for map key
+		questionUUID, _ := uuid.FromBytes(row.QuestionID.Bytes[:])
+		responseMap[row.ResponseID][questionUUID] = answer
+	}
+
+	// Build output structure
+	type OutputQuestion struct {
+		ID       string `json:"id"`
+		Label    string `json:"label"`
+		Type     string `json:"type"`
+		Required bool   `json:"required"`
+	}
+
+	type OutputResponse struct {
+		ID            string                 `json:"id"`
+		SubmittedAt   string                 `json:"submitted_at"`
+		RespondentEmail string               `json:"respondent_email,omitempty"`
+		RespondentName  string               `json:"respondent_name,omitempty"`
+		Answers       map[string]interface{} `json:"answers"`
+	}
+
+	type Output struct {
+		FormID      string            `json:"form_id"`
+		ExportedAt  string            `json:"exported_at"`
+		Total       int               `json:"total_responses"`
+		Questions   []OutputQuestion  `json:"questions"`
+		Responses   []OutputResponse  `json:"responses"`
+	}
+
+	// Build questions list
+	qlist := make([]OutputQuestion, 0, len(questions))
+	for _, q := range questions {
+		qlist = append(qlist, OutputQuestion{
+			ID:       q.ID.String(),
+			Label:    q.Label,
+			Type:     q.Type,
+			Required: q.Required,
+		})
+	}
+
+	// Build responses list
+	seenResponses := make(map[uuid.UUID]bool)
+	responses := make([]OutputResponse, 0)
+	for _, row := range rows {
+		if seenResponses[row.ResponseID] {
+			continue
+		}
+		seenResponses[row.ResponseID] = true
+
+		resp := OutputResponse{
+			ID:          row.ResponseID.String(),
+			SubmittedAt: row.SubmittedAt.Time.Format(time.RFC3339),
+			Answers:     make(map[string]interface{}),
+		}
+
+		if row.RespondentEmail.Valid {
+			resp.RespondentEmail = row.RespondentEmail.String
+		}
+		if row.RespondentName.Valid {
+			resp.RespondentName = row.RespondentName.String
+		}
+
+		// Map answers by question ID
+		if answers, ok := responseMap[row.ResponseID]; ok {
+			for qid, answer := range answers {
+				resp.Answers[qid.String()] = answer
 			}
-			grouped[respID] = resp
 		}
 
-		// Format answer
-		answerValue := formatAnswerForJSON(row)
-
-		// Use question ID as key (more reliable than label)
-		resp.Answers[row.QuestionID.String()] = answerValue
+		responses = append(responses, resp)
 	}
 
-	// Convert map to slice
-	var responses []ResponseExport
-	for _, r := range grouped {
-		responses = append(responses, *r)
+	output := Output{
+		FormID:     formID.String(),
+		ExportedAt: time.Now().Format(time.RFC3339),
+		Total:      len(responses),
+		Questions:  qlist,
+		Responses:  responses,
 	}
 
-	// Sort responses by submitted_at descending
-	sort.Slice(responses, func(i, j int) bool {
-		if responses[i].SubmittedAt == "" {
-			return false
-		}
-		if responses[j].SubmittedAt == "" {
-			return true
-		}
-		ti, _ := time.Parse(time.RFC3339, responses[i].SubmittedAt)
-		tj, _ := time.Parse(time.RFC3339, responses[j].SubmittedAt)
-		return ti.After(tj)
-	})
-
-	// Final payload
-	exportPayload := map[string]interface{}{
-		"form_id":     formID.String(),
-		"exported_at": time.Now().Format(time.RFC3339),
-		"questions":   questionInfos,
-		"responses":   responses,
-		"total":       len(responses),
-	}
-
-	// Pretty-print JSON
-	var buf bytes.Buffer
-	encoder := json.NewEncoder(&buf)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(exportPayload); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
-}
-
-// Helper to safely get string from pgtype.Text
-func getTextString(txt pgtype.Text) string {
-	if txt.Valid {
-		return txt.String
-	}
-	return ""
-}
-
-// Enhanced answer formatting for JSON
-func formatAnswerForJSON(row sqlc.GetFormResponsesWithAnswersRow) interface{} {
-	if row.AnswerText.Valid {
-		return row.AnswerText.String
-	}
-	if row.AnswerNumber.Valid {
-		flt, err := row.AnswerNumber.Float64Value()
-		if err == nil {
-			return flt.Float64
-		}
-	}
-	if row.AnswerDate.Valid {
-		return row.AnswerDate.Time.Format("2006-01-02") // ISO date
-	}
-	if row.AnswerTime.Valid {
-		micros := row.AnswerTime.Microseconds
-		return time.Date(0, 0, 0, 0, 0, int(micros), 0, time.UTC).Format("15:04:05")
-	}
-	if len(row.AnswerChoices) > 0 {
-		// Try to unmarshal as array or object
-		var choices interface{}
-		if err := json.Unmarshal(row.AnswerChoices, &choices); err == nil {
-			return choices
-		}
-		return string(row.AnswerChoices)
-	}
-	if row.AnswerFileUrl.Valid {
-		return map[string]string{
-			"type": "file",
-			"url":  row.AnswerFileUrl.String,
-		}
-	}
-	return nil
+	return json.MarshalIndent(output, "", "  ")
 }

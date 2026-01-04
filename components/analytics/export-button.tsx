@@ -1,0 +1,81 @@
+import { useState } from 'react';
+import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { downloadAnalyticsExport } from '@/lib/grpc-client';
+import { toast } from 'sonner';
+
+interface ExportButtonProps {
+  formId: string;
+  startDate: Date;
+  endDate: Date;
+}
+
+export function ExportButton({ formId, startDate, endDate }: ExportButtonProps) {
+  const [isExporting, setIsExporting] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleExport = async (format: 'csv' | 'xlsx' | 'pdf') => {
+    setIsExporting(true);
+    setShowMenu(false);
+
+    try {
+      const result = await downloadAnalyticsExport(formId, format, startDate, endDate);
+      
+      // Show success notification
+      toast.success(`Analytics exported successfully: ${result.filename}`);
+    } catch (error) {
+      toast.error('Failed to export analytics');
+      console.error('Export error:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowMenu(!showMenu)}
+        disabled={isExporting}
+        className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isExporting ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Exporting...
+          </>
+        ) : (
+          <>
+            <Download className="w-4 h-4" />
+            Export
+          </>
+        )}
+      </button>
+
+      {showMenu && !isExporting && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+          <button
+            onClick={() => handleExport('csv')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            Export as CSV
+          </button>
+          <button
+            onClick={() => handleExport('xlsx')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            Export as Excel
+          </button>
+          <button
+            onClick={() => handleExport('pdf')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 opacity-50 cursor-not-allowed"
+            disabled
+          >
+            <FileText className="w-4 h-4" />
+            Export as PDF (Coming Soon)
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

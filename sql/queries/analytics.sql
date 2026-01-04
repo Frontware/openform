@@ -261,3 +261,35 @@ WHERE id = @form_id::uuid;
 UPDATE form.forms
 SET completion_count = completion_count + 1
 WHERE id = @form_id::uuid;
+
+-- name: GetViewStatsForDate :many
+SELECT
+    session_id,
+    device_type,
+    COUNT(*)::int8 as count
+FROM form.form_views
+WHERE form_id = @form_id::uuid
+    AND viewed_at >= @start_date::timestamptz
+    AND viewed_at < @end_date::timestamptz
+GROUP BY session_id, device_type;
+
+-- name: GetResponseStartsForDate :many
+SELECT id, form_id, session_id
+FROM form.response_starts
+WHERE form_id = @form_id::uuid
+    AND created_at >= @start_date::timestamptz
+    AND created_at < @end_date::timestamptz;
+
+-- name: GetCompletionStatsForDate :many
+SELECT
+    id,
+    CASE
+        WHEN submitted_at IS NOT NULL AND created_at IS NOT NULL
+        THEN EXTRACT(EPOCH FROM (submitted_at - created_at))::integer
+        ELSE NULL
+    END as completion_time_seconds
+FROM form.responses
+WHERE form_id = @form_id::uuid
+    AND completed = true
+    AND submitted_at >= @start_date::timestamptz
+    AND submitted_at < @end_date::timestamptz;
