@@ -67,13 +67,46 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
   const locale = useLocale()
   const isDraftForm = form.status === 'draft'
   
-  const copyFormLink = () => {
+  const copyFormLink = async () => {
     if (isDraftForm) {
       return
     }
     const link = `${window.location.origin}/f/${form.slug}`
-    navigator.clipboard.writeText(link)
-    toast.success('Link copied to clipboard')
+    
+    // Fallback for insecure contexts or browsers without clipboard API
+    if (!navigator.clipboard) {
+      const textArea = document.createElement('textarea')
+      textArea.value = link
+      textArea.style.position = 'fixed' // Avoid scrolling to bottom
+      textArea.style.left = '-9999px'
+      textArea.style.top = '0'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      
+      try {
+        const successful = document.execCommand('copy')
+        if (successful) {
+          toast.success('Link copied to clipboard')
+        } else {
+          toast.error('Failed to copy link')
+        }
+      } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err)
+        toast.error('Failed to copy link')
+      }
+      
+      document.body.removeChild(textArea)
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(link)
+      toast.success('Link copied to clipboard')
+    } catch (err) {
+      console.error('Failed to copy link:', err)
+      toast.error('Failed to copy link')
+    }
   }
 
   const shareFormLink = async () => {
@@ -94,7 +127,7 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
         }
       }
     } else {
-      copyFormLink()
+      await copyFormLink()
     }
   }
 
