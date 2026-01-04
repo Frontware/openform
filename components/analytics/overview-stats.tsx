@@ -1,4 +1,7 @@
+'use client'
+
 import { Eye, Users, CheckCircle, Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface StatCardProps {
   title: string;
@@ -29,6 +32,8 @@ function StatCard({ title, value, change, icon: Icon, trend }: StatCardProps) {
 }
 
 export function OverviewStats({ stats }: { stats: any }) {
+  const t = useTranslations('analytics');
+  
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -45,28 +50,28 @@ export function OverviewStats({ stats }: { stats: any }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatCard
-        title="Total Views"
+        title={t('totalViews')}
         value={Number(stats.totalViews).toLocaleString()}
         change={stats.viewsChange || "0%"}
         icon={Eye}
         trend={getTrend(stats.viewsChange)}
       />
       <StatCard
-        title="Total Responses"
+        title={t('totalResponses')}
         value={Number(stats.totalResponses).toLocaleString()}
         change={stats.responsesChange || "0%"}
         icon={Users}
         trend={getTrend(stats.responsesChange)}
       />
       <StatCard
-        title="Completion Rate"
+        title={t('completionRate')}
         value={`${Number(stats.completionRate).toFixed(1)}%`}
         change={stats.completionRateChange || "0%"}
         icon={CheckCircle}
         trend={getTrend(stats.completionRateChange)}
       />
       <StatCard
-        title="Avg. Time"
+        title={t('avgTime')}
         value={formatTime(stats.avgCompletionTimeSeconds)}
         change={stats.avgTimeChange || "0s"}
         icon={Clock}
@@ -75,3 +80,4 @@ export function OverviewStats({ stats }: { stats: any }) {
     </div>
   );
 }
+

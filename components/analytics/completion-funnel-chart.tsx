@@ -1,6 +1,11 @@
+'use client'
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
+import { useTranslations } from 'next-intl';
 
 export function CompletionFunnelChart({ funnel }: { funnel: any }) {
+  const t = useTranslations('analytics');
+  
   const data = funnel.stages.map((s: any) => ({
     name: s.name,
     count: Number(s.count),
@@ -10,9 +15,9 @@ export function CompletionFunnelChart({ funnel }: { funnel: any }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-full">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Completion Funnel</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{t('completionFunnel')}</h2>
         <div className="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
-          {Number(funnel.overallCompletionRate).toFixed(1)}% Conversion
+          {Number(funnel.overallCompletionRate).toFixed(1)}% {t('conversion')}
         </div>
       </div>
       <div className="h-[250px]">

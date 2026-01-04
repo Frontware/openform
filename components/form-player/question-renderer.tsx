@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { QuestionConfig, ThemeConfig, Json } from '@/lib/database.types'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { Star, Upload, Check, X, FileText, Image as ImageIcon, Loader2, AlertCircle } from 'lucide-react'
 
@@ -22,6 +23,7 @@ interface FileUploadQuestionProps {
 }
 
 function FileUploadQuestion({ question, value, onChange, theme }: FileUploadQuestionProps) {
+  const t = useTranslations('formPlayer')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -139,7 +141,7 @@ function FileUploadQuestion({ question, value, onChange, theme }: FileUploadQues
           }}
         >
           <Loader2 className="w-8 h-8 animate-spin" style={{ color: theme.primaryColor }} />
-          <p className="font-medium">Uploading...</p>
+          <p className="font-medium">{t('uploading')}</p>
         </div>
       ) : (
         <div>
@@ -156,9 +158,9 @@ function FileUploadQuestion({ question, value, onChange, theme }: FileUploadQues
           >
             <Upload className="w-8 h-8 opacity-50" />
             <div className="text-center">
-              <p className="font-medium">Click to upload</p>
+              <p className="font-medium">{t('clickToUpload')}</p>
               <p className="text-sm opacity-50 mt-1">
-                Images & PDFs up to {question.maxFileSize || 10}MB
+                {t('imagesAndPdfsUpTo', { size: question.maxFileSize || 10 })}
               </p>
             </div>
           </motion.button>
@@ -193,6 +195,7 @@ export function QuestionRenderer({
   onSubmit,
   onClearError
 }: QuestionRendererProps) {
+  const t = useTranslations('formPlayer')
   const [isFocused, setIsFocused] = useState(false)
 
   const inputStyles = {
@@ -214,7 +217,7 @@ export function QuestionRenderer({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder={question.placeholder || 'Type your answer here...'}
+          placeholder={question.placeholder || t('typeYourAnswer')}
           className="text-xl md:text-2xl h-auto py-3 px-0 border-0 border-b-2 rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:opacity-40"
           style={inputStyles}
           autoFocus
@@ -228,7 +231,7 @@ export function QuestionRenderer({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder={question.placeholder || 'Type your answer here...'}
+          placeholder={question.placeholder || t('typeYourAnswer')}
           className="text-lg md:text-xl min-h-[150px] p-4 border-2 rounded-xl bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:opacity-40 resize-none"
           style={inputStyles}
           autoFocus
@@ -340,26 +343,30 @@ export function QuestionRenderer({
             )
           })}
           <p className="text-sm opacity-50 mt-2" style={{ color: theme.textColor }}>
-            Select all that apply
+            {t('selectAllThatApply')}
           </p>
         </div>
       )
 
     case 'yes_no':
+      const yesNoOptions = [
+        { label: t('yes'), value: 'Yes' },
+        { label: t('no'), value: 'No' },
+      ]
       return (
         <div className="flex gap-4">
-          {['Yes', 'No'].map((option) => {
-            const isSelected = value === option
+          {yesNoOptions.map((option) => {
+            const isSelected = value === option.value
             return (
               <motion.button
-                key={option}
+                key={option.value}
                 type="button"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  onChange(option)
+                  onChange(option.value)
                   onClearError?.()
                   onSubmit(true)
                 }}
@@ -381,11 +388,11 @@ export function QuestionRenderer({
                     <Check className="w-4 h-4" style={{ color: theme.backgroundColor }} />
                   ) : (
                     <span className="text-sm font-medium" style={{ color: theme.textColor }}>
-                      {option[0]}
+                      {option.label[0]}
                     </span>
                   )}
                 </div>
-                <span className="text-xl font-medium">{option}</span>
+                <span className="text-xl font-medium">{option.label}</span>
               </motion.button>
             )
           })}

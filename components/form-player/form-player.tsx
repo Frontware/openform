@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { Form, QuestionConfig, Json } from '@/lib/database.types'
 import { getTheme, getThemeCSSVariables } from '@/lib/themes'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,9 @@ declare global {
 }
 
 export function FormPlayer({ form, sessionId }: FormPlayerProps) {
+  const t = useTranslations('formPlayer')
+  const tCommon = useTranslations('common')
+  const tForm = useTranslations('form')
   const questions = (form.questions as QuestionConfig[]) || []
   const theme = getTheme(form.theme)
   const themeStyles = getThemeCSSVariables(theme)
@@ -107,12 +111,12 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
 
     if (currentQuestion.required) {
       if (answer === undefined || answer === null || answer === '') {
-        setErrors({ ...errors, [currentQuestion.id]: 'This field is required' })
+        setErrors({ ...errors, [currentQuestion.id]: t('validation.required') })
         return false
       }
 
       if (Array.isArray(answer) && answer.length === 0) {
-        setErrors({ ...errors, [currentQuestion.id]: 'Please select at least one option' })
+        setErrors({ ...errors, [currentQuestion.id]: t('validation.selectAtLeastOne') })
         return false
       }
     }
@@ -121,7 +125,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
     if (answer && currentQuestion.type === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(String(answer))) {
-        setErrors({ ...errors, [currentQuestion.id]: 'Please enter a valid email address' })
+        setErrors({ ...errors, [currentQuestion.id]: t('validation.validEmail') })
         return false
       }
     }
@@ -130,7 +134,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
       try {
         new URL(String(answer))
       } catch {
-        setErrors({ ...errors, [currentQuestion.id]: 'Please enter a valid URL' })
+        setErrors({ ...errors, [currentQuestion.id]: t('validation.validUrl') })
         return false
       }
     }
@@ -138,7 +142,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
     if (answer && currentQuestion.type === 'phone') {
       const phoneRegex = /^[+]?[\d\s\-().]+$/
       if (!phoneRegex.test(String(answer))) {
-        setErrors({ ...errors, [currentQuestion.id]: 'Please enter a valid phone number' })
+        setErrors({ ...errors, [currentQuestion.id]: t('validation.validPhone') })
         return false
       }
     }
@@ -148,29 +152,9 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
     delete newErrors[currentQuestion.id]
     setErrors(newErrors)
     return true
-  }, [currentQuestion, answers, errors])
+  }, [currentQuestion, answers, errors, t])
 
-  const goToNext = useCallback((skipValidation?: boolean) => {
-    // Check both the parameter and the ref for skip validation
-    const shouldSkip = skipValidation || skipNextValidationRef.current
-    skipNextValidationRef.current = false // Reset the ref
-
-    if (!shouldSkip && !validateCurrentQuestion()) return
-
-    if (isLastQuestion) {
-      handleSubmit()
-    } else {
-      setDirection(1)
-      setCurrentIndex(prev => Math.min(prev + 1, questions.length - 1))
-    }
-  }, [isLastQuestion, questions.length, validateCurrentQuestion])
-
-  const goToPrevious = useCallback(() => {
-    setDirection(-1)
-    setCurrentIndex(prev => Math.max(prev - 1, 0))
-  }, [])
-
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!validateCurrentQuestion()) return
 
     setIsSubmitting(true)
@@ -216,11 +200,37 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
       setIsSubmitted(true)
     } catch (error) {
       console.error(error)
-      toast.error('Failed to submit response')
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      
+      if (errorMessage.includes('reCAPTCHA')) {
+        toast.error('Bot protection check failed. Please try again.')
+      } else {
+        toast.error('Failed to submit response')
+      }
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [form.id, form.force_captcha, answers, recaptchaLoaded, recaptchaSiteKey, validateCurrentQuestion])
+
+  const goToNext = useCallback((skipValidation?: boolean) => {
+    // Check both the parameter and the ref for skip validation
+    const shouldSkip = skipValidation || skipNextValidationRef.current
+    skipNextValidationRef.current = false // Reset the ref
+
+    if (!shouldSkip && !validateCurrentQuestion()) return
+
+    if (isLastQuestion) {
+      handleSubmit()
+    } else {
+      setDirection(1)
+      setCurrentIndex(prev => Math.min(prev + 1, questions.length - 1))
+    }
+  }, [isLastQuestion, questions.length, validateCurrentQuestion, handleSubmit])
+
+  const goToPrevious = useCallback(() => {
+    setDirection(-1)
+    setCurrentIndex(prev => Math.max(prev - 1, 0))
+  }, [])
 
   const updateAnswer = (questionId: string, value: Json) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }))
@@ -328,13 +338,13 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
             className="text-3xl md:text-4xl font-bold mb-4"
             style={{ color: theme.textColor }}
           >
-            {form.thank_you_message}
+            {form.thank_you_message || tCommon('success')}
           </h1>
           <p 
             className="text-lg opacity-70"
             style={{ color: theme.textColor }}
           >
-            Your response has been recorded.
+            {t('responseRecorded')}
           </p>
           
           {/* Company branding (Enterprise) or Weladee Form branding */}
@@ -368,7 +378,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
                 className="inline-flex items-center gap-2 text-sm opacity-50 hover:opacity-70 transition-opacity"
                 style={{ color: theme.textColor }}
               >
-                <span>Made with</span>
+                <span>{t('madeWith')}</span>
                 <span className="font-semibold">Weladee Form</span>
               </a>
             )}
@@ -389,7 +399,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
         }}
       >
         <p style={{ color: theme.textColor }} className="opacity-50">
-          This form has no questions yet.
+          {t('emptyForm')}
         </p>
       </div>
     )
@@ -471,7 +481,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
                 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3"
                 style={{ color: theme.textColor }}
               >
-                {currentQuestion.title || 'Untitled question'}
+                {currentQuestion.title || tForm('untitled')}
                 {currentQuestion.required && (
                   <span style={{ color: theme.primaryColor }} className="ml-1">*</span>
                 )}
@@ -550,15 +560,15 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
                   }}
                 >
                   {isSubmitting ? (
-                    'Submitting...'
+                    t('submitting')
                   ) : isLastQuestion ? (
                     <>
-                      Submit
+                      {tCommon('submit')}
                       <Check className="w-4 h-4 ml-2" />
                     </>
                   ) : (
                     <>
-                      OK
+                      {tCommon('ok')}
                       <Check className="w-4 h-4 ml-2" />
                     </>
                   )}
@@ -568,7 +578,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
                   className="text-sm opacity-50"
                   style={{ color: theme.textColor }}
                 >
-                  press <kbd className="font-mono font-medium">Enter ↵</kbd>
+                  {t('pressEnter')} <kbd className="font-mono font-medium">Enter ↵</kbd>
                 </span>
               </motion.div>
             </motion.div>
@@ -623,7 +633,7 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
             className="text-sm opacity-50 hover:opacity-70 transition-opacity"
             style={{ color: theme.textColor }}
           >
-            Powered by <span className="font-semibold">Weladee Form</span>
+            {t('poweredBy')} <span className="font-semibold">Weladee Form</span>
           </a>
         )}
       </footer>

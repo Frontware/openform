@@ -1,9 +1,15 @@
+'use client'
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useLocale, useTranslations } from 'next-intl';
 
 export function ResponseTrendChart({ data }: { data: any[] }) {
+  const t = useTranslations('analytics');
+  const locale = useLocale();
+
   // Format data for recharts
   const chartData = data.map(point => ({
-    date: new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    date: new Date(point.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
     views: Number(point.views),
     responses: Number(point.responses),
     completions: Number(point.completions)
@@ -12,19 +18,19 @@ export function ResponseTrendChart({ data }: { data: any[] }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Response Trends</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{t('responseTrends')}</h2>
         <div className="flex gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
-            <span className="text-gray-600">Views</span>
+            <span className="text-gray-600">{t('views')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
-            <span className="text-gray-600">Responses</span>
+            <span className="text-gray-600">{t('responses')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-gray-600">Completions</span>
+            <span className="text-gray-600">{t('completions')}</span>
           </div>
         </div>
       </div>
@@ -51,3 +57,4 @@ export function ResponseTrendChart({ data }: { data: any[] }) {
     </div>
   );
 }
+

@@ -189,10 +189,10 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 				return nil, status.Errorf(codes.InvalidArgument, "reCAPTCHA verification failed: %v", err)
 			}
 			if !verified {
-				return nil, status.Errorf(codes.InvalidArgument, "reCAPTCHA verification failed")
+				return nil, status.Errorf(codes.InvalidArgument, "reCAPTCHA verification failed: score too low")
 			}
 		} else {
-			return nil, status.Errorf(codes.InvalidArgument, "reCAPTCHA token is required for this form")
+			return nil, status.Errorf(codes.InvalidArgument, "reCAPTCHA token is required")
 		}
 	}
 

@@ -1,5 +1,7 @@
+'use client'
+
 import React from 'react';
-import { Filter, Eye, Users, CheckCircle, Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { OverviewStats } from './overview-stats';
 import { ResponseTrendChart } from './response-trend-chart';
 import { DeviceBreakdownChart } from './device-breakdown-chart';
@@ -20,6 +22,7 @@ export function AnalyticsDashboard({
   onTimeRangeChange,
   formId
 }: AnalyticsDashboardProps) {
+  const t = useTranslations('analytics');
   const { startDate, endDate } = calculateDateRange(timeRange);
 
   return (
@@ -28,24 +31,24 @@ export function AnalyticsDashboard({
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-            <p className="text-gray-500 mt-1">Form Performance Insights</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
+            <p className="text-gray-500 mt-1">{t('subtitle')}</p>
           </div>
           <div className="flex gap-3">
             <select
               value={timeRange}
               onChange={(e) => onTimeRangeChange(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-200 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 outline-none"
             >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="all">All time</option>
+              <option value="7d">{t('last7Days')}</option>
+              <option value="30d">{t('last30Days')}</option>
+              <option value="90d">{t('last90Days')}</option>
+              <option value="all">{t('allTime')}</option>
             </select>
-            <ExportButton 
-              formId={formId} 
-              startDate={startDate} 
-              endDate={endDate} 
+            <ExportButton
+              formId={formId}
+              startDate={startDate}
+              endDate={endDate}
             />
           </div>
         </div>
@@ -94,8 +97,10 @@ function calculateDateRange(timeRange: string): { startDate: Date; endDate: Date
     default:
       startDate.setFullYear(2000);
   }
+
   startDate.setHours(0, 0, 0, 0);
 
   return { startDate, endDate };
 }
+
 

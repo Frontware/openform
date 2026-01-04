@@ -1,9 +1,14 @@
+'use client'
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTranslations } from 'next-intl';
 
 export function QuestionAnalyticsSection({ questions }: { questions: any[] }) {
+  const t = useTranslations('analytics');
+  
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold text-gray-900">Question Analytics</h2>
+      <h2 className="text-xl font-bold text-gray-900">{t('questionAnalytics')}</h2>
 
       {questions.map((question) => (
         <QuestionAnalyticsCard key={question.questionId} question={question} />
@@ -13,6 +18,8 @@ export function QuestionAnalyticsSection({ questions }: { questions: any[] }) {
 }
 
 function QuestionAnalyticsCard({ question }: { question: any }) {
+  const t = useTranslations('analytics');
+  
   const renderChart = () => {
     switch (question.questionType) {
       case 'single_choice':
@@ -20,11 +27,11 @@ function QuestionAnalyticsCard({ question }: { question: any }) {
       case 'dropdown':
         return <ChoiceQuestionChart stats={question.choiceStats || []} />;
       case 'rating':
-        return question.npsStats ? 
-          <NPSChart stats={question.npsStats} /> : 
+        return question.npsStats ?
+          <NPSChart stats={question.npsStats} /> :
           <RatingChart stats={question.ratingStats || []} />;
       default:
-        return <div className="text-gray-500 py-8 text-center border border-dashed rounded-lg">Visualization for this question type is not yet available</div>;
+        return <div className="text-gray-500 py-8 text-center border border-dashed rounded-lg">{t('noVisualization')}</div>;
     }
   };
 
@@ -33,7 +40,7 @@ function QuestionAnalyticsCard({ question }: { question: any }) {
       <div className="mb-6">
         <div className="flex items-start justify-between mb-2">
           <h3 className="text-base font-semibold text-gray-900">{question.questionLabel}</h3>
-          <span className="text-sm text-gray-500">{Number(question.responseCount)} responses</span>
+          <span className="text-sm text-gray-500">{Number(question.responseCount)} {t('responses').toLowerCase()}</span>
         </div>
         <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full">
           {question.questionType.replace('_', ' ')}

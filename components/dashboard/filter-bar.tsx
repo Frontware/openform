@@ -174,7 +174,7 @@ export function FilterBar({
                 <span className="text-sm text-gray-600">{t('filteredBy')}</span>
                 <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-gray-200">
                   <span className="text-sm font-medium text-gray-700">
-                    "{searchQuery}"
+                    &quot;{searchQuery}&quot;
                   </span>
                   <button
                     onClick={() => onSearchChange('')}
@@ -197,7 +197,7 @@ export function FilterBar({
           </span>
           {searchQuery && (
             <span className="text-sm text-gray-600">
-              | {t('search')}: <span className="font-semibold text-gray-900">"{searchQuery}"</span>
+              | {t('search')}: <span className="font-semibold text-gray-900">&quot;{searchQuery}&quot;</span>
             </span>
           )}
           <span className="text-sm text-gray-600">

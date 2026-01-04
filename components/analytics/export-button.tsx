@@ -1,6 +1,9 @@
+'use client'
+
 import { useState } from 'react';
 import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 import { downloadAnalyticsExport } from '@/lib/grpc-client';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 interface ExportButtonProps {
@@ -10,6 +13,7 @@ interface ExportButtonProps {
 }
 
 export function ExportButton({ formId, startDate, endDate }: ExportButtonProps) {
+  const t = useTranslations('analytics');
   const [isExporting, setIsExporting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -19,11 +23,10 @@ export function ExportButton({ formId, startDate, endDate }: ExportButtonProps) 
 
     try {
       const result = await downloadAnalyticsExport(formId, format, startDate, endDate);
-      
       // Show success notification
-      toast.success(`Analytics exported successfully: ${result.filename}`);
+      toast.success(`${t('export')} ${t('success')}: ${result.filename}`);
     } catch (error) {
-      toast.error('Failed to export analytics');
+      toast.error(t('error'));
       console.error('Export error:', error);
     } finally {
       setIsExporting(false);
@@ -35,17 +38,17 @@ export function ExportButton({ formId, startDate, endDate }: ExportButtonProps) 
       <button
         onClick={() => setShowMenu(!showMenu)}
         disabled={isExporting}
-        className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed outline-none"
       >
         {isExporting ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            Exporting...
+            {t('exporting')}
           </>
         ) : (
           <>
             <Download className="w-4 h-4" />
-            Export
+            {t('export')}
           </>
         )}
       </button>
@@ -57,14 +60,14 @@ export function ExportButton({ formId, startDate, endDate }: ExportButtonProps) 
             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
           >
             <FileText className="w-4 h-4" />
-            Export as CSV
+            {t('exportCsv')}
           </button>
           <button
             onClick={() => handleExport('xlsx')}
             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
           >
             <FileSpreadsheet className="w-4 h-4" />
-            Export as Excel
+            {t('exportExcel')}
           </button>
           <button
             onClick={() => handleExport('pdf')}
@@ -72,10 +75,11 @@ export function ExportButton({ formId, startDate, endDate }: ExportButtonProps) 
             disabled
           >
             <FileText className="w-4 h-4" />
-            Export as PDF (Coming Soon)
+            {t('exportPdf')}
           </button>
         </div>
       )}
     </div>
   );
 }
+

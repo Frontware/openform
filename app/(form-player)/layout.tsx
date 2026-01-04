@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Sans, Plus_Jakarta_Sans, Outfit, Sora, Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 import "../globals.css";
 
 const dmSans = DM_Sans({
@@ -33,17 +35,21 @@ export const metadata: Metadata = {
   description: "Build stunning forms with Weladee Form. Free and open source.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const messages = await getMessages();
+
   return (
     <html lang="en">
       <body
         className={`${dmSans.variable} ${plusJakarta.variable} ${outfit.variable} ${sora.variable} ${inter.variable} antialiased`}
       >
-        {children}
+        <NextIntlClientProvider messages={messages} locale="en">
+          {children}
+        </NextIntlClientProvider>
         <Toaster richColors position="top-center" />
       </body>
     </html>

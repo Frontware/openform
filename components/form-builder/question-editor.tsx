@@ -2,6 +2,7 @@
 
 import { QuestionConfig } from '@/lib/database.types'
 import { getQuestionTypeInfo } from '@/lib/questions'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,6 +18,7 @@ interface QuestionEditorProps {
 }
 
 export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
+  const t = useTranslations('form')
   const typeInfo = getQuestionTypeInfo(question.type)
 
   const addOption = () => {
@@ -40,17 +42,17 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
       {/* Question Type Badge */}
       <div className="flex items-center gap-2">
         {typeInfo && <typeInfo.icon className="w-4 h-4 text-blue-600" />}
-        <span className="text-sm font-medium text-slate-600">{typeInfo?.label}</span>
+        <span className="text-sm font-medium text-slate-600">{t(`questionTypes.${question.type}`)}</span>
       </div>
 
       {/* Question Title */}
       <div>
-        <Label htmlFor="title" className="text-sm font-medium">Question</Label>
+        <Label htmlFor="title" className="text-sm font-medium">{t('questions')}</Label>
         <Textarea
           id="title"
           value={question.title}
           onChange={(e) => onUpdate({ title: e.target.value })}
-          placeholder="Type your question here..."
+          placeholder={t('addQuestionDescription')}
           className="mt-2 resize-none"
           rows={2}
         />
@@ -59,13 +61,13 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
       {/* Description */}
       <div>
         <Label htmlFor="description" className="text-sm font-medium">
-          Description <span className="text-slate-400 font-normal">(optional)</span>
+          {t('description')} <span className="text-slate-400 font-normal">{t('descriptionPlaceholder')}</span>
         </Label>
         <Textarea
           id="description"
           value={question.description || ''}
           onChange={(e) => onUpdate({ description: e.target.value })}
-          placeholder="Add a description..."
+          placeholder={t('descriptionPlaceholder')}
           className="mt-2 resize-none"
           rows={2}
         />
@@ -76,7 +78,7 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
       {/* Type-specific settings */}
       {(question.type === 'dropdown' || question.type === 'checkboxes') && (
         <div>
-          <Label className="text-sm font-medium mb-3 block">Options</Label>
+          <Label className="text-sm font-medium mb-3 block">{t('questions')}</Label>
           <div className="space-y-2">
             {(question.options || []).map((option, index) => (
               <div
@@ -111,13 +113,13 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
             className="mt-3 w-full"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add option
+            {t('addQuestion')}
           </Button>
         </div>
       )}
 
-      {(question.type === 'short_text' || question.type === 'long_text' || 
-        question.type === 'email' || question.type === 'phone' || 
+      {(question.type === 'short_text' || question.type === 'long_text' ||
+        question.type === 'email' || question.type === 'phone' ||
         question.type === 'url' || question.type === 'number') && (
         <div>
           <Label htmlFor="placeholder" className="text-sm font-medium">Placeholder</Label>
@@ -239,7 +241,7 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
         className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
       >
         <Trash2 className="w-4 h-4 mr-2" />
-        Delete question
+        {t('actions.save')}
       </Button>
     </div>
   )
