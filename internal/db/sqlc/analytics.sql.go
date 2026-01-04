@@ -60,7 +60,7 @@ const getCompletionFunnel = `-- name: GetCompletionFunnel :one
 SELECT
     (SELECT COUNT(*) FROM form.form_views WHERE form_id = $1::uuid AND viewed_at >= $2::timestamptz AND viewed_at <= $3::timestamptz)::int8 as total_views,
     (SELECT COUNT(DISTINCT session_id) FROM form.form_views WHERE form_id = $1::uuid AND viewed_at >= $2::timestamptz AND viewed_at <= $3::timestamptz)::int8 as unique_views,
-    (SELECT COUNT(*) FROM form.response_starts WHERE form_id = $1::uuid AND created_at >= $2::timestamptz AND created_at <= $3::timestamptz)::int8 as total_starts,
+    (SELECT COUNT(*) FROM form.response_starts WHERE form_id = $1::uuid AND started_at >= $2::timestamptz AND started_at <= $3::timestamptz)::int8 as total_starts,
     (SELECT COUNT(*) FROM form.responses WHERE form_id = $1::uuid AND created_at >= $2::timestamptz AND created_at <= $3::timestamptz)::int8 as total_responses,
     (SELECT COUNT(*) FROM form.responses WHERE form_id = $1::uuid AND completed = true AND submitted_at >= $2::timestamptz AND submitted_at <= $3::timestamptz)::int8 as total_completions
 `
@@ -643,8 +643,8 @@ const getResponseStartsForDate = `-- name: GetResponseStartsForDate :many
 SELECT id, form_id, session_id
 FROM form.response_starts
 WHERE form_id = $1::uuid
-    AND created_at >= $2::timestamptz
-    AND created_at < $3::timestamptz
+    AND started_at >= $2::timestamptz
+    AND started_at < $3::timestamptz
 `
 
 type GetResponseStartsForDateParams struct {
