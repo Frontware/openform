@@ -117,8 +117,12 @@ The schema creates the `form` schema with the following tables:
 - `questions` - Form questions
 - `responses` - Form submissions
 - `answers` - Response answers
-- `file_uploads` - Uploaded file metadata
-- `analytics` - Daily form analytics
+- `file_uploads` - File metadata
+- `form_views` - View & interaction tracking
+- `response_starts` - Response start tracking
+- `question_interactions` - Question interaction tracking
+- `daily_stats` - Aggregated daily analytics
+- `question_stats` - Question statistics
 
 ### 3. Configure Environment
 
@@ -477,13 +481,50 @@ protoc --go_out=. --go_opt=paths=source_relative \
 - `filename`, `original_filename`, `mime_type`
 - `file_size`
 - `s3_key`, `s3_url`
+- `uploaded_by_user_id` (UUID, nullable)
 - `created_at`
 
-**form.analytics** - Daily analytics
+**form.form_views** - View & interaction tracking
 - `id` (UUID)
 - `form_id` (UUID)
-- `date` (date)
-- `total_views`, `total_starts`, `total_completions`
+- `session_id` (varchar, nullable)
+- `user_id` (UUID, nullable)
+- `ip_address` (inet), `user_agent` (text)
+- `referrer` (text), `device_type` (varchar)
+- `browser` (varchar), `os` (varchar)
+- `country` (varchar), `city` (varchar)
+- `viewed_at` (timestamptz)
+
+**form.response_starts** - Response start tracking
+- `id` (UUID)
+- `form_id` (UUID)
+- `session_id` (varchar)
+- `started_at` (timestamptz)
+
+**form.question_interactions** - Question interaction tracking
+- `id` (UUID)
+- `form_id`, `question_id`, `response_id` (UUIDs)
+- `session_id` (varchar)
+- `interaction_type` (varchar)
+- `time_spent_seconds` (integer)
+- `created_at` (timestamptz)
+
+**form.daily_stats** - Aggregated daily analytics
+- `id` (UUID)
+- `form_id` (UUID)
+- `stat_date` (date)
+- `total_views`, `unique_views`, `total_starts`, `total_completions`
+- `desktop_views`, `mobile_views`, `tablet_views`
+- `avg_completion_time_seconds` (integer)
+- `created_at`, `updated_at`
+
+**form.question_stats** - Question statistics
+- `id` (UUID)
+- `question_id` (UUID)
+- `answer_value` (text)
+- `response_count` (integer)
+- `percentage` (decimal)
+- `last_updated` (timestamptz)
 
 ## License
 
