@@ -201,7 +201,8 @@
       "publish": "เผยแพร่",
       "unpublish": "เลิกเผยแพร่",
       "copyLink": "คัดลอกลิงก์",
-      "view": "ดู"
+      "view": "ดู",
+      "edit": "แก้ไข"
     },
     "publishDialog": {
       "title": "เผยแพร่แบบฟอร์ม?",

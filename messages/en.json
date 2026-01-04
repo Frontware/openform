@@ -201,7 +201,8 @@
       "publish": "Publish",
       "unpublish": "Unpublish",
       "copyLink": "Copy link",
-      "view": "View"
+      "view": "View",
+      "edit": "Edit"
     },
     "publishDialog": {
       "title": "Publish form?",

@@ -15,11 +15,39 @@ Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 qu
 **Key Features:**
 - **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit)
 - **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (app/(form-player)/f/[slug])
-- **Response Dashboard** - View, search, filter, and export responses to CSV/JSON (app/(main)/dashboard/forms/[id]/responses)
+- **Response Dashboard** - View, search, filter, and export responses to CSV/JSON/Excel (app/(main)/dashboard/forms/[id]/responses)
 - **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
-- **Authentication** - JWT token validation
+- **Authentication** - JWT token validation with RSA key support (RS256)
+- **Customer Type Enforcement** - Three tiers (SME, Standard, Enterprise) with different feature limits
+- **Company Branding** - Enterprise users can display their logo on forms
 - **Smart Menu States** - Menu items automatically disable for draft forms (Responses, Copy Link) with visual feedback
 - **Language Switcher** - User can change language (English, Thai, French) from the user dropdown menu with flag icons and persistent cookie storage
+
+## Customer Type Enforcement
+
+Weladee Form enforces feature restrictions based on customer type:
+
+| Feature | SME | Standard | Enterprise |
+|:---|:---:|:---:|:---:|
+| Max Forms | 5 | 15 | Unlimited |
+| File Upload Questions | ❌ | ❌ | ✅ |
+| Company Branding | ❌ | ❌ | ✅ |
+| Export to CSV | ✅ | ✅ | ✅ |
+| Export to Excel | ❌ | ❌ | ✅ |
+
+**Backend Enforcement** (Go):
+- **Form Creation Limit** (`internal/gapi/rpc_form.go:CreateForm`): Checks `CountUserForms` before allowing creation
+- **File Upload Restriction** (`internal/gapi/rpc_form.go:CreateQuestion`): Blocks `QUESTION_TYPE_FILE_UPLOAD` for non-enterprise
+- **Excel Export Restriction** (`internal/gapi/rpc_response.go:ExportResponses`): Validates customer_type before Excel export
+
+**Frontend Enforcement** (TypeScript/React):
+- **Form Builder** (`components/form-builder/form-builder.tsx`): Filters out file_upload question type for non-enterprise
+- **Export Menu** (`components/responses/responses-dashboard.tsx`): Hides Excel option for non-enterprise
+- **Form Player** (`components/form-player/form-player.tsx`): Shows company logo/name for enterprise users
+
+**JWT Claims**:
+- `customer_type`: "sme" | "standard" | "enterprise"
+- `logo_url`: Optional company logo URL for branding
 
 ## Backend Architecture
 
@@ -78,8 +106,21 @@ The database layer uses SQLC for type-safe SQL queries:
 5. **Public Endpoints:** Only specific public endpoints (like GetFormBySlug for answering forms) bypass auth.
 
 **Auth Files**:
-- `internal/auth/jwt.go` - JWT token validation
+- `internal/auth/jwt.go` - JWT token validation, RSA key generation
 - `internal/auth/interceptor.go` - gRPC auth interceptor with public method whitelist
+
+**Customer Type in JWT**:
+The JWT token includes customer type for feature enforcement:
+```json
+{
+  "user_id": 1,
+  "email": "user@example.com",
+  "display_name": "John Doe",
+  "role": "admin",
+  "customer_type": "enterprise",
+  "logo_url": "https://company.com/logo.png"
+}
+```
 
 ### Storage Layer
 
@@ -186,7 +227,18 @@ make proto           # Regenerate protobuf Go code
 # Direct Go commands
 go run cmd/server/main.go                    # Run server directly
 ./bin/weladee-form serve                     # Run server
-./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"  # Generate JWT token
+
+# Generate RSA key pairs for JWT authentication (RS256)
+./bin/weladee-form generate-keys             # Generate 2048-bit RSA key pair
+./bin/weladee-form generate-keys --bits 4096 # Generate 4096-bit keys
+./bin/weladee-form generate-keys --output-dir ./keys
+
+# Generate JWT tokens for testing
+./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"
+./bin/weladee-form create-jwt --customer-type enterprise --logo-url "https://company.com/logo.png"
+./bin/weladee-form create-jwt --customer-type sme
+./bin/weladee-form create-jwt --customer-type standard
+
 ./bin/weladee-form config                    # Open config.yaml in nano editor
 go build -o bin/weladee-form cmd/server/main.go  # Build binary
 sqlc generate                                  # Generate SQLC code
@@ -516,13 +568,14 @@ const { response } = await client.responseService.submitResponse({
 
 ### Exporting responses
 
-The responses dashboard supports exporting form data in both CSV and JSON formats. The implementation uses a hybrid approach:
+The responses dashboard supports exporting form data in CSV, JSON, and Excel formats (Enterprise only). The implementation uses a hybrid approach:
 
 - **Client-side generation** for datasets under 1,000 responses (faster, no network latency)
 - **Server-side gRPC** for datasets with 1,000+ responses (better memory handling)
 
 **Frontend (components/responses/responses-dashboard.tsx):**
 - Dropdown menu with "Export as CSV" (FileText icon) and "Export as JSON" (FileJson icon)
+- Excel export option shown only for Enterprise customers
 - Loading state with spinner during server-side exports
 - Toast notifications for success/error feedback
 
@@ -551,9 +604,14 @@ The responses dashboard supports exporting form data in both CSV and JSON format
 ```typescript
 const { data, filename, mimeType } = await client.responseService.exportResponses({
   formId: form.id,
-  format: 'csv', // or 'json'
+  format: 'csv', // or 'json', 'excel' (Enterprise only)
 });
 ```
+
+**Excel Export Utility** (`internal/utils/export.go`):
+- `ExportResponsesToExcel()` - Generates .xlsx files with formatted headers
+- `ExcelExporter` - Helper with auto-fit columns and styled headers
+- Enterprise-only feature enforced at both backend and frontend levels
 
 ## Type Safety
 

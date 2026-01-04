@@ -201,7 +201,8 @@
       "publish": "Publier",
       "unpublish": "Dépublier",
       "copyLink": "Copier le lien",
-      "view": "Voir"
+      "view": "Voir",
+      "edit": "Modifier"
     },
     "publishDialog": {
       "title": "Publier le formulaire ?",

@@ -221,13 +221,48 @@ recaptcha:
 
 **Note:** The application will automatically load `config.yaml` from the current directory or `./config/` directory if it exists.
 
-### 4. Generate JWT Tokens (for testing/debugging)
+### 4. Generate RSA Keys for JWT Authentication
+
+For production use with asymmetric JWT signing (RS256), generate RSA key pairs:
+
+```bash
+# Generate RSA key pair (default: 2048-bit)
+./bin/weladee-form generate-keys
+
+# Generate with custom output directory
+./bin/weladee-form generate-keys --output-dir /path/to/keys
+
+# Generate with custom file names
+./bin/weladee-form generate-keys --private-key-file my-private.pem --public-key-file my-public.pem
+
+# Generate 4096-bit keys
+./bin/weladee-form generate-keys --bits 4096
+```
+
+**Key Usage**:
+- **Private key** (`jwt-private.pem`): Used by calling applications (e.g., Weladee portal) to sign JWT tokens
+- **Public key** (`jwt-public.pem`): Used by Weladee Form to validate JWT tokens
+
+Configure the public key path:
+```bash
+export JWT_PUBLIC_KEY_PATH="/path/to/jwt-public.pem"
+./bin/weladee-form serve
+```
+
+### 4.1. Generate JWT Tokens (for testing/debugging)
 
 For testing and debugging purposes, you can generate JWT tokens using the built-in CLI:
 
 ```bash
 # Generate JWT token with command line flags
 ./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"
+
+# Generate JWT token with customer type (affects feature access)
+./bin/weladee-form create-jwt --name "Enterprise User" --email "user@company.com" --customer-type enterprise --logo-url "https://company.com/logo.png"
+
+# Generate for different customer types
+./bin/weladee-form create-jwt --name "SME User" --email "sme@example.com" --customer-type sme
+./bin/weladee-form create-jwt --name "Standard User" --email "standard@example.com" --customer-type standard
 
 # Generate JWT token interactively (will prompt for name and email)
 ./bin/weladee-form create-jwt
@@ -236,9 +271,15 @@ For testing and debugging purposes, you can generate JWT tokens using the built-
 JWT_SECRET="your-custom-secret" ./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"
 ```
 
+**Available Flags**:
+- `--name`: User display name (default: "eric")
+- `--email`: User email address (default: "eric.fairon@gmail.com")
+- `--customer-type`: Customer tier - `sme`, `standard`, or `enterprise` (default: "enterprise")
+- `--logo-url`: Company logo URL for enterprise branding (optional)
+
 The generated token will be valid for 2 hours and can be used for authentication with the backend API.
 
-### 4.1. Configure reCAPTCHA v3 (Optional)
+### 4.2. Configure reCAPTCHA v3 (Optional)
 
 Weladee Form supports Google reCAPTCHA v3 for bot protection. This is an **invisible** CAPTCHA that doesn't require user interaction.
 
@@ -297,7 +338,7 @@ The form will now require reCAPTCHA verification on submission.
 - **Configurable threshold**: Submissions below the threshold are rejected (default: 0.5)
 - **Per-form control**: Enable/disable per form in the form builder
 
-### 5. Run the application
+### 5. Run the Application
 
 **Backend:**
 ```bash
