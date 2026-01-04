@@ -3,6 +3,7 @@ import { createGrpcWebTransport } from "@bufbuild/connect-web";
 import { FormService } from "./proto/proto/form_connect";
 import { ResponseService } from "./proto/proto/response_connect";
 import { FileService } from "./proto/proto/file_connect";
+import { AnalyticsService } from "./proto/proto/analytics_connect";
 import { getToken, clearToken } from "./auth/weladee";
 import { ConnectError } from "@bufbuild/connect";
 
@@ -52,3 +53,4 @@ const transport = createGrpcWebTransport({
 export const formClient = createPromiseClient(FormService, transport);
 export const responseClient = createPromiseClient(ResponseService, transport);
 export const fileClient = createPromiseClient(FileService, transport);
+export const analyticsClient = createPromiseClient(AnalyticsService, transport);

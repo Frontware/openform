@@ -21,7 +21,7 @@ SET
     completed = true,
     submitted_at = NOW()
 WHERE id = $1::uuid
-RETURNING id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at
+RETURNING id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at, completion_time_seconds, device_type, browser, os, country, city, referrer, session_id
 `
 
 func (q *Queries) CompleteResponse(ctx context.Context, id uuid.UUID) (FormResponse, error) {
@@ -39,6 +39,14 @@ func (q *Queries) CompleteResponse(ctx context.Context, id uuid.UUID) (FormRespo
 		&i.SubmittedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.CompletionTimeSeconds,
+		&i.DeviceType,
+		&i.Browser,
+		&i.Os,
+		&i.Country,
+		&i.City,
+		&i.Referrer,
+		&i.SessionID,
 	)
 	return i, err
 }
@@ -137,7 +145,7 @@ VALUES (
     $7::boolean,
     COALESCE($8::timestamptz, NOW())
 )
-RETURNING id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at
+RETURNING id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at, completion_time_seconds, device_type, browser, os, country, city, referrer, session_id
 `
 
 type CreateResponseParams struct {
@@ -175,6 +183,14 @@ func (q *Queries) CreateResponse(ctx context.Context, arg CreateResponseParams) 
 		&i.SubmittedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.CompletionTimeSeconds,
+		&i.DeviceType,
+		&i.Browser,
+		&i.Os,
+		&i.Country,
+		&i.City,
+		&i.Referrer,
+		&i.SessionID,
 	)
 	return i, err
 }
@@ -270,7 +286,7 @@ func (q *Queries) GetFormResponsesWithAnswers(ctx context.Context, formID uuid.U
 }
 
 const getResponse = `-- name: GetResponse :one
-SELECT id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at FROM form.responses
+SELECT id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at, completion_time_seconds, device_type, browser, os, country, city, referrer, session_id FROM form.responses
 WHERE id = $1::uuid
 `
 
@@ -289,6 +305,14 @@ func (q *Queries) GetResponse(ctx context.Context, id uuid.UUID) (FormResponse, 
 		&i.SubmittedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.CompletionTimeSeconds,
+		&i.DeviceType,
+		&i.Browser,
+		&i.Os,
+		&i.Country,
+		&i.City,
+		&i.Referrer,
+		&i.SessionID,
 	)
 	return i, err
 }
@@ -343,7 +367,7 @@ func (q *Queries) GetResponseAnswers(ctx context.Context, responseID uuid.UUID) 
 }
 
 const listFormResponses = `-- name: ListFormResponses :many
-SELECT id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at FROM form.responses
+SELECT id, form_id, respondent_user_id, respondent_email, respondent_name, ip_address, user_agent, completed, submitted_at, created_at, updated_at, completion_time_seconds, device_type, browser, os, country, city, referrer, session_id FROM form.responses
 WHERE form_id = $1::uuid
 ORDER BY submitted_at DESC NULLS LAST, created_at DESC
 LIMIT $3::int OFFSET $2::int
@@ -376,6 +400,14 @@ func (q *Queries) ListFormResponses(ctx context.Context, arg ListFormResponsesPa
 			&i.SubmittedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.CompletionTimeSeconds,
+			&i.DeviceType,
+			&i.Browser,
+			&i.Os,
+			&i.Country,
+			&i.City,
+			&i.Referrer,
+			&i.SessionID,
 		); err != nil {
 			return nil, err
 		}

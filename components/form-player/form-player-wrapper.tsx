@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { notFound } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import { formClient } from '@/lib/grpc-client'
+import { formClient, analyticsClient } from '@/lib/grpc-client'
+import { v4 as uuidv4 } from 'uuid'
 import { Form } from '@/lib/database.types'
 import { Form as PbForm, FormTheme, QuestionType, Question as PbQuestion } from '@/lib/proto/proto/form_pb'
 import { FormPlayer } from './form-player'
@@ -82,6 +83,15 @@ export function FormPlayerWrapper({ slug: serverSlug }: { slug: string }) {
   const [form, setForm] = useState<Form | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [sessionId] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    let sid = sessionStorage.getItem('form_session_id')
+    if (!sid) {
+      sid = uuidv4()
+      sessionStorage.setItem('form_session_id', sid)
+    }
+    return sid
+  })
 
   useEffect(() => {
     async function load() {
@@ -98,6 +108,17 @@ export function FormPlayerWrapper({ slug: serverSlug }: { slug: string }) {
         const response = await formClient.getFormBySlug({ slug: actualSlug })
         if (response.form) {
             setForm(mapPbFormToDBForm(response.form))
+            
+            // Track view
+            if (typeof window !== 'undefined') {
+              analyticsClient.trackView({
+                formId: response.form.id,
+                sessionId: sessionId,
+                userAgent: navigator.userAgent,
+                referrer: document.referrer,
+                ipAddress: '' // Will be extracted on server
+              }).catch(err => console.error('Failed to track view:', err))
+            }
         } else {
             setError(true)
         }
@@ -109,7 +130,7 @@ export function FormPlayerWrapper({ slug: serverSlug }: { slug: string }) {
       }
     }
     load()
-  }, [serverSlug])
+  }, [serverSlug, sessionId])
 
   if (loading) {
     return (
@@ -128,5 +149,5 @@ export function FormPlayerWrapper({ slug: serverSlug }: { slug: string }) {
     )
   }
 
-  return <FormPlayer form={form} />
+  return <FormPlayer form={form} sessionId={sessionId} />
 }

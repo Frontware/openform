@@ -39,6 +39,8 @@ import {
   Palette,
   FileText,
   Pencil,
+  LineChart,
+  BarChart3,
 } from 'lucide-react'
 import Link from 'next/link'
 import { QuestionEditor } from './question-editor'
@@ -333,6 +335,22 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          {form.status !== 'draft' && (
+            <>
+              <Link href={`/forms/${form.id}/responses`}>
+                <Button variant="ghost" size="sm">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Responses
+                </Button>
+              </Link>
+              <Link href={`/forms/${form.id}/analytics`}>
+                <Button variant="ghost" size="sm" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
+                  <LineChart className="w-4 h-4 mr-2" />
+                  Stats
+                </Button>
+              </Link>
+            </>
+          )}
           {form.status === 'published' && (
             <>
               <Button variant="outline" size="sm" onClick={copyFormLink}>

@@ -48,6 +48,7 @@ import {
   File,
   Eye,
   FileJson,
+  LineChart,
 } from 'lucide-react'
 
 interface ResponsesDashboardProps {
@@ -330,6 +331,12 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
               <Button variant="outline" size="sm">
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit Form
+              </Button>
+            </Link>
+            <Link href={`/forms/${form.id}/analytics`}>
+              <Button variant="outline" size="sm" className="bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100">
+                <LineChart className="w-4 h-4 mr-2" />
+                Stats
               </Button>
             </Link>
             {form.status === 'published' && (

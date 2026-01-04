@@ -176,6 +176,99 @@ func (a *connectResponseServiceAdapter) ExportResponses(ctx context.Context, req
 	return connect.NewResponse(resp), nil
 }
 
+// Adapt gRPC AnalyticsService to Connect interface
+type connectAnalyticsServiceAdapter struct {
+	impl *gapi.AnalyticsServerImpl
+}
+
+func (a *connectAnalyticsServiceAdapter) GetOverviewStats(ctx context.Context, req *connect.Request[pb.GetOverviewStatsRequest]) (*connect.Response[pb.GetOverviewStatsResponse], error) {
+	resp, err := a.impl.GetOverviewStats(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) GetResponseTrend(ctx context.Context, req *connect.Request[pb.GetResponseTrendRequest]) (*connect.Response[pb.GetResponseTrendResponse], error) {
+	resp, err := a.impl.GetResponseTrend(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) GetDeviceBreakdown(ctx context.Context, req *connect.Request[pb.GetDeviceBreakdownRequest]) (*connect.Response[pb.GetDeviceBreakdownResponse], error) {
+	resp, err := a.impl.GetDeviceBreakdown(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) GetCompletionFunnel(ctx context.Context, req *connect.Request[pb.GetCompletionFunnelRequest]) (*connect.Response[pb.GetCompletionFunnelResponse], error) {
+	resp, err := a.impl.GetCompletionFunnel(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) GetQuestionAnalytics(ctx context.Context, req *connect.Request[pb.GetQuestionAnalyticsRequest]) (*connect.Response[pb.GetQuestionAnalyticsResponse], error) {
+	resp, err := a.impl.GetQuestionAnalytics(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) GetQuestionDropOff(ctx context.Context, req *connect.Request[pb.GetQuestionDropOffRequest]) (*connect.Response[pb.GetQuestionDropOffResponse], error) {
+	resp, err := a.impl.GetQuestionDropOff(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) GetGeographicDistribution(ctx context.Context, req *connect.Request[pb.GetGeographicDistributionRequest]) (*connect.Response[pb.GetGeographicDistributionResponse], error) {
+	resp, err := a.impl.GetGeographicDistribution(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) GetTimeDistribution(ctx context.Context, req *connect.Request[pb.GetTimeDistributionRequest]) (*connect.Response[pb.GetTimeDistributionResponse], error) {
+	resp, err := a.impl.GetTimeDistribution(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) TrackView(ctx context.Context, req *connect.Request[pb.TrackViewRequest]) (*connect.Response[pb.TrackViewResponse], error) {
+	resp, err := a.impl.TrackView(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) TrackResponseStart(ctx context.Context, req *connect.Request[pb.TrackResponseStartRequest]) (*connect.Response[pb.TrackResponseStartResponse], error) {
+	resp, err := a.impl.TrackResponseStart(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *connectAnalyticsServiceAdapter) ExportAnalytics(ctx context.Context, req *connect.Request[pb.ExportAnalyticsRequest]) (*connect.Response[pb.ExportAnalyticsResponse], error) {
+	resp, err := a.impl.ExportAnalytics(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "weladee-form",
@@ -258,11 +351,13 @@ func runServe(cmd *cobra.Command, args []string) error {
 	formServer := gapi.NewFormServer(database, s3Storage)
 	responseServer := gapi.NewResponseServer(database, cfg.Recaptcha)
 	fileServer := gapi.NewFileServer(database, s3Storage)
+	analyticsServer := gapi.NewAnalyticsServer(database)
 
 	// Register services with the gRPC server
 	pb.RegisterFormServiceServer(grpcServer, formServer)
 	pb.RegisterResponseServiceServer(grpcServer, responseServer)
 	pb.RegisterFileServiceServer(grpcServer, fileServer)
+	pb.RegisterAnalyticsServiceServer(grpcServer, analyticsServer)
 
 	log.Println("✓ gRPC services registered")
 
@@ -278,6 +373,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 	// We use adapters to convert between gRPC and Connect interfaces
 	formConnectAdapter := &connectFormServiceAdapter{impl: formServer.(*gapi.FormServer).FormServerImpl}
 	responseConnectAdapter := &connectResponseServiceAdapter{impl: responseServer.(*gapi.ResponseServer).ResponseServerImpl}
+	analyticsConnectAdapter := &connectAnalyticsServiceAdapter{impl: analyticsServer.(*gapi.AnalyticsServer).AnalyticsServerImpl}
 
 	// Create a ServeMux for all Connect handlers
 	connectMux := http.NewServeMux()
@@ -297,6 +393,14 @@ func runServe(cmd *cobra.Command, args []string) error {
 	)
 	connectMux.Handle(respPath, respHandler)
 	log.Printf("✓ Connect ResponseService handler registered at %s", respPath)
+
+	// Register AnalyticsService handler
+	analyticsPath, analyticsHandler := pbconnect.NewAnalyticsServiceHandler(
+		analyticsConnectAdapter,
+		connect.WithInterceptors(auth.NewConnectAuthInterceptor(tokenValidator)),
+	)
+	connectMux.Handle(analyticsPath, analyticsHandler)
+	log.Printf("✓ Connect AnalyticsService handler registered at %s", analyticsPath)
 
 	// Helper function to check if request is Connect protocol
 	isConnectRequest := func(r *http.Request) bool {

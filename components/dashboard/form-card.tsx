@@ -17,7 +17,8 @@ import {
   ExternalLink,
   BarChart3,
   Pencil,
-  Copy
+  Copy,
+  LineChart
 } from 'lucide-react'
 import { Form, FormStatus } from '@/lib/database.types'
 import { DeleteFormButton } from './delete-form-button'
@@ -128,6 +129,21 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem 
+              asChild
+              disabled={isDraftForm}
+              className={cn(
+                isDraftForm && 'opacity-50 cursor-not-allowed text-gray-400'
+              )}
+            >
+              <Link href={`/${locale}/forms/${form.id}/analytics`} className={cn(
+                'cursor-pointer',
+                isDraftForm && 'pointer-events-none'
+              )}>
+                <LineChart className="mr-2 h-4 w-4" />
+                Stats
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
               onClick={isDraftForm ? undefined : copyFormLink}
               disabled={isDraftForm}
               className={cn(
@@ -147,8 +163,10 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
       <div className="flex items-center justify-between">
         {getStatusBadge(form.status)}
         <div className="flex items-center gap-1 text-sm text-slate-500">
-          <BarChart3 className="w-4 h-4" />
-          <span>{responseCount} responses</span>
+          <Link href={`/${locale}/forms/${form.id}/responses`} className="hover:text-blue-600 transition-colors flex items-center gap-1">
+            <BarChart3 className="w-4 h-4" />
+            <span>{responseCount} responses</span>
+          </Link>
         </div>
       </div>
 
@@ -175,6 +193,26 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
               <Button variant="outline" size="sm" className="w-full hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition-colors">
                 <BarChart3 className="w-3 h-3 mr-2" />
                 Responses
+              </Button>
+            </Link>
+          )}
+        </div>
+        <div className="flex-1">
+          {isDraftForm ? (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled
+              className="w-full opacity-50 cursor-not-allowed text-gray-400"
+            >
+              <LineChart className="w-3 h-3 mr-2" />
+              Stats
+            </Button>
+          ) : (
+            <Link href={`/${locale}/forms/${form.id}/analytics`} className="block">
+              <Button variant="outline" size="sm" className="w-full hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition-colors">
+                <LineChart className="w-3 h-3 mr-2" />
+                Stats
               </Button>
             </Link>
           )}

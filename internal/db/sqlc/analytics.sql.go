@@ -7,54 +7,856 @@ package sqlc
 
 import (
 	"context"
+	"net"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const incrementFormCompletions = `-- name: IncrementFormCompletions :exec
-/**
- * Increment the total completions for a form on a given date
- * @param {uuid} form_id - The ID of the form
- */
-INSERT INTO form.analytics (form_id, date, total_completions)
-VALUES ($1::uuid, CURRENT_DATE, 1)
-ON CONFLICT (form_id, date)
-DO UPDATE SET total_completions = form.analytics.total_completions + 1
+const getChoiceQuestionStats = `-- name: GetChoiceQuestionStats :many
+SELECT
+    a.answer_text as choice,
+    COUNT(*)::int8 as count,
+    ROUND((COUNT(*)::numeric / (
+        SELECT COUNT(*) 
+        FROM form.answers 
+        WHERE question_id = $1::uuid
+    )::numeric) * 100, 2)::float8 as percentage
+FROM form.answers a
+WHERE a.question_id = $1::uuid
+    AND a.answer_text IS NOT NULL
+GROUP BY a.answer_text
+ORDER BY count DESC
 `
 
-func (q *Queries) IncrementFormCompletions(ctx context.Context, formID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, incrementFormCompletions, formID)
+type GetChoiceQuestionStatsRow struct {
+	Choice     pgtype.Text `db:"choice" json:"choice"`
+	Count      int64       `db:"count" json:"count"`
+	Percentage float64     `db:"percentage" json:"percentage"`
+}
+
+func (q *Queries) GetChoiceQuestionStats(ctx context.Context, questionID uuid.UUID) ([]GetChoiceQuestionStatsRow, error) {
+	rows, err := q.db.Query(ctx, getChoiceQuestionStats, questionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetChoiceQuestionStatsRow{}
+	for rows.Next() {
+		var i GetChoiceQuestionStatsRow
+		if err := rows.Scan(&i.Choice, &i.Count, &i.Percentage); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCompletionFunnel = `-- name: GetCompletionFunnel :one
+SELECT
+    (SELECT COUNT(*) FROM form.form_views WHERE form_id = $1::uuid)::int8 as total_views,
+    (SELECT COUNT(DISTINCT session_id) FROM form.form_views WHERE form_id = $1::uuid)::int8 as unique_views,
+    (SELECT COUNT(*) FROM form.response_starts WHERE form_id = $1::uuid)::int8 as total_starts,
+    (SELECT COUNT(*) FROM form.responses WHERE form_id = $1::uuid)::int8 as total_responses,
+    (SELECT COUNT(*) FROM form.responses WHERE form_id = $1::uuid AND completed = true)::int8 as total_completions
+`
+
+type GetCompletionFunnelRow struct {
+	TotalViews       int64 `db:"total_views" json:"totalViews"`
+	UniqueViews      int64 `db:"unique_views" json:"uniqueViews"`
+	TotalStarts      int64 `db:"total_starts" json:"totalStarts"`
+	TotalResponses   int64 `db:"total_responses" json:"totalResponses"`
+	TotalCompletions int64 `db:"total_completions" json:"totalCompletions"`
+}
+
+func (q *Queries) GetCompletionFunnel(ctx context.Context, formID uuid.UUID) (GetCompletionFunnelRow, error) {
+	row := q.db.QueryRow(ctx, getCompletionFunnel, formID)
+	var i GetCompletionFunnelRow
+	err := row.Scan(
+		&i.TotalViews,
+		&i.UniqueViews,
+		&i.TotalStarts,
+		&i.TotalResponses,
+		&i.TotalCompletions,
+	)
+	return i, err
+}
+
+const getDailyStatsRange = `-- name: GetDailyStatsRange :many
+SELECT id, form_id, stat_date, total_views, unique_views, total_starts, total_completions, desktop_views, mobile_views, tablet_views, avg_completion_time_seconds, created_at, updated_at
+FROM form.daily_stats
+WHERE form_id = $1::uuid
+    AND stat_date >= $2::date
+    AND stat_date <= $3::date
+ORDER BY stat_date DESC
+`
+
+type GetDailyStatsRangeParams struct {
+	FormID    uuid.UUID   `db:"form_id" json:"formId"`
+	StartDate pgtype.Date `db:"start_date" json:"startDate"`
+	EndDate   pgtype.Date `db:"end_date" json:"endDate"`
+}
+
+func (q *Queries) GetDailyStatsRange(ctx context.Context, arg GetDailyStatsRangeParams) ([]FormDailyStat, error) {
+	rows, err := q.db.Query(ctx, getDailyStatsRange, arg.FormID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []FormDailyStat{}
+	for rows.Next() {
+		var i FormDailyStat
+		if err := rows.Scan(
+			&i.ID,
+			&i.FormID,
+			&i.StatDate,
+			&i.TotalViews,
+			&i.UniqueViews,
+			&i.TotalStarts,
+			&i.TotalCompletions,
+			&i.DesktopViews,
+			&i.MobileViews,
+			&i.TabletViews,
+			&i.AvgCompletionTimeSeconds,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDayOfWeekDistribution = `-- name: GetDayOfWeekDistribution :many
+SELECT
+    EXTRACT(DOW FROM submitted_at)::int4 as day_of_week,
+    COUNT(*)::int8 as count
+FROM form.responses
+WHERE form_id = $1::uuid
+    AND completed = true
+    AND submitted_at >= $2::timestamptz
+GROUP BY day_of_week
+ORDER BY day_of_week
+`
+
+type GetDayOfWeekDistributionParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	StartDate time.Time `db:"start_date" json:"startDate"`
+}
+
+type GetDayOfWeekDistributionRow struct {
+	DayOfWeek int32 `db:"day_of_week" json:"dayOfWeek"`
+	Count     int64 `db:"count" json:"count"`
+}
+
+func (q *Queries) GetDayOfWeekDistribution(ctx context.Context, arg GetDayOfWeekDistributionParams) ([]GetDayOfWeekDistributionRow, error) {
+	rows, err := q.db.Query(ctx, getDayOfWeekDistribution, arg.FormID, arg.StartDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetDayOfWeekDistributionRow{}
+	for rows.Next() {
+		var i GetDayOfWeekDistributionRow
+		if err := rows.Scan(&i.DayOfWeek, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDeviceBreakdown = `-- name: GetDeviceBreakdown :many
+SELECT
+    device_type,
+    COUNT(*)::int8 as count,
+    ROUND((COUNT(*)::numeric / SUM(COUNT(*)) OVER ()) * 100, 2)::float8 as percentage
+FROM form.responses
+WHERE form_id = $1::uuid
+    AND device_type IS NOT NULL
+GROUP BY device_type
+ORDER BY count DESC
+`
+
+type GetDeviceBreakdownRow struct {
+	DeviceType pgtype.Text `db:"device_type" json:"deviceType"`
+	Count      int64       `db:"count" json:"count"`
+	Percentage float64     `db:"percentage" json:"percentage"`
+}
+
+func (q *Queries) GetDeviceBreakdown(ctx context.Context, formID uuid.UUID) ([]GetDeviceBreakdownRow, error) {
+	rows, err := q.db.Query(ctx, getDeviceBreakdown, formID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetDeviceBreakdownRow{}
+	for rows.Next() {
+		var i GetDeviceBreakdownRow
+		if err := rows.Scan(&i.DeviceType, &i.Count, &i.Percentage); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFormOverviewStats = `-- name: GetFormOverviewStats :one
+SELECT
+    f.id,
+    f.view_count,
+    f.response_count,
+    f.completion_count,
+    COALESCE(
+        ROUND(
+            (f.completion_count::numeric / NULLIF(f.view_count, 0)::numeric) * 100, 
+            2
+        ), 
+        0
+    )::float8 as completion_rate,
+    COALESCE(AVG(r.completion_time_seconds), 0)::int4 as avg_completion_time
+FROM form.forms f
+LEFT JOIN form.responses r ON f.id = r.form_id AND r.completed = true
+WHERE f.id = $1::uuid
+GROUP BY f.id
+`
+
+type GetFormOverviewStatsRow struct {
+	ID                uuid.UUID   `db:"id" json:"id"`
+	ViewCount         pgtype.Int4 `db:"view_count" json:"viewCount"`
+	ResponseCount     pgtype.Int4 `db:"response_count" json:"responseCount"`
+	CompletionCount   pgtype.Int4 `db:"completion_count" json:"completionCount"`
+	CompletionRate    float64     `db:"completion_rate" json:"completionRate"`
+	AvgCompletionTime int32       `db:"avg_completion_time" json:"avgCompletionTime"`
+}
+
+func (q *Queries) GetFormOverviewStats(ctx context.Context, formID uuid.UUID) (GetFormOverviewStatsRow, error) {
+	row := q.db.QueryRow(ctx, getFormOverviewStats, formID)
+	var i GetFormOverviewStatsRow
+	err := row.Scan(
+		&i.ID,
+		&i.ViewCount,
+		&i.ResponseCount,
+		&i.CompletionCount,
+		&i.CompletionRate,
+		&i.AvgCompletionTime,
+	)
+	return i, err
+}
+
+const getGeographicDistribution = `-- name: GetGeographicDistribution :many
+SELECT
+    country,
+    city,
+    COUNT(*)::int8 as count
+FROM form.responses
+WHERE form_id = $1::uuid
+    AND country IS NOT NULL
+GROUP BY country, city
+ORDER BY count DESC
+LIMIT 50
+`
+
+type GetGeographicDistributionRow struct {
+	Country pgtype.Text `db:"country" json:"country"`
+	City    pgtype.Text `db:"city" json:"city"`
+	Count   int64       `db:"count" json:"count"`
+}
+
+func (q *Queries) GetGeographicDistribution(ctx context.Context, formID uuid.UUID) ([]GetGeographicDistributionRow, error) {
+	rows, err := q.db.Query(ctx, getGeographicDistribution, formID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetGeographicDistributionRow{}
+	for rows.Next() {
+		var i GetGeographicDistributionRow
+		if err := rows.Scan(&i.Country, &i.City, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getHourlyDistribution = `-- name: GetHourlyDistribution :many
+SELECT
+    EXTRACT(HOUR FROM submitted_at)::int4 as hour,
+    COUNT(*)::int8 as count
+FROM form.responses
+WHERE form_id = $1::uuid
+    AND completed = true
+    AND submitted_at >= $2::timestamptz
+GROUP BY hour
+ORDER BY hour
+`
+
+type GetHourlyDistributionParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	StartDate time.Time `db:"start_date" json:"startDate"`
+}
+
+type GetHourlyDistributionRow struct {
+	Hour  int32 `db:"hour" json:"hour"`
+	Count int64 `db:"count" json:"count"`
+}
+
+func (q *Queries) GetHourlyDistribution(ctx context.Context, arg GetHourlyDistributionParams) ([]GetHourlyDistributionRow, error) {
+	rows, err := q.db.Query(ctx, getHourlyDistribution, arg.FormID, arg.StartDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetHourlyDistributionRow{}
+	for rows.Next() {
+		var i GetHourlyDistributionRow
+		if err := rows.Scan(&i.Hour, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getNPSScore = `-- name: GetNPSScore :one
+SELECT
+    COUNT(*) FILTER (WHERE a.answer_number >= 0 AND a.answer_number <= 6)::int8 as detractors,
+    COUNT(*) FILTER (WHERE a.answer_number >= 7 AND a.answer_number <= 8)::int8 as passives,
+    COUNT(*) FILTER (WHERE a.answer_number >= 9 AND a.answer_number <= 10)::int8 as promoters,
+    COUNT(*)::int8 as total_responses,
+    CASE 
+        WHEN COUNT(*) > 0 THEN
+            ROUND(
+                ((COUNT(*) FILTER (WHERE a.answer_number >= 9 AND a.answer_number <= 10)::numeric / COUNT(*)::numeric) * 100) -
+                ((COUNT(*) FILTER (WHERE a.answer_number >= 0 AND a.answer_number <= 6)::numeric / COUNT(*)::numeric) * 100),
+                1
+            )
+        ELSE 0
+    END::float8 as nps_score
+FROM form.answers a
+WHERE a.question_id = $1::uuid
+    AND a.answer_number IS NOT NULL
+`
+
+type GetNPSScoreRow struct {
+	Detractors     int64   `db:"detractors" json:"detractors"`
+	Passives       int64   `db:"passives" json:"passives"`
+	Promoters      int64   `db:"promoters" json:"promoters"`
+	TotalResponses int64   `db:"total_responses" json:"totalResponses"`
+	NpsScore       float64 `db:"nps_score" json:"npsScore"`
+}
+
+func (q *Queries) GetNPSScore(ctx context.Context, questionID uuid.UUID) (GetNPSScoreRow, error) {
+	row := q.db.QueryRow(ctx, getNPSScore, questionID)
+	var i GetNPSScoreRow
+	err := row.Scan(
+		&i.Detractors,
+		&i.Passives,
+		&i.Promoters,
+		&i.TotalResponses,
+		&i.NpsScore,
+	)
+	return i, err
+}
+
+const getQuestionAnalytics = `-- name: GetQuestionAnalytics :many
+SELECT
+    q.id,
+    q.type,
+    q.label,
+    q.required,
+    COUNT(a.id)::int8 as response_count,
+    CASE 
+        WHEN q.type IN ('single_choice', 'multiple_choice', 'dropdown') THEN
+            jsonb_agg(
+                jsonb_build_object(
+                    'value', a.answer_text,
+                    'count', 1
+                )
+            )
+        WHEN q.type = 'rating' THEN
+            jsonb_agg(
+                jsonb_build_object(
+                    'rating', a.answer_number,
+                    'count', 1
+                )
+            )
+        ELSE NULL
+    END as aggregated_data
+FROM form.questions q
+LEFT JOIN form.answers a ON q.id = a.question_id
+WHERE q.form_id = $1::uuid
+GROUP BY q.id, q.type, q.label, q.required
+ORDER BY q.order_index
+`
+
+type GetQuestionAnalyticsRow struct {
+	ID             uuid.UUID   `db:"id" json:"id"`
+	Type           string      `db:"type" json:"type"`
+	Label          string      `db:"label" json:"label"`
+	Required       bool        `db:"required" json:"required"`
+	ResponseCount  int64       `db:"response_count" json:"responseCount"`
+	AggregatedData interface{} `db:"aggregated_data" json:"aggregatedData"`
+}
+
+func (q *Queries) GetQuestionAnalytics(ctx context.Context, formID uuid.UUID) ([]GetQuestionAnalyticsRow, error) {
+	rows, err := q.db.Query(ctx, getQuestionAnalytics, formID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetQuestionAnalyticsRow{}
+	for rows.Next() {
+		var i GetQuestionAnalyticsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Type,
+			&i.Label,
+			&i.Required,
+			&i.ResponseCount,
+			&i.AggregatedData,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getQuestionDropOff = `-- name: GetQuestionDropOff :many
+SELECT
+    q.id,
+    q.label,
+    q.order_index,
+    COUNT(DISTINCT qi.session_id) FILTER (WHERE qi.interaction_type = 'viewed')::int8 as viewed_count,
+    COUNT(DISTINCT qi.session_id) FILTER (WHERE qi.interaction_type = 'answered')::int8 as answered_count,
+    COUNT(DISTINCT qi.session_id) FILTER (WHERE qi.interaction_type = 'abandoned')::int8 as abandoned_count,
+    COALESCE(AVG(qi.time_spent_seconds) FILTER (WHERE qi.interaction_type = 'answered'), 0)::float8 as avg_time_spent
+FROM form.questions q
+LEFT JOIN form.question_interactions qi ON q.id = qi.question_id
+WHERE q.form_id = $1::uuid
+GROUP BY q.id, q.label, q.order_index
+ORDER BY q.order_index
+`
+
+type GetQuestionDropOffRow struct {
+	ID             uuid.UUID `db:"id" json:"id"`
+	Label          string    `db:"label" json:"label"`
+	OrderIndex     int32     `db:"order_index" json:"orderIndex"`
+	ViewedCount    int64     `db:"viewed_count" json:"viewedCount"`
+	AnsweredCount  int64     `db:"answered_count" json:"answeredCount"`
+	AbandonedCount int64     `db:"abandoned_count" json:"abandonedCount"`
+	AvgTimeSpent   float64   `db:"avg_time_spent" json:"avgTimeSpent"`
+}
+
+func (q *Queries) GetQuestionDropOff(ctx context.Context, formID uuid.UUID) ([]GetQuestionDropOffRow, error) {
+	rows, err := q.db.Query(ctx, getQuestionDropOff, formID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetQuestionDropOffRow{}
+	for rows.Next() {
+		var i GetQuestionDropOffRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Label,
+			&i.OrderIndex,
+			&i.ViewedCount,
+			&i.AnsweredCount,
+			&i.AbandonedCount,
+			&i.AvgTimeSpent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getRatingQuestionStats = `-- name: GetRatingQuestionStats :many
+SELECT
+    a.answer_number as rating,
+    COUNT(*)::int8 as count,
+    ROUND((COUNT(*)::numeric / (
+        SELECT COUNT(*) 
+        FROM form.answers 
+        WHERE question_id = $1::uuid
+    )::numeric) * 100, 2)::float8 as percentage
+FROM form.answers a
+WHERE a.question_id = $1::uuid
+    AND a.answer_number IS NOT NULL
+GROUP BY a.answer_number
+ORDER BY rating DESC
+`
+
+type GetRatingQuestionStatsRow struct {
+	Rating     pgtype.Numeric `db:"rating" json:"rating"`
+	Count      int64          `db:"count" json:"count"`
+	Percentage float64        `db:"percentage" json:"percentage"`
+}
+
+func (q *Queries) GetRatingQuestionStats(ctx context.Context, questionID uuid.UUID) ([]GetRatingQuestionStatsRow, error) {
+	rows, err := q.db.Query(ctx, getRatingQuestionStats, questionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetRatingQuestionStatsRow{}
+	for rows.Next() {
+		var i GetRatingQuestionStatsRow
+		if err := rows.Scan(&i.Rating, &i.Count, &i.Percentage); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getResponseCompletionTrend = `-- name: GetResponseCompletionTrend :many
+SELECT
+    DATE(submitted_at) as date,
+    COUNT(*)::int8 as completions
+FROM form.responses
+WHERE form_id = $1::uuid
+    AND completed = true
+    AND submitted_at >= $2::timestamptz
+    AND submitted_at <= $3::timestamptz
+GROUP BY DATE(submitted_at)
+ORDER BY date DESC
+`
+
+type GetResponseCompletionTrendParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	StartDate time.Time `db:"start_date" json:"startDate"`
+	EndDate   time.Time `db:"end_date" json:"endDate"`
+}
+
+type GetResponseCompletionTrendRow struct {
+	Date        pgtype.Date `db:"date" json:"date"`
+	Completions int64       `db:"completions" json:"completions"`
+}
+
+func (q *Queries) GetResponseCompletionTrend(ctx context.Context, arg GetResponseCompletionTrendParams) ([]GetResponseCompletionTrendRow, error) {
+	rows, err := q.db.Query(ctx, getResponseCompletionTrend, arg.FormID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetResponseCompletionTrendRow{}
+	for rows.Next() {
+		var i GetResponseCompletionTrendRow
+		if err := rows.Scan(&i.Date, &i.Completions); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getResponseTrend = `-- name: GetResponseTrend :many
+SELECT
+    DATE(viewed_at) as date,
+    COUNT(DISTINCT session_id)::int8 as unique_views,
+    COUNT(*)::int8 as total_views
+FROM form.form_views
+WHERE form_id = $1::uuid
+    AND viewed_at >= $2::timestamptz
+    AND viewed_at <= $3::timestamptz
+GROUP BY DATE(viewed_at)
+ORDER BY date DESC
+`
+
+type GetResponseTrendParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	StartDate time.Time `db:"start_date" json:"startDate"`
+	EndDate   time.Time `db:"end_date" json:"endDate"`
+}
+
+type GetResponseTrendRow struct {
+	Date        pgtype.Date `db:"date" json:"date"`
+	UniqueViews int64       `db:"unique_views" json:"uniqueViews"`
+	TotalViews  int64       `db:"total_views" json:"totalViews"`
+}
+
+func (q *Queries) GetResponseTrend(ctx context.Context, arg GetResponseTrendParams) ([]GetResponseTrendRow, error) {
+	rows, err := q.db.Query(ctx, getResponseTrend, arg.FormID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetResponseTrendRow{}
+	for rows.Next() {
+		var i GetResponseTrendRow
+		if err := rows.Scan(&i.Date, &i.UniqueViews, &i.TotalViews); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const incrementFormCompletionCount = `-- name: IncrementFormCompletionCount :exec
+UPDATE form.forms
+SET completion_count = completion_count + 1
+WHERE id = $1::uuid
+`
+
+func (q *Queries) IncrementFormCompletionCount(ctx context.Context, formID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, incrementFormCompletionCount, formID)
 	return err
 }
 
-const incrementFormStarts = `-- name: IncrementFormStarts :exec
-/**
- * Increment the total starts for a form on a given date
- * @param {uuid} form_id - The ID of the form
- */
-INSERT INTO form.analytics (form_id, date, total_starts)
-VALUES ($1::uuid, CURRENT_DATE, 1)
-ON CONFLICT (form_id, date)
-DO UPDATE SET total_starts = form.analytics.total_starts + 1
+const incrementFormResponseCount = `-- name: IncrementFormResponseCount :exec
+UPDATE form.forms
+SET response_count = response_count + 1
+WHERE id = $1::uuid
 `
 
-func (q *Queries) IncrementFormStarts(ctx context.Context, formID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, incrementFormStarts, formID)
+func (q *Queries) IncrementFormResponseCount(ctx context.Context, formID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, incrementFormResponseCount, formID)
 	return err
 }
 
-const incrementFormViews = `-- name: IncrementFormViews :exec
-/**
- * Increment the total views for a form on a given date
- * @param {uuid} form_id - The ID of the form
- */
-INSERT INTO form.analytics (form_id, date, total_views)
-VALUES ($1::uuid, CURRENT_DATE, 1)
-ON CONFLICT (form_id, date)
-DO UPDATE SET total_views = form.analytics.total_views + 1
+const incrementFormViewCount = `-- name: IncrementFormViewCount :exec
+UPDATE form.forms
+SET view_count = view_count + 1
+WHERE id = $1::uuid
 `
 
-func (q *Queries) IncrementFormViews(ctx context.Context, formID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, incrementFormViews, formID)
+func (q *Queries) IncrementFormViewCount(ctx context.Context, formID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, incrementFormViewCount, formID)
 	return err
+}
+
+const trackFormView = `-- name: TrackFormView :one
+INSERT INTO form.form_views (
+    form_id, session_id, user_id, ip_address, user_agent,
+    referrer, device_type, browser, os, country, city
+) VALUES (
+    $1::uuid, $2::varchar, $3::uuid, $4::inet, $5::text,
+    $6::text, $7::varchar, $8::varchar, $9::varchar, $10::varchar, $11::varchar
+)
+RETURNING id, form_id, session_id, user_id, ip_address, user_agent, referrer, device_type, browser, os, country, city, viewed_at
+`
+
+type TrackFormViewParams struct {
+	FormID     uuid.UUID `db:"form_id" json:"formId"`
+	SessionID  string    `db:"session_id" json:"sessionId"`
+	UserID     uuid.UUID `db:"user_id" json:"userId"`
+	IpAddress  net.IP    `db:"ip_address" json:"ipAddress"`
+	UserAgent  string    `db:"user_agent" json:"userAgent"`
+	Referrer   string    `db:"referrer" json:"referrer"`
+	DeviceType string    `db:"device_type" json:"deviceType"`
+	Browser    string    `db:"browser" json:"browser"`
+	Os         string    `db:"os" json:"os"`
+	Country    string    `db:"country" json:"country"`
+	City       string    `db:"city" json:"city"`
+}
+
+func (q *Queries) TrackFormView(ctx context.Context, arg TrackFormViewParams) (FormFormView, error) {
+	row := q.db.QueryRow(ctx, trackFormView,
+		arg.FormID,
+		arg.SessionID,
+		arg.UserID,
+		arg.IpAddress,
+		arg.UserAgent,
+		arg.Referrer,
+		arg.DeviceType,
+		arg.Browser,
+		arg.Os,
+		arg.Country,
+		arg.City,
+	)
+	var i FormFormView
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.SessionID,
+		&i.UserID,
+		&i.IpAddress,
+		&i.UserAgent,
+		&i.Referrer,
+		&i.DeviceType,
+		&i.Browser,
+		&i.Os,
+		&i.Country,
+		&i.City,
+		&i.ViewedAt,
+	)
+	return i, err
+}
+
+const trackQuestionInteraction = `-- name: TrackQuestionInteraction :one
+INSERT INTO form.question_interactions (
+    form_id, question_id, response_id, session_id,
+    interaction_type, time_spent_seconds
+) VALUES (
+    $1::uuid, $2::uuid, $3::uuid, $4::varchar,
+    $5::varchar, $6::integer
+)
+RETURNING id, form_id, question_id, response_id, session_id, interaction_type, time_spent_seconds, created_at
+`
+
+type TrackQuestionInteractionParams struct {
+	FormID           uuid.UUID `db:"form_id" json:"formId"`
+	QuestionID       uuid.UUID `db:"question_id" json:"questionId"`
+	ResponseID       uuid.UUID `db:"response_id" json:"responseId"`
+	SessionID        string    `db:"session_id" json:"sessionId"`
+	InteractionType  string    `db:"interaction_type" json:"interactionType"`
+	TimeSpentSeconds int32     `db:"time_spent_seconds" json:"timeSpentSeconds"`
+}
+
+func (q *Queries) TrackQuestionInteraction(ctx context.Context, arg TrackQuestionInteractionParams) (FormQuestionInteraction, error) {
+	row := q.db.QueryRow(ctx, trackQuestionInteraction,
+		arg.FormID,
+		arg.QuestionID,
+		arg.ResponseID,
+		arg.SessionID,
+		arg.InteractionType,
+		arg.TimeSpentSeconds,
+	)
+	var i FormQuestionInteraction
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.QuestionID,
+		&i.ResponseID,
+		&i.SessionID,
+		&i.InteractionType,
+		&i.TimeSpentSeconds,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const trackResponseStart = `-- name: TrackResponseStart :one
+INSERT INTO form.response_starts (
+    form_id, session_id
+) VALUES (
+    $1::uuid, $2::varchar
+)
+RETURNING id, form_id, session_id, started_at
+`
+
+type TrackResponseStartParams struct {
+	FormID    uuid.UUID `db:"form_id" json:"formId"`
+	SessionID string    `db:"session_id" json:"sessionId"`
+}
+
+func (q *Queries) TrackResponseStart(ctx context.Context, arg TrackResponseStartParams) (FormResponseStart, error) {
+	row := q.db.QueryRow(ctx, trackResponseStart, arg.FormID, arg.SessionID)
+	var i FormResponseStart
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.SessionID,
+		&i.StartedAt,
+	)
+	return i, err
+}
+
+const updateDailyStats = `-- name: UpdateDailyStats :one
+INSERT INTO form.daily_stats (
+    form_id, stat_date, total_views, unique_views,
+    total_starts, total_completions, desktop_views,
+    mobile_views, tablet_views, avg_completion_time_seconds
+) VALUES (
+    $1::uuid, $2::date, $3::integer, $4::integer,
+    $5::integer, $6::integer, $7::integer,
+    $8::integer, $9::integer, $10::integer
+)
+ON CONFLICT (form_id, stat_date)
+DO UPDATE SET
+    total_views = EXCLUDED.total_views,
+    unique_views = EXCLUDED.unique_views,
+    total_starts = EXCLUDED.total_starts,
+    total_completions = EXCLUDED.total_completions,
+    desktop_views = EXCLUDED.desktop_views,
+    mobile_views = EXCLUDED.mobile_views,
+    tablet_views = EXCLUDED.tablet_views,
+    avg_completion_time_seconds = EXCLUDED.avg_completion_time_seconds,
+    updated_at = NOW()
+RETURNING id, form_id, stat_date, total_views, unique_views, total_starts, total_completions, desktop_views, mobile_views, tablet_views, avg_completion_time_seconds, created_at, updated_at
+`
+
+type UpdateDailyStatsParams struct {
+	FormID                   uuid.UUID   `db:"form_id" json:"formId"`
+	StatDate                 pgtype.Date `db:"stat_date" json:"statDate"`
+	TotalViews               int32       `db:"total_views" json:"totalViews"`
+	UniqueViews              int32       `db:"unique_views" json:"uniqueViews"`
+	TotalStarts              int32       `db:"total_starts" json:"totalStarts"`
+	TotalCompletions         int32       `db:"total_completions" json:"totalCompletions"`
+	DesktopViews             int32       `db:"desktop_views" json:"desktopViews"`
+	MobileViews              int32       `db:"mobile_views" json:"mobileViews"`
+	TabletViews              int32       `db:"tablet_views" json:"tabletViews"`
+	AvgCompletionTimeSeconds int32       `db:"avg_completion_time_seconds" json:"avgCompletionTimeSeconds"`
+}
+
+func (q *Queries) UpdateDailyStats(ctx context.Context, arg UpdateDailyStatsParams) (FormDailyStat, error) {
+	row := q.db.QueryRow(ctx, updateDailyStats,
+		arg.FormID,
+		arg.StatDate,
+		arg.TotalViews,
+		arg.UniqueViews,
+		arg.TotalStarts,
+		arg.TotalCompletions,
+		arg.DesktopViews,
+		arg.MobileViews,
+		arg.TabletViews,
+		arg.AvgCompletionTimeSeconds,
+	)
+	var i FormDailyStat
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.StatDate,
+		&i.TotalViews,
+		&i.UniqueViews,
+		&i.TotalStarts,
+		&i.TotalCompletions,
+		&i.DesktopViews,
+		&i.MobileViews,
+		&i.TabletViews,
+		&i.AvgCompletionTimeSeconds,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

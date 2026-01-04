@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button'
 import { ChevronUp, ChevronDown, Check, ArrowRight } from 'lucide-react'
 import { QuestionRenderer } from './question-renderer'
 import { toast } from 'sonner'
-import { responseClient } from '@/lib/grpc-client'
+import { responseClient, analyticsClient } from '@/lib/grpc-client'
 import { AnswerInput } from '@/lib/proto/proto/response_pb'
 
 interface FormPlayerProps {
   form: Form & { force_captcha?: boolean }
+  sessionId?: string
 }
 
 // Type for window.grecaptcha
@@ -25,7 +26,7 @@ declare global {
   }
 }
 
-export function FormPlayer({ form }: FormPlayerProps) {
+export function FormPlayer({ form, sessionId }: FormPlayerProps) {
   const questions = (form.questions as QuestionConfig[]) || []
   const theme = getTheme(form.theme)
   const themeStyles = getThemeCSSVariables(theme)
@@ -36,6 +37,7 @@ export function FormPlayer({ form }: FormPlayerProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [direction, setDirection] = useState(0)
+  const [isStarted, setIsStarted] = useState(false)
 
   // reCAPTCHA state
   const [recaptchaSiteKey, setRecaptchaSiteKey] = useState<string | null>(null)
@@ -48,6 +50,19 @@ export function FormPlayer({ form }: FormPlayerProps) {
   const isLastQuestion = currentIndex === questions.length - 1
   const isFirstQuestion = currentIndex === 0
   const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0
+
+  // Track response start when first interaction happens
+  useEffect(() => {
+    if (!isStarted && Object.keys(answers).length > 0) {
+      setIsStarted(true)
+      if (sessionId) {
+        analyticsClient.trackResponseStart({
+          formId: form.id,
+          sessionId: sessionId
+        }).catch(err => console.error('Failed to track response start:', err))
+      }
+    }
+  }, [answers, isStarted, form.id, sessionId])
 
   // Fetch reCAPTCHA site key when form requires it
   useEffect(() => {

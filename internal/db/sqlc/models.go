@@ -53,6 +53,22 @@ type FormAnswer struct {
 	UpdatedAt     time.Time   `db:"updated_at" json:"updatedAt"`
 }
 
+type FormDailyStat struct {
+	ID                       uuid.UUID   `db:"id" json:"id"`
+	FormID                   uuid.UUID   `db:"form_id" json:"formId"`
+	StatDate                 pgtype.Date `db:"stat_date" json:"statDate"`
+	TotalViews               pgtype.Int4 `db:"total_views" json:"totalViews"`
+	UniqueViews              pgtype.Int4 `db:"unique_views" json:"uniqueViews"`
+	TotalStarts              pgtype.Int4 `db:"total_starts" json:"totalStarts"`
+	TotalCompletions         pgtype.Int4 `db:"total_completions" json:"totalCompletions"`
+	DesktopViews             pgtype.Int4 `db:"desktop_views" json:"desktopViews"`
+	MobileViews              pgtype.Int4 `db:"mobile_views" json:"mobileViews"`
+	TabletViews              pgtype.Int4 `db:"tablet_views" json:"tabletViews"`
+	AvgCompletionTimeSeconds pgtype.Int4 `db:"avg_completion_time_seconds" json:"avgCompletionTimeSeconds"`
+	CreatedAt                time.Time   `db:"created_at" json:"createdAt"`
+	UpdatedAt                time.Time   `db:"updated_at" json:"updatedAt"`
+}
+
 // Uploaded file metadata - tracks files submitted via file_upload questions
 type FormFileUpload struct {
 	// File upload record identifier (UUID)
@@ -110,9 +126,28 @@ type FormForm struct {
 	RedirectUrl  pgtype.Text `db:"redirect_url" json:"redirectUrl"`
 	ForceCaptcha bool        `db:"force_captcha" json:"forceCaptcha"`
 	// Additional configuration as JSON (flexible schema)
-	Settings  []byte    `db:"settings" json:"settings"`
-	CreatedAt time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
+	Settings        []byte      `db:"settings" json:"settings"`
+	CreatedAt       time.Time   `db:"created_at" json:"createdAt"`
+	UpdatedAt       time.Time   `db:"updated_at" json:"updatedAt"`
+	ViewCount       pgtype.Int4 `db:"view_count" json:"viewCount"`
+	ResponseCount   pgtype.Int4 `db:"response_count" json:"responseCount"`
+	CompletionCount pgtype.Int4 `db:"completion_count" json:"completionCount"`
+}
+
+type FormFormView struct {
+	ID         uuid.UUID   `db:"id" json:"id"`
+	FormID     uuid.UUID   `db:"form_id" json:"formId"`
+	SessionID  pgtype.Text `db:"session_id" json:"sessionId"`
+	UserID     pgtype.UUID `db:"user_id" json:"userId"`
+	IpAddress  *netip.Addr `db:"ip_address" json:"ipAddress"`
+	UserAgent  pgtype.Text `db:"user_agent" json:"userAgent"`
+	Referrer   pgtype.Text `db:"referrer" json:"referrer"`
+	DeviceType pgtype.Text `db:"device_type" json:"deviceType"`
+	Browser    pgtype.Text `db:"browser" json:"browser"`
+	Os         pgtype.Text `db:"os" json:"os"`
+	Country    pgtype.Text `db:"country" json:"country"`
+	City       pgtype.Text `db:"city" json:"city"`
+	ViewedAt   time.Time   `db:"viewed_at" json:"viewedAt"`
 }
 
 // Form questions - individual fields in a form
@@ -143,6 +178,26 @@ type FormQuestion struct {
 	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
 }
 
+type FormQuestionInteraction struct {
+	ID               uuid.UUID   `db:"id" json:"id"`
+	FormID           uuid.UUID   `db:"form_id" json:"formId"`
+	QuestionID       uuid.UUID   `db:"question_id" json:"questionId"`
+	ResponseID       pgtype.UUID `db:"response_id" json:"responseId"`
+	SessionID        pgtype.Text `db:"session_id" json:"sessionId"`
+	InteractionType  pgtype.Text `db:"interaction_type" json:"interactionType"`
+	TimeSpentSeconds pgtype.Int4 `db:"time_spent_seconds" json:"timeSpentSeconds"`
+	CreatedAt        time.Time   `db:"created_at" json:"createdAt"`
+}
+
+type FormQuestionStat struct {
+	ID            uuid.UUID      `db:"id" json:"id"`
+	QuestionID    uuid.UUID      `db:"question_id" json:"questionId"`
+	AnswerValue   pgtype.Text    `db:"answer_value" json:"answerValue"`
+	ResponseCount pgtype.Int4    `db:"response_count" json:"responseCount"`
+	Percentage    pgtype.Numeric `db:"percentage" json:"percentage"`
+	LastUpdated   time.Time      `db:"last_updated" json:"lastUpdated"`
+}
+
 // Form submissions - one record per form submission
 type FormResponse struct {
 	// Response identifier (UUID)
@@ -162,9 +217,24 @@ type FormResponse struct {
 	// Whether response was fully completed
 	Completed bool `db:"completed" json:"completed"`
 	// Timestamp of final submission
-	SubmittedAt pgtype.Timestamptz `db:"submitted_at" json:"submittedAt"`
-	CreatedAt   time.Time          `db:"created_at" json:"createdAt"`
-	UpdatedAt   time.Time          `db:"updated_at" json:"updatedAt"`
+	SubmittedAt           pgtype.Timestamptz `db:"submitted_at" json:"submittedAt"`
+	CreatedAt             time.Time          `db:"created_at" json:"createdAt"`
+	UpdatedAt             time.Time          `db:"updated_at" json:"updatedAt"`
+	CompletionTimeSeconds pgtype.Int4        `db:"completion_time_seconds" json:"completionTimeSeconds"`
+	DeviceType            pgtype.Text        `db:"device_type" json:"deviceType"`
+	Browser               pgtype.Text        `db:"browser" json:"browser"`
+	Os                    pgtype.Text        `db:"os" json:"os"`
+	Country               pgtype.Text        `db:"country" json:"country"`
+	City                  pgtype.Text        `db:"city" json:"city"`
+	Referrer              pgtype.Text        `db:"referrer" json:"referrer"`
+	SessionID             pgtype.Text        `db:"session_id" json:"sessionId"`
+}
+
+type FormResponseStart struct {
+	ID        uuid.UUID   `db:"id" json:"id"`
+	FormID    uuid.UUID   `db:"form_id" json:"formId"`
+	SessionID pgtype.Text `db:"session_id" json:"sessionId"`
+	StartedAt time.Time   `db:"started_at" json:"startedAt"`
 }
 
 // Form system users - linked to Weladee platform users

@@ -23,26 +23,44 @@ type Querier interface {
 	DeleteForm(ctx context.Context, arg DeleteFormParams) error
 	DeleteQuestion(ctx context.Context, id uuid.UUID) error
 	DeleteResponse(ctx context.Context, id uuid.UUID) error
+	GetChoiceQuestionStats(ctx context.Context, questionID uuid.UUID) ([]GetChoiceQuestionStatsRow, error)
+	GetCompletionFunnel(ctx context.Context, formID uuid.UUID) (GetCompletionFunnelRow, error)
+	GetDailyStatsRange(ctx context.Context, arg GetDailyStatsRangeParams) ([]FormDailyStat, error)
+	GetDayOfWeekDistribution(ctx context.Context, arg GetDayOfWeekDistributionParams) ([]GetDayOfWeekDistributionRow, error)
+	GetDeviceBreakdown(ctx context.Context, formID uuid.UUID) ([]GetDeviceBreakdownRow, error)
 	GetFileUpload(ctx context.Context, id uuid.UUID) (FormFileUpload, error)
 	GetForm(ctx context.Context, id uuid.UUID) (FormForm, error)
 	// Try to look up by ID (if slug is a UUID) or by slug column
 	GetFormBySlug(ctx context.Context, slug string) (FormForm, error)
+	GetFormOverviewStats(ctx context.Context, formID uuid.UUID) (GetFormOverviewStatsRow, error)
 	GetFormResponsesWithAnswers(ctx context.Context, formID uuid.UUID) ([]GetFormResponsesWithAnswersRow, error)
 	GetFormStats(ctx context.Context, formID uuid.UUID) (GetFormStatsRow, error)
 	GetFormUser(ctx context.Context, id uuid.UUID) (FormUser, error)
 	GetFormUserByWeladeeID(ctx context.Context, weladeeUserID int32) (FormUser, error)
 	GetFormWithQuestions(ctx context.Context, id uuid.UUID) (GetFormWithQuestionsRow, error)
+	GetGeographicDistribution(ctx context.Context, formID uuid.UUID) ([]GetGeographicDistributionRow, error)
+	GetHourlyDistribution(ctx context.Context, arg GetHourlyDistributionParams) ([]GetHourlyDistributionRow, error)
+	GetNPSScore(ctx context.Context, questionID uuid.UUID) (GetNPSScoreRow, error)
 	GetQuestion(ctx context.Context, id uuid.UUID) (FormQuestion, error)
+	GetQuestionAnalytics(ctx context.Context, formID uuid.UUID) ([]GetQuestionAnalyticsRow, error)
+	GetQuestionDropOff(ctx context.Context, formID uuid.UUID) ([]GetQuestionDropOffRow, error)
+	GetRatingQuestionStats(ctx context.Context, questionID uuid.UUID) ([]GetRatingQuestionStatsRow, error)
 	GetResponse(ctx context.Context, id uuid.UUID) (FormResponse, error)
 	GetResponseAnswers(ctx context.Context, responseID uuid.UUID) ([]FormAnswer, error)
-	IncrementFormCompletions(ctx context.Context, formID uuid.UUID) error
-	IncrementFormStarts(ctx context.Context, formID uuid.UUID) error
-	IncrementFormViews(ctx context.Context, formID uuid.UUID) error
+	GetResponseCompletionTrend(ctx context.Context, arg GetResponseCompletionTrendParams) ([]GetResponseCompletionTrendRow, error)
+	GetResponseTrend(ctx context.Context, arg GetResponseTrendParams) ([]GetResponseTrendRow, error)
+	IncrementFormCompletionCount(ctx context.Context, formID uuid.UUID) error
+	IncrementFormResponseCount(ctx context.Context, formID uuid.UUID) error
+	IncrementFormViewCount(ctx context.Context, formID uuid.UUID) error
 	ListFormQuestions(ctx context.Context, formID uuid.UUID) ([]FormQuestion, error)
 	ListFormResponses(ctx context.Context, arg ListFormResponsesParams) ([]FormResponse, error)
 	ListUserForms(ctx context.Context, arg ListUserFormsParams) ([]ListUserFormsRow, error)
 	PublishForm(ctx context.Context, arg PublishFormParams) (FormForm, error)
 	ReorderQuestions(ctx context.Context, arg ReorderQuestionsParams) error
+	TrackFormView(ctx context.Context, arg TrackFormViewParams) (FormFormView, error)
+	TrackQuestionInteraction(ctx context.Context, arg TrackQuestionInteractionParams) (FormQuestionInteraction, error)
+	TrackResponseStart(ctx context.Context, arg TrackResponseStartParams) (FormResponseStart, error)
+	UpdateDailyStats(ctx context.Context, arg UpdateDailyStatsParams) (FormDailyStat, error)
 	UpdateForm(ctx context.Context, arg UpdateFormParams) (FormForm, error)
 	UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (FormQuestion, error)
 }

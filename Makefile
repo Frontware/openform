@@ -194,9 +194,14 @@ proto: ## Generate protobuf Go and TypeScript code
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		proto/*.proto
-	@echo "Copying generated Go files to proto/pb..."
+	@echo "Generating Connect Go code..."
+	@mkdir -p proto/pbconnect
+	protoc --connect-go_out=. --connect-go_opt=paths=source_relative \
+		proto/*.proto
+	@echo "Copying generated Go files to proto/pb and proto/pbconnect..."
 	@mkdir -p proto/pb
 	@cp -f proto/*.pb.go proto/pb/ 2>/dev/null || true
+	@mv -f proto/*.connect.go proto/pbconnect/ 2>/dev/null || true
 	@echo "Generating protobuf TypeScript code..."
 	@mkdir -p lib/proto/proto
 	protoc --plugin=protoc-gen-es=node_modules/.bin/protoc-gen-es \
@@ -207,6 +212,8 @@ proto: ## Generate protobuf Go and TypeScript code
 		--connect-es_out=lib/proto/proto \
 		--connect-es_opt=target=ts \
 		proto/*.proto
+	@echo "Fixing import extensions in generated TypeScript files..."
+	@find lib/proto/proto -name "*.ts" -exec sed -i 's/from "\.\/\(.*\)\.js"/from ".\/\1"/g' {} +
 	@echo "Moving generated TypeScript files to correct location..."
 	@if [ -d "lib/proto/proto/proto" ]; then \
 		cp -f lib/proto/proto/proto/*.ts lib/proto/proto/ 2>/dev/null || true; \

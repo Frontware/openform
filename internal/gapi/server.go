@@ -22,6 +22,11 @@ type FileServer struct {
 	*FileServerImpl
 }
 
+// AnalyticsServer wrapper - embeds AnalyticsServerImpl which already embeds UnimplementedAnalyticsServiceServer
+type AnalyticsServer struct {
+	*AnalyticsServerImpl
+}
+
 // Constructor functions
 
 func NewFormServer(database *db.Database, storage *storage.S3Storage) pb.FormServiceServer {
@@ -47,6 +52,14 @@ func NewFileServer(database *db.Database, storage *storage.S3Storage) pb.FileSer
 		FileServerImpl: &FileServerImpl{
 			db:      database,
 			storage: storage,
+		},
+	}
+}
+
+func NewAnalyticsServer(database *db.Database) pb.AnalyticsServiceServer {
+	return &AnalyticsServer{
+		AnalyticsServerImpl: &AnalyticsServerImpl{
+			db: database,
 		},
 	}
 }
