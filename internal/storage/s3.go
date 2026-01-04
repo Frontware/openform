@@ -43,7 +43,7 @@ func NewS3Storage(cfg S3Config) (*S3Storage, error) {
 		awsCfg, err = config.LoadDefaultConfig(context.Background(),
 			config.WithRegion(cfg.Region),
 			config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
-				func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+				func(service, region string, options ...any) (aws.Endpoint, error) {
 					return aws.Endpoint{URL: cfg.Endpoint}, nil
 				},
 			)),

@@ -411,7 +411,7 @@ func formatInt(i int32) string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-func formatString(s interface{}) string {
+func formatString(s any) string {
 	if s == nil {
 		return ""
 	}

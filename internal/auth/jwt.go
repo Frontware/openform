@@ -82,7 +82,7 @@ func (j *JWTValidator) ValidateToken(token string) (*WeladeeUserClaims, error) {
 	}
 
 	// Parse and validate JWT
-	parsedToken, err := jwt.ParseWithClaims(token, &WeladeeUserClaims{}, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &WeladeeUserClaims{}, func(token *jwt.Token) (any, error) {
 		// Check for RS256 first
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); ok {
 			if j.publicKey != nil {

@@ -77,7 +77,7 @@ func (s *FormServerImpl) convertFormWithQuestions(form sqlc.FormForm, questions 
 
 	// Unmarshal settings JSONB if present
 	if len(form.Settings) > 0 {
-		var settingsMap map[string]interface{}
+		var settingsMap map[string]any
 		if err := json.Unmarshal(form.Settings, &settingsMap); err == nil {
 			settings, err := structpb.NewStruct(settingsMap)
 			if err != nil {
@@ -105,21 +105,21 @@ func (s *FormServerImpl) convertFormWithQuestions(form sqlc.FormForm, questions 
 		}
 
 		if len(q.Options) > 0 {
-			var optsMap map[string]interface{}
+			var optsMap map[string]any
 			if err := json.Unmarshal(q.Options, &optsMap); err == nil {
 				opts, _ := structpb.NewStruct(optsMap)
 				pbQ.Options = opts
 			}
 		}
 		if len(q.ValidationRules) > 0 {
-			var rulesMap map[string]interface{}
+			var rulesMap map[string]any
 			if err := json.Unmarshal(q.ValidationRules, &rulesMap); err == nil {
 				rules, _ := structpb.NewStruct(rulesMap)
 				pbQ.ValidationRules = rules
 			}
 		}
 		if len(q.Settings) > 0 {
-			var setMap map[string]interface{}
+			var setMap map[string]any
 			if err := json.Unmarshal(q.Settings, &setMap); err == nil {
 				set, _ := structpb.NewStruct(setMap)
 				pbQ.Settings = set
@@ -874,7 +874,7 @@ func (s *FormServerImpl) convertQuestionToProto(q sqlc.FormQuestion) *pb.Questio
 	}
 
 	if len(q.Options) > 0 {
-		var optsMap map[string]interface{}
+		var optsMap map[string]any
 		if err := json.Unmarshal(q.Options, &optsMap); err == nil {
 			if opts, err := structpb.NewStruct(optsMap); err == nil {
 				pbQ.Options = opts
@@ -882,7 +882,7 @@ func (s *FormServerImpl) convertQuestionToProto(q sqlc.FormQuestion) *pb.Questio
 		}
 	}
 	if len(q.ValidationRules) > 0 {
-		var rulesMap map[string]interface{}
+		var rulesMap map[string]any
 		if err := json.Unmarshal(q.ValidationRules, &rulesMap); err == nil {
 			if rules, err := structpb.NewStruct(rulesMap); err == nil {
 				pbQ.ValidationRules = rules
@@ -890,7 +890,7 @@ func (s *FormServerImpl) convertQuestionToProto(q sqlc.FormQuestion) *pb.Questio
 		}
 	}
 	if len(q.Settings) > 0 {
-		var setMap map[string]interface{}
+		var setMap map[string]any
 		if err := json.Unmarshal(q.Settings, &setMap); err == nil {
 			if set, err := structpb.NewStruct(setMap); err == nil {
 				pbQ.Settings = set

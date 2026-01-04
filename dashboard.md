@@ -2095,10 +2095,10 @@ func (server *AnalyticsServer) exportCSV(
     }
 
     // Group by response ID
-    responseMap := make(map[uuid.UUID]map[string]interface{})
+    responseMap := make(map[uuid.UUID]map[string]any)
     for _, r := range responses {
         if _, exists := responseMap[r.ResponseID]; !exists {
-            responseMap[r.ResponseID] = map[string]interface{}{
+            responseMap[r.ResponseID] = map[string]any{
                 "submitted_at":       r.SubmittedAt,
                 "completed":          r.Completed,
                 "device":             r.DeviceType,
@@ -2191,10 +2191,10 @@ func (server *AnalyticsServer) exportExcel(
     }
 
     // Group responses and write
-    responseMap := make(map[uuid.UUID]map[string]interface{})
+    responseMap := make(map[uuid.UUID]map[string]any)
     for _, r := range responses {
         if _, exists := responseMap[r.ResponseID]; !exists {
-            responseMap[r.ResponseID] = map[string]interface{}{
+            responseMap[r.ResponseID] = map[string]any{
                 "submitted_at": r.SubmittedAt,
                 "completed":    r.Completed,
                 "device":       r.DeviceType,
@@ -2359,7 +2359,7 @@ func formatInt(i int32) string {
     return strconv.FormatInt(int64(i), 10)
 }
 
-func formatString(s interface{}) string {
+func formatString(s any) string {
     if s == nil {
         return ""
     }

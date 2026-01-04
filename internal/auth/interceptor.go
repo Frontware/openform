@@ -44,10 +44,10 @@ func NewAuthInterceptor(validator *JWTValidator) *AuthInterceptor {
 func (i *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
-		req interface{},
+		req any,
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
-	) (interface{}, error) {
+	) (any, error) {
 		// Check if method requires authentication
 		if i.publicMethods[info.FullMethod] {
 			return handler(ctx, req)
@@ -69,7 +69,7 @@ func (i *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
 // Stream returns a stream server interceptor for authentication
 func (i *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 	return func(
-		srv interface{},
+		srv any,
 		stream grpc.ServerStream,
 		info *grpc.StreamServerInfo,
 		handler grpc.StreamHandler,

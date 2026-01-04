@@ -145,7 +145,7 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 
 // setDefaults sets default values for configuration
 func setDefaults(v *viper.Viper) {
-	defaults := map[string]interface{}{
+	defaults := map[string]any{
 		"grpc_port":           "50051",
 		"jwt_secret":          "weladee-form-secret-change-in-production",
 		"s3_region":           "auto",

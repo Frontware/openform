@@ -146,7 +146,7 @@ func (s *ResponseServerImpl) convertResponse(resp sqlc.FormResponse, answers []s
 			pbA.AnswerTime = &timeStr
 		}
 		if len(a.AnswerChoices) > 0 {
-			var choicesMap map[string]interface{}
+			var choicesMap map[string]any
 			if err := json.Unmarshal(a.AnswerChoices, &choicesMap); err == nil {
 				choices, _ := structpb.NewStruct(choicesMap)
 				pbA.AnswerChoices = choices

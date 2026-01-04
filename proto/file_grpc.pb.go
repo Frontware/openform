@@ -8,6 +8,7 @@ package pb
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -109,14 +110,14 @@ func RegisterFileServiceServer(s grpc.ServiceRegistrar, srv FileServiceServer) {
 	s.RegisterService(&FileService_ServiceDesc, srv)
 }
 
-func _FileService_UploadFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _FileService_UploadFile_Handler(srv any, stream grpc.ServerStream) error {
 	return srv.(FileServiceServer).UploadFile(&grpc.GenericServerStream[UploadFileRequest, UploadFileResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type FileService_UploadFileServer = grpc.ClientStreamingServer[UploadFileRequest, UploadFileResponse]
 
-func _FileService_GetFileUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FileService_GetFileUrl_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(GetFileUrlRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -128,7 +129,7 @@ func _FileService_GetFileUrl_Handler(srv interface{}, ctx context.Context, dec f
 		Server:     srv,
 		FullMethod: FileService_GetFileUrl_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FileServiceServer).GetFileUrl(ctx, req.(*GetFileUrlRequest))
 	}
 	return interceptor(ctx, in, info, handler)

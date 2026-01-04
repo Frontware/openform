@@ -252,14 +252,14 @@ func ExportResponsesToCSV(questions []sqlc.FormQuestion, rows []sqlc.GetFormResp
 // ExportResponsesToJSON exports form responses to JSON format
 func ExportResponsesToJSON(questions []sqlc.FormQuestion, rows []sqlc.GetFormResponsesWithAnswersRow, formID uuid.UUID) ([]byte, error) {
 	// Group answers by response
-	responseMap := make(map[uuid.UUID]map[uuid.UUID]interface{})
+	responseMap := make(map[uuid.UUID]map[uuid.UUID]any)
 	for _, row := range rows {
 		if _, ok := responseMap[row.ResponseID]; !ok {
-			responseMap[row.ResponseID] = make(map[uuid.UUID]interface{})
+			responseMap[row.ResponseID] = make(map[uuid.UUID]any)
 		}
 
 		// Convert answer to appropriate type
-		var answer interface{}
+		var answer any
 		if row.AnswerText.Valid {
 			answer = row.AnswerText.String
 		} else if row.AnswerNumber.Valid {
@@ -272,7 +272,7 @@ func ExportResponsesToJSON(questions []sqlc.FormQuestion, rows []sqlc.GetFormRes
 			t := time.Date(0, 0, 0, 0, 0, int(micros), 0, time.UTC)
 			answer = t.Format("15:04:05")
 		} else if len(row.AnswerChoices) > 0 {
-			var choices map[string]interface{}
+			var choices map[string]any
 			if err := json.Unmarshal(row.AnswerChoices, &choices); err == nil {
 				answer = choices
 			} else {
@@ -298,7 +298,7 @@ func ExportResponsesToJSON(questions []sqlc.FormQuestion, rows []sqlc.GetFormRes
 		SubmittedAt   string                 `json:"submitted_at"`
 		RespondentEmail string               `json:"respondent_email,omitempty"`
 		RespondentName  string               `json:"respondent_name,omitempty"`
-		Answers       map[string]interface{} `json:"answers"`
+		Answers       map[string]any `json:"answers"`
 	}
 
 	type Output struct {
@@ -332,7 +332,7 @@ func ExportResponsesToJSON(questions []sqlc.FormQuestion, rows []sqlc.GetFormRes
 		resp := OutputResponse{
 			ID:          row.ResponseID.String(),
 			SubmittedAt: row.SubmittedAt.Time.Format(time.RFC3339),
-			Answers:     make(map[string]interface{}),
+			Answers:     make(map[string]any),
 		}
 
 		if row.RespondentEmail.Valid {

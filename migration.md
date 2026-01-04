@@ -1166,10 +1166,10 @@ func NewAuthInterceptor(validator *RedisTokenValidator) *AuthInterceptor {
 func (i *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
     return func(
         ctx context.Context,
-        req interface{},
+        req any,
         info *grpc.UnaryServerInfo,
         handler grpc.UnaryHandler,
-    ) (interface{}, error) {
+    ) (any, error) {
         // Check if method requires authentication
         if i.publicMethods[info.FullMethod] {
             return handler(ctx, req)
@@ -1196,7 +1196,7 @@ func (i *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
 
 func (i *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
     return func(
-        srv interface{},
+        srv any,
         stream grpc.ServerStream,
         info *grpc.StreamServerInfo,
         handler grpc.StreamHandler,
@@ -1503,7 +1503,7 @@ func NewS3Storage(cfg S3Config) (*S3Storage, error) {
         awsCfg, err = config.LoadDefaultConfig(context.Background(),
             config.WithRegion(cfg.Region),
             config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
-                func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+                func(service, region string, options ...any) (aws.Endpoint, error) {
                     return aws.Endpoint{URL: cfg.Endpoint}, nil
                 },
             )),

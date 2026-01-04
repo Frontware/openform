@@ -8,6 +8,7 @@ package pb
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -268,7 +269,7 @@ func RegisterFormServiceServer(s grpc.ServiceRegistrar, srv FormServiceServer) {
 	s.RegisterService(&FormService_ServiceDesc, srv)
 }
 
-func _FormService_CreateForm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_CreateForm_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(CreateFormRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -280,13 +281,13 @@ func _FormService_CreateForm_Handler(srv interface{}, ctx context.Context, dec f
 		Server:     srv,
 		FullMethod: FormService_CreateForm_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).CreateForm(ctx, req.(*CreateFormRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_GetForm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_GetForm_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(GetFormRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -298,13 +299,13 @@ func _FormService_GetForm_Handler(srv interface{}, ctx context.Context, dec func
 		Server:     srv,
 		FullMethod: FormService_GetForm_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).GetForm(ctx, req.(*GetFormRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_GetFormBySlug_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_GetFormBySlug_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(GetFormBySlugRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -316,13 +317,13 @@ func _FormService_GetFormBySlug_Handler(srv interface{}, ctx context.Context, de
 		Server:     srv,
 		FullMethod: FormService_GetFormBySlug_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).GetFormBySlug(ctx, req.(*GetFormBySlugRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_UpdateForm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_UpdateForm_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(UpdateFormRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -334,13 +335,13 @@ func _FormService_UpdateForm_Handler(srv interface{}, ctx context.Context, dec f
 		Server:     srv,
 		FullMethod: FormService_UpdateForm_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).UpdateForm(ctx, req.(*UpdateFormRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_DeleteForm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_DeleteForm_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(DeleteFormRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -352,13 +353,13 @@ func _FormService_DeleteForm_Handler(srv interface{}, ctx context.Context, dec f
 		Server:     srv,
 		FullMethod: FormService_DeleteForm_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).DeleteForm(ctx, req.(*DeleteFormRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_ListForms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_ListForms_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(ListFormsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -370,13 +371,13 @@ func _FormService_ListForms_Handler(srv interface{}, ctx context.Context, dec fu
 		Server:     srv,
 		FullMethod: FormService_ListForms_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).ListForms(ctx, req.(*ListFormsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_PublishForm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_PublishForm_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(PublishFormRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -388,13 +389,13 @@ func _FormService_PublishForm_Handler(srv interface{}, ctx context.Context, dec 
 		Server:     srv,
 		FullMethod: FormService_PublishForm_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).PublishForm(ctx, req.(*PublishFormRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_GetFormStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_GetFormStats_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(GetFormStatsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -406,13 +407,13 @@ func _FormService_GetFormStats_Handler(srv interface{}, ctx context.Context, dec
 		Server:     srv,
 		FullMethod: FormService_GetFormStats_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).GetFormStats(ctx, req.(*GetFormStatsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_CreateQuestion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_CreateQuestion_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(CreateQuestionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -424,13 +425,13 @@ func _FormService_CreateQuestion_Handler(srv interface{}, ctx context.Context, d
 		Server:     srv,
 		FullMethod: FormService_CreateQuestion_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).CreateQuestion(ctx, req.(*CreateQuestionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_UpdateQuestion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_UpdateQuestion_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(UpdateQuestionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -442,13 +443,13 @@ func _FormService_UpdateQuestion_Handler(srv interface{}, ctx context.Context, d
 		Server:     srv,
 		FullMethod: FormService_UpdateQuestion_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).UpdateQuestion(ctx, req.(*UpdateQuestionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_DeleteQuestion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_DeleteQuestion_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(DeleteQuestionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -460,13 +461,13 @@ func _FormService_DeleteQuestion_Handler(srv interface{}, ctx context.Context, d
 		Server:     srv,
 		FullMethod: FormService_DeleteQuestion_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).DeleteQuestion(ctx, req.(*DeleteQuestionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FormService_ReorderQuestions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FormService_ReorderQuestions_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(ReorderQuestionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -478,7 +479,7 @@ func _FormService_ReorderQuestions_Handler(srv interface{}, ctx context.Context,
 		Server:     srv,
 		FullMethod: FormService_ReorderQuestions_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(FormServiceServer).ReorderQuestions(ctx, req.(*ReorderQuestionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
