@@ -11,6 +11,10 @@ database_url: "postgresql://username:password@localhost:5432/weladee_form"
 # Secret key for JWT token validation
 # Change this in production and keep it secure!
 jwt_secret: "weladee-form-secret-change-in-production"
+# Paths to RSA keys for asymmetric signing (RS256)
+# If configured, RS256 will be preferred over HS256 (jwt_secret)
+# jwt_private_key_path: "./private_key.pem" # Only needed for creating tokens (CLI)
+# jwt_public_key_path: "./public_key.pem"   # Needed for validating tokens (Server)
 
 # reCAPTCHA v3 Configuration (Optional)
 # Google reCAPTCHA v3 for bot protection on forms

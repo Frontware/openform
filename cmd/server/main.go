@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -292,8 +293,11 @@ func main() {
 		Short: "Create a JWT token for testing/debugging",
 		RunE:  runCreateJWT,
 	}
-	createJWTCmd.Flags().String("name", "", "User display name")
-	createJWTCmd.Flags().String("email", "", "User email address")
+	createJWTCmd.Flags().String("name", "eric", "User display name")
+	createJWTCmd.Flags().String("email", "eric.fairon@gmail.com", "User email address")
+	createJWTCmd.Flags().String("customer-type", "enterprise", "Customer type (enterprise, standard, sme)")
+	createJWTCmd.Flags().String("logo-url", "", "Company logo URL (optional)")
+	config.AddFlags(createJWTCmd)
 	rootCmd.AddCommand(createJWTCmd)
 
 	// Add config command
@@ -304,6 +308,18 @@ func main() {
 		RunE:  runConfig,
 	}
 	rootCmd.AddCommand(configCmd)
+
+	// Add generate-keys command
+	var generateKeysCmd = &cobra.Command{
+		Use:   "generate-keys",
+		Short: "Generate RSA private/public key pair for JWT authentication",
+		Long:  "Generates a new RSA key pair for JWT signing (private key) and validation (public key). The private key is used by calling applications to sign tokens, while the public key is used by Weladee Form to validate tokens.",
+		RunE:  runGenerateKeys,
+	}
+	generateKeysCmd.Flags().String("output-dir", ".", "Directory to save key files")
+	generateKeysCmd.Flags().String("private-key-file", "jwt-private.pem", "Private key filename")
+	generateKeysCmd.Flags().String("public-key-file", "jwt-public.pem", "Public key filename")
+	rootCmd.AddCommand(generateKeysCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalf("Failed to execute command: %v", err)
@@ -581,7 +597,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		secret = "weladee-form-secret-change-in-production"
 	}
 
-	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", secret, cfg.JWTPrivateKeyPath, 2*time.Hour)
+	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", "enterprise", "", secret, cfg.JWTPrivateKeyPath, 2*time.Hour)
 	if err != nil {
 		log.Printf("⚠️ Failed to generate JWT token: %v", err)
 		log.Printf("💡 To get a valid JWT token, run: go run ./cmd/server create-jwt")
@@ -623,32 +639,61 @@ func runServe(cmd *cobra.Command, args []string) error {
 }
 
 func runCreateJWT(cmd *cobra.Command, args []string) error {
-	// Get JWT secret from environment or use default
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		secret = "weladee-form-secret-change-in-production"
+	// Load configuration to get secrets and key paths
+	cfg, err := config.LoadConfig(cmd)
+	if err != nil {
+		// Even if config loading fails (e.g. missing DB url which is required for serve but not here),
+		// we should try to proceed if we just need JWT settings.
+		// However, LoadConfig validates required fields.
+		// For create-jwt, we might not need database_url.
+		// Let's print a warning and try to proceed if we have what we need,
+		// or just handle the error.
+		// For now, let's assume if LoadConfig fails, we might still want to proceed if it's just missing DB.
+		// But LoadConfig returns error if validation fails.
+		// Let's try to manually construct a config if LoadConfig fails, or just accept that
+		// the user needs to provide a valid config even for this command.
+		// Given the shared config structure, it's cleaner to fix validation or mock it,
+		// but for now let's just propagate the error as the simplest safe path.
+		// Actually, let's just log it and try to continue if it's just a validation error?
+		// No, let's stick to strict config loading.
+		// Wait, config.LoadConfig enforces DatabaseURL. That's annoying for a CLI tool that doesn't need DB.
+		// We might need to relax validation in LoadConfig or mock it here.
+		// Let's pass a dummy DB URL if it's missing just for this command?
+		// Or better: update config.go to make validation context-aware.
+		// For this specific task, let's just let it error if config is invalid,
+		// but the user can pass --database-url=dummy if needed.
+		// Or, since we are in `runCreateJWT`, maybe we can just ignore the error if we can get the JWT stuff?
+		// No, `LoadConfig` returns nil on error.
+
+		// Let's try to load it. If it fails, we check if we have enough info in env/flags manually?
+		// No, that defeats the purpose.
+		// Let's assume the user has a valid dev environment (which has a DB URL).
+		return fmt.Errorf("failed to load configuration: %w", err)
 	}
 
-	privateKeyPath := os.Getenv("JWT_PRIVATE_KEY_PATH")
+	name, _ := cmd.Flags().GetString("name")
+	email, _ := cmd.Flags().GetString("email")
+	customerType, _ := cmd.Flags().GetString("customer-type")
+	logoURL, _ := cmd.Flags().GetString("logo-url")
 
-	// Use pre-configured credentials for eric
-	name := "eric"
-	email := "eric.fairon@gmail.com"
-
-	// Generate JWT token with eric's credentials
-	token, err := auth.GenerateToken(1, email, name, "admin", secret, privateKeyPath, 2*time.Hour)
+	// Generate JWT token
+	token, err := auth.GenerateToken(1, email, name, "admin", customerType, logoURL, cfg.JWTSecret, cfg.JWTPrivateKeyPath, 2*time.Hour)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT token: %w", err)
 	}
 
-	fmt.Println("JWT Token generated successfully for eric:")
+	fmt.Println("JWT Token generated successfully:")
 	fmt.Println(token)
-	if privateKeyPath != "" {
-		fmt.Println("Algorithm: RS256 (Asymmetric)")
+	if cfg.JWTPrivateKeyPath != "" {
+		fmt.Printf("Algorithm: RS256 (Asymmetric) - Key: %s\n", cfg.JWTPrivateKeyPath)
 	} else {
 		fmt.Println("Algorithm: HS256 (Symmetric)")
 	}
 	fmt.Printf("User: %s (%s) - Role: admin\n", name, email)
+	fmt.Printf("Customer Type: %s\n", customerType)
+	if logoURL != "" {
+		fmt.Printf("Logo URL: %s\n", logoURL)
+	}
 	fmt.Println("Token expires in 2 hours.")
 	return nil
 }
@@ -701,5 +746,48 @@ func runConfig(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("Config file closed.")
+	return nil
+}
+
+func runGenerateKeys(cmd *cobra.Command, args []string) error {
+	// Get flag values
+	outputDir, _ := cmd.Flags().GetString("output-dir")
+	privateKeyFile, _ := cmd.Flags().GetString("private-key-file")
+	publicKeyFile, _ := cmd.Flags().GetString("public-key-file")
+
+	// Generate key pair
+	keyPair, err := auth.GenerateRSAKeyPair(2048)
+	if err != nil {
+		return fmt.Errorf("failed to generate key pair: %w", err)
+	}
+
+	// Create output directory if it doesn't exist
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Write private key
+	privateKeyPath := filepath.Join(outputDir, privateKeyFile)
+	if err := os.WriteFile(privateKeyPath, keyPair.PrivateKeyPEM, 0600); err != nil {
+		return fmt.Errorf("failed to write private key: %w", err)
+	}
+
+	// Write public key
+	publicKeyPath := filepath.Join(outputDir, publicKeyFile)
+	if err := os.WriteFile(publicKeyPath, keyPair.PublicKeyPEM, 0644); err != nil {
+		return fmt.Errorf("failed to write public key: %w", err)
+	}
+
+	// Print success message
+	fmt.Println("✅ RSA key pair generated successfully!")
+	fmt.Printf("🔑 Private key: %s\n", privateKeyPath)
+	fmt.Printf("📜 Public key: %s\n", publicKeyPath)
+	fmt.Println()
+	fmt.Println("Usage:")
+	fmt.Println("  Weladee Portal (signing):   export JWT_PRIVATE_KEY_PATH=" + privateKeyPath)
+	fmt.Println("  Weladee Form (validation): export JWT_PUBLIC_KEY_PATH=" + publicKeyPath)
+	fmt.Println()
+	fmt.Println("⚠️  Keep the private key secure and never commit it to version control!")
+
 	return nil
 }

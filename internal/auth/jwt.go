@@ -1,7 +1,10 @@
 package auth
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"log"
 	"os"
@@ -16,10 +19,12 @@ var JWTSecret = []byte("weladee-form-secret-change-in-production")
 
 // WeladeeUserClaims represents the user claims in the JWT
 type WeladeeUserClaims struct {
-	UserID      int    `json:"user_id"`
-	Email       string `json:"email"`
-	DisplayName string `json:"display_name"`
-	Role        string `json:"role"`
+	UserID       int    `json:"user_id"`
+	Email        string `json:"email"`
+	DisplayName  string `json:"display_name"` // Company Name
+	Role         string `json:"role"`
+	CustomerType string `json:"customer_type"` // enterprise, standard, sme
+	LogoURL      string `json:"logo_url"`
 	jwt.RegisteredClaims
 }
 
@@ -62,10 +67,12 @@ func (j *JWTValidator) ValidateToken(token string) (*WeladeeUserClaims, error) {
 	// Special TEST token for debugging
 	if token == "TEST_TOKEN" || token == "test-token" {
 		return &WeladeeUserClaims{
-			UserID:      1,
-			Email:       "test@weladee.com",
-			DisplayName: "Test User",
-			Role:        "admin",
+			UserID:       1,
+			Email:        "test@weladee.com",
+			DisplayName:  "Test Company",
+			Role:         "admin",
+			CustomerType: "enterprise",
+			LogoURL:      "https://weladee.com/logo.png",
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -110,17 +117,19 @@ func (j *JWTValidator) ValidateToken(token string) (*WeladeeUserClaims, error) {
 
 // GenerateToken generates a JWT token for testing purposes
 // In production, this would be done by the auth service
-func GenerateToken(userID int, email, displayName, role string, secret string, privateKeyPath string, expiration time.Duration) (string, error) {
+func GenerateToken(userID int, email, displayName, role, customerType, logoURL string, secret string, privateKeyPath string, expiration time.Duration) (string, error) {
 	if secret == "" {
 		secret = "weladee-form-secret-change-in-production"
 	}
 
 	now := time.Now()
 	claims := &WeladeeUserClaims{
-		UserID:      userID,
-		Email:       email,
-		DisplayName: displayName,
-		Role:        role,
+		UserID:       userID,
+		Email:        email,
+		DisplayName:  displayName,
+		Role:         role,
+		CustomerType: customerType,
+		LogoURL:      logoURL,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(expiration)),
 			IssuedAt:  jwt.NewNumericDate(now),
@@ -147,4 +156,42 @@ func GenerateToken(userID int, email, displayName, role string, secret string, p
 	// Fallback to HS256
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
+}
+
+// KeyPair holds the PEM-encoded private and public keys
+type KeyPair struct {
+	PrivateKeyPEM []byte
+	PublicKeyPEM  []byte
+}
+
+// GenerateRSAKeyPair generates an RSA key pair for JWT signing/validation
+// The private key is used for signing tokens, the public key for validation
+func GenerateRSAKeyPair(bits int) (*KeyPair, error) {
+	// Generate private key
+	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate private key: %w", err)
+	}
+
+	// Encode private key to PEM format
+	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: privateKeyBytes,
+	})
+
+	// Encode public key to PEM format
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal public key: %w", err)
+	}
+	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKeyBytes,
+	})
+
+	return &KeyPair{
+		PrivateKeyPEM: privateKeyPEM,
+		PublicKeyPEM:  publicKeyPEM,
+	}, nil
 }

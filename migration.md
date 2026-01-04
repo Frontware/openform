@@ -1848,4 +1848,38 @@ const form = response.form;
 
 ## Frontend
 - [ ] Update Next.js environment variables
-- [ ] Deploy with gRPC-
+- [ ] Deploy with gRPC-Web proxy if needed
+
+---
+
+## 🔐 Phase 9: Asymmetric JWT Signing (Security Enhancement)
+
+To enhance security, the system has been upgraded from symmetric (HS256) to asymmetric (RS256) JWT signing. This ensures that the private key used for signing never needs to be stored on the validation server.
+
+### 1. Generate RSA Key Pair
+
+Use the built-in CLI command to generate a 2048-bit RSA key pair:
+
+```bash
+go run ./cmd/server generate-keys --output-dir . --private-key-file jwt-private.pem --public-key-file jwt-public.pem
+```
+
+### 2. Configuration
+
+Update your environment variables or `config.yaml`:
+
+- `JWT_PRIVATE_KEY_PATH`: Path to the private key (e.g., `./jwt-private.pem`). Required for CLI signing.
+- `JWT_PUBLIC_KEY_PATH`: Path to the public key (e.g., `./jwt-public.pem`). Required for server-side validation.
+- `JWT_SECRET`: Retained as a fallback for HS256 (optional during transition).
+
+### 3. Generate Tokens with RS256
+
+The `create-jwt` command will automatically use RS256 if `JWT_PRIVATE_KEY_PATH` is configured:
+
+```bash
+JWT_PRIVATE_KEY_PATH=./jwt-private.pem go run ./cmd/server create-jwt --name "John Doe" --email "john@example.com"
+```
+
+### 4. Validation
+
+The backend `JWTValidator` (`internal/auth/jwt.go`) will automatically prefer RS256 validation if `JWTPublicKeyPath` is provided in the configuration. It maintains backward compatibility with HS256 as a fallback if the public key is not configured or if an HS256 token is received.
