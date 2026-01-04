@@ -27,6 +27,8 @@ function mapPbQuestionType(type: QuestionType): QuestionConfig['type'] {
     case QuestionType.YES_NO: return 'yes_no'
     case QuestionType.FILE_UPLOAD: return 'file_upload'
     case QuestionType.URL: return 'url'
+    case QuestionType.MATRIX: return 'matrix'
+    case QuestionType.RANKING: return 'ranking'
     default: return 'short_text'
   }
 }

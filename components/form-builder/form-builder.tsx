@@ -109,6 +109,29 @@ function buildOptions(q: QuestionConfig): Struct {
   if (q.options) {
       opts['items'] = q.options
   }
+  // Matrix question properties
+  if (q.rows) {
+    opts['rows'] = q.rows
+  }
+  if (q.columns) {
+    opts['columns'] = q.columns
+  }
+  if (q.allow_multiple_per_row !== undefined) {
+    opts['allow_multiple_per_row'] = q.allow_multiple_per_row
+  }
+  // Ranking question properties
+  if (q.items) {
+    opts['ranking_items'] = q.items
+  }
+  if (q.min_selections !== undefined) {
+    opts['min_selections'] = q.min_selections
+  }
+  if (q.max_selections !== undefined) {
+    opts['max_selections'] = q.max_selections
+  }
+  if (q.shuffle_items !== undefined) {
+    opts['shuffle_items'] = q.shuffle_items
+  }
   return Struct.fromJson(opts)
 }
 
