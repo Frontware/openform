@@ -26,6 +26,8 @@ function mapPbQuestionType(type: QuestionType): QuestionConfig['type'] {
     case QuestionType.YES_NO: return 'yes_no'
     case QuestionType.FILE_UPLOAD: return 'file_upload'
     case QuestionType.URL: return 'url'
+    case QuestionType.MATRIX: return 'matrix'
+    case QuestionType.RANKING: return 'ranking'
     default: return 'short_text'
   }
 }
@@ -33,27 +35,80 @@ function mapPbQuestionType(type: QuestionType): QuestionConfig['type'] {
 function mapPbQuestionToConfig(pbQ: PbQuestion): QuestionConfig {
   const optionsStruct = pbQ.options?.fields || {}
   const validationStruct = pbQ.validationRules?.fields || {}
-  
-  // Extract options array if present
+  const questionType = mapPbQuestionType(pbQ.type)
+
+  // Extract options array if present (for dropdown/checkboxes)
   let options: string[] = []
   if (optionsStruct['items']?.kind.case === 'listValue') {
-    options = optionsStruct['items'].kind.value.values.map(v => 
+    options = optionsStruct['items'].kind.value.values.map(v =>
       v.kind.case === 'stringValue' ? v.kind.value : ''
     )
   }
 
-  return {
+  // Extract ranking_items for ranking questions
+  let rankingItems: string[] = []
+  if (optionsStruct['ranking_items']?.kind.case === 'listValue') {
+    rankingItems = optionsStruct['ranking_items'].kind.value.values.map(v =>
+      v.kind.case === 'stringValue' ? v.kind.value : ''
+    )
+  }
+
+  // Extract rows for matrix questions
+  let rows: string[] = []
+  if (optionsStruct['rows']?.kind.case === 'listValue') {
+    rows = optionsStruct['rows'].kind.value.values.map(v =>
+      v.kind.case === 'stringValue' ? v.kind.value : ''
+    )
+  }
+
+  // Extract columns for matrix questions
+  let columns: string[] = []
+  if (optionsStruct['columns']?.kind.case === 'listValue') {
+    columns = optionsStruct['columns'].kind.value.values.map(v =>
+      v.kind.case === 'stringValue' ? v.kind.value : ''
+    )
+  }
+
+  const config: QuestionConfig = {
     id: pbQ.id,
-    type: mapPbQuestionType(pbQ.type),
+    type: questionType,
     title: pbQ.label,
     description: pbQ.description,
     required: pbQ.required,
     placeholder: pbQ.placeholder,
-    options: options,
+    options: options.length > 0 ? options : undefined,
     minValue: validationStruct['minValue']?.kind.case === 'numberValue' ? validationStruct['minValue'].kind.value : undefined,
     maxValue: validationStruct['maxValue']?.kind.case === 'numberValue' ? validationStruct['maxValue'].kind.value : undefined,
     maxFileSize: validationStruct['maxFileSize']?.kind.case === 'numberValue' ? validationStruct['maxFileSize'].kind.value : undefined,
   }
+
+  // Add ranking-specific properties
+  if (questionType === 'ranking' && rankingItems.length > 0) {
+    config.items = rankingItems
+  }
+  if (validationStruct['min_selections']?.kind.case === 'numberValue') {
+    config.min_selections = validationStruct['min_selections'].kind.value
+  }
+  if (validationStruct['max_selections']?.kind.case === 'numberValue') {
+    config.max_selections = validationStruct['max_selections'].kind.value
+  }
+  if (validationStruct['shuffle_items']?.kind.case === 'boolValue') {
+    config.shuffle_items = validationStruct['shuffle_items'].kind.value
+  }
+
+  // Add matrix-specific properties
+  if (questionType === 'matrix') {
+    if (rows.length > 0) config.rows = rows
+    if (columns.length > 0) config.columns = columns
+  }
+  if (validationStruct['input_type']?.kind.case === 'stringValue') {
+    config.input_type = validationStruct['input_type'].kind.value as 'radio' | 'checkbox'
+  }
+  if (validationStruct['allow_multiple_per_row']?.kind.case === 'boolValue') {
+    config.allow_multiple_per_row = validationStruct['allow_multiple_per_row'].kind.value
+  }
+
+  return config
 }
 
 function mapPbFormToDBForm(pbForm: PbForm): Form {

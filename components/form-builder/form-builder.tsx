@@ -121,7 +121,7 @@ function buildOptions(q: QuestionConfig): Struct {
   }
   // Ranking question properties
   if (q.items) {
-    opts['ranking_items'] = q.items
+    opts['items'] = q.items
   }
   if (q.min_selections !== undefined) {
     opts['min_selections'] = q.min_selections
