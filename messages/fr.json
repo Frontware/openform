@@ -85,12 +85,24 @@
         }
       },
       "questionTypes": {
-        "title": "13 types de questions au choix",
+        "title": "15 types de questions au choix",
         "subtitle": "Du simple texte aux téléchargements de fichiers, nous avons tout prévu",
         "types": [
-          "Texte Court", "Texte Long", "Menu Déroulant", "Cases à Cocher",
-          "E-mail", "Téléphone", "Nombre", "Date", "Évaluation", "Échelle d'Opinion",
-          "Oui/Non", "Téléchargement de Fichier", "URL de Site Web"
+          { "name": "Texte Court", "description": "Une seule ligne de texte", "plan": "SME" },
+          { "name": "Texte Long", "description": "Plusieurs lignes de texte", "plan": "SME" },
+          { "name": "Menu Déroulant", "description": "Sélectionner un élément dans une liste", "plan": "SME" },
+          { "name": "Cases à Cocher", "description": "Sélectionner plusieurs éléments dans une liste", "plan": "SME" },
+          { "name": "E-mail", "description": "Adresse e-mail avec validation", "plan": "SME" },
+          { "name": "Téléphone", "description": "Numéro de téléphone avec validation", "plan": "SME" },
+          { "name": "Nombre", "description": "Entrée numérique uniquement", "plan": "SME" },
+          { "name": "Date", "description": "Sélecteur de date", "plan": "SME" },
+          { "name": "Évaluation", "description": "Échelle d'évaluation par étoiles", "plan": "SME" },
+          { "name": "Échelle d'Opinion", "description": "Échelle numérique", "plan": "SME" },
+          { "name": "Oui/Non", "description": "Choix binaire", "plan": "SME" },
+          { "name": "Téléchargement de Fichier", "description": "Télécharger des images et des PDF", "plan": "Enterprise" },
+          { "name": "URL de Site Web", "description": "Entrée d'URL avec validation", "plan": "SME" },
+          { "name": "Matrice", "description": "Grille d'options", "plan": "Standard" },
+          { "name": "Classement", "description": "Glisser-déposer pour classer les éléments", "plan": "Enterprise" }
         ]
       },
       "cta": {
@@ -103,6 +115,16 @@
         "github": "GitHub",
         "privacy": "Confidentialité",
         "terms": "Conditions"
+      },
+      "privacy": {
+        "title": "Politique de Confidentialité",
+        "lastUpdated": "Dernière mise à jour : 5 janvier 2026",
+        "content": "Chez Weladee Form, nous prenons votre vie privée au sérieux. Vos données vous appartiennent et nous veillons à ce qu'elles restent protégées. Nous ne vendons pas vos informations personnelles à des tiers. Les réponses collectées via vos formulaires sont stockées de manière sécurisée et peuvent être exportées ou supprimées par vous à tout moment."
+      },
+      "terms": {
+        "title": "Conditions d'Utilisation",
+        "lastUpdated": "Dernière mise à jour : 5 janvier 2026",
+        "content": "En utilisant Weladee Form, vous acceptez de vous conformer à nos conditions. Nous fournissons une plateforme pour la création de formulaires et la collecte de réponses. Vous êtes responsable du contenu de vos formulaires et des données que vous collectez. L'utilisation abusive de la plateforme pour des activités illégales ou du spam est strictement interdite."
       }
     }
   },

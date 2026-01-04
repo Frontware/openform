@@ -44,7 +44,7 @@ ls -la app/api/
 2. List all database tables, views, and functions from `supabase/schema.sql`
 3. Identify all Supabase client calls across the codebase
 4. Map all environment variables used
-5. Document the 13 question types from `lib/questions.ts`
+5. Document the 15 question types from `lib/questions.ts`
 6. Note all authentication patterns used
 
 ### Step 1.2: Create New Go Project Structure
@@ -1806,7 +1806,7 @@ const form = response.form;
 
 #### End-to-End Tests
 - [ ] Create form → publish → submit response
-- [ ] All 13 question types work correctly
+- [ ] All 15 question types work correctly
 - [ ] CSV export generates correctly
 - [ ] All 6 themes render properly
 - [ ] Keyboard navigation preserved

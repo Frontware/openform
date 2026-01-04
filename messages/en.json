@@ -85,12 +85,24 @@
         }
       },
       "questionTypes": {
-        "title": "13 question types to choose from",
+        "title": "15 question types to choose from",
         "subtitle": "From simple text to file uploads, we've got you covered",
         "types": [
-          "Short Text", "Long Text", "Dropdown", "Checkboxes",
-          "Email", "Phone", "Number", "Date", "Rating", "Opinion Scale",
-          "Yes/No", "File Upload", "Website URL"
+          { "name": "Short Text", "description": "Single line of text", "plan": "SME" },
+          { "name": "Long Text", "description": "Multiple lines of text", "plan": "SME" },
+          { "name": "Dropdown", "description": "Select one from list", "plan": "SME" },
+          { "name": "Checkboxes", "description": "Select multiple from list", "plan": "SME" },
+          { "name": "Email", "description": "Email address with validation", "plan": "SME" },
+          { "name": "Phone", "description": "Phone number with validation", "plan": "SME" },
+          { "name": "Number", "description": "Numeric input only", "plan": "SME" },
+          { "name": "Date", "description": "Date picker", "plan": "SME" },
+          { "name": "Rating", "description": "Star rating scale", "plan": "SME" },
+          { "name": "Opinion Scale", "description": "Numerical scale", "plan": "SME" },
+          { "name": "Yes/No", "description": "Binary choice", "plan": "SME" },
+          { "name": "File Upload", "description": "Upload images and PDFs", "plan": "Enterprise" },
+          { "name": "Website URL", "description": "URL input with validation", "plan": "SME" },
+          { "name": "Matrix/Grid", "description": "Grid of options", "plan": "Standard" },
+          { "name": "Ranking", "description": "Drag and drop to rank items", "plan": "Enterprise" }
         ]
       },
       "cta": {
@@ -103,6 +115,16 @@
         "github": "GitHub",
         "privacy": "Privacy",
         "terms": "Terms"
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "lastUpdated": "Last updated: January 5, 2026",
+        "content": "At Weladee Form, we take your privacy seriously. Your data is yours, and we ensure it stays protected. We do not sell your personal information to third parties. Responses collected through your forms are stored securely and can be exported or deleted by you at any time."
+      },
+      "terms": {
+        "title": "Terms of Service",
+        "lastUpdated": "Last updated: January 5, 2026",
+        "content": "By using Weladee Form, you agree to comply with our terms. We provide a platform for form creation and response collection. You are responsible for the content of your forms and the data you collect. Misuse of the platform for illegal activities or spam is strictly prohibited."
       }
     }
   },

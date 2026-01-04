@@ -10,7 +10,7 @@ Weladee Form is an open-source TypeForm alternative built with:
 - **Database**: PostgreSQL with SQLC for type-safe queries
 - **Auth**: JWT token validation
 
-Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
+Users can create beautiful, one-question-at-a-time forms with 7 themes and 15 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
 
 **Key Features:**
 - **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit)

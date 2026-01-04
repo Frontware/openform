@@ -4,8 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { ArrowRight, Palette, Shield, Sparkles, Zap } from 'lucide-react'
 import Link from 'next/link'
-import { setRequestLocale } from 'next-intl/server'
+import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -18,6 +24,7 @@ export default async function HomePage({
 }) {
   const { locale } = await params
   setRequestLocale(locale)
+  const t = await getTranslations('marketing.home')
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
@@ -186,27 +193,42 @@ export default async function HomePage({
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
-              13 question types to choose from
+              {t('questionTypes.title')}
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              From simple text to file uploads, we&apos;ve got you covered
+              {t('questionTypes.subtitle')}
             </p>
           </div>
           
-          <div className="flex flex-wrap justify-center gap-3">
-            {[
-              'Short Text', 'Long Text', 'Dropdown', 'Checkboxes',
-              'Email', 'Phone', 'Number', 'Date', 'Rating', 'Opinion Scale',
-              'Yes/No', 'File Upload', 'Website URL'
-            ].map((type) => (
-              <span
-                key={type}
-                className="px-4 py-2 bg-white rounded-full border border-slate-200 text-slate-700 text-sm font-medium shadow-sm hover:border-teal-200 hover:bg-teal-50 transition-colors cursor-default"
-              >
-                {type}
-              </span>
-            ))}
-          </div>
+          <TooltipProvider>
+            <div className="flex flex-wrap justify-center gap-3">
+              {t.raw('questionTypes.types').map((type: { name: string, description: string, plan: string }) => (
+                <Tooltip key={type.name}>
+                  <TooltipTrigger asChild>
+                    <span
+                      className="px-4 py-2 bg-white rounded-full border border-slate-200 text-slate-700 text-sm font-medium shadow-sm hover:border-teal-200 hover:bg-teal-50 transition-colors cursor-help"
+                    >
+                      {type.name}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold mb-1">{type.name}</p>
+                    <p className="text-slate-200 mb-2">{type.description}</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] uppercase tracking-wider opacity-70">Plan:</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                        type.plan === 'SME' ? 'bg-slate-700' :
+                        type.plan === 'Standard' ? 'bg-blue-700' :
+                        'bg-purple-700'
+                      }`}>
+                        {type.plan}
+                      </span>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </TooltipProvider>
         </div>
       </section>
 
@@ -238,18 +260,25 @@ export default async function HomePage({
       <footer className="relative z-10 py-8 px-6 border-t border-slate-100 bg-white">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-600 text-sm">
-            © 2026 Weladee Form. 
+            © 2026{' '}
+            <a href="https://weladee.com" className="text-[#13a89e] hover:underline" target="_blank" rel="noopener noreferrer">
+              Weladee
+            </a>
+            {' '}by{' '}
+            <a href="https://frontware.co.th" className="text-[#13a89e] hover:underline" target="_blank" rel="noopener noreferrer">
+              Frontware International Co.,Ltd
+            </a>
           </p>
           <div className="flex items-center gap-6">
             <a href="https://github.com" className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
-              GitHub
+              {t('footer.github')}
             </a>
-            <a href="#" className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
-              Privacy
-            </a>
-            <a href="#" className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
-              Terms
-            </a>
+            <Link href={`/${locale}/privacy`} className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
+              {t('footer.privacy')}
+            </Link>
+            <Link href={`/${locale}/terms`} className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
+              {t('footer.terms')}
+            </Link>
           </div>
         </div>
       </footer>
