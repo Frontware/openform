@@ -198,6 +198,8 @@ func (s *FormServerImpl) CreateForm(ctx context.Context, req *pb.CreateFormReque
 			Settings:                 settingsJSON,
 		}
 
+		log.Printf("[CreateForm] Params: Title=%s, Theme=%s, ProgressBarStyle=%s", formParams.Title, formParams.Theme, formParams.ProgressBarStyle)
+
 		form, err := q.CreateForm(ctx, formParams)
 		if err != nil {
 			return err
@@ -288,6 +290,7 @@ func (s *FormServerImpl) GetForm(ctx context.Context, req *pb.GetFormRequest) (*
 }
 
 func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormRequest) (*pb.UpdateFormResponse, error) {
+	log.Printf("[UpdateForm] Request: %+v", req)
 	user, err := s.getAuthenticatedFormUser(ctx)
 	if err != nil {
 		return nil, err
@@ -322,6 +325,8 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 		Settings:                 currentForm.Settings,
 	}
 
+	log.Printf("[UpdateForm] Current ProgressBarStyle from DB: %s", currentForm.ProgressBarStyle)
+
 	// Override with provided values
 	if req.Title != nil {
 		params.Title = *req.Title
@@ -353,7 +358,11 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 	}
 	if req.ProgressBarStyle != nil {
 		if *req.ProgressBarStyle != pb.ProgressBarStyle_PROGRESS_BAR_STYLE_UNSPECIFIED {
-			params.ProgressBarStyle = mapProgressBarStyleToDB(*req.ProgressBarStyle)
+			dbStyle := mapProgressBarStyleToDB(*req.ProgressBarStyle)
+			log.Printf("[UpdateForm] Updating progress_bar_style: Proto=%v (%s), DB=%s", *req.ProgressBarStyle, req.ProgressBarStyle.String(), dbStyle)
+			params.ProgressBarStyle = dbStyle
+		} else {
+			log.Printf("[UpdateForm] progress_bar_style is UNSPECIFIED, keeping existing: %s", params.ProgressBarStyle)
 		}
 	}
 	if req.CustomThankYouMessage != nil {
@@ -367,6 +376,8 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 			params.Settings = jsonBytes
 		}
 	}
+
+	log.Printf("[UpdateForm] Final params for DB update: ID=%s, Title=%s, ProgressBarStyle=%s", params.ID, params.Title, params.ProgressBarStyle)
 
 	form, err := s.db.Queries.UpdateForm(ctx, params)
 	if err != nil {
@@ -931,6 +942,7 @@ func (s *FormServerImpl) convertQuestionToProto(q sqlc.FormQuestion) *pb.Questio
 
 // Helper to map QuestionType enum to DB string
 func mapQuestionTypeToDB(qt pb.QuestionType) string {
+	log.Printf("[mapQuestionTypeToDB] Input: %v (%s)", qt, qt.String())
 	switch qt {
 	case pb.QuestionType_QUESTION_TYPE_SHORT_TEXT:
 		return "short_text"
@@ -969,6 +981,7 @@ func mapQuestionTypeToDB(qt pb.QuestionType) string {
 
 // Helper to map FormTheme enum to DB string
 func mapThemeToDB(theme pb.FormTheme) string {
+	log.Printf("[mapThemeToDB] Input: %v (%s)", theme, theme.String())
 	switch theme {
 	case pb.FormTheme_FORM_THEME_MINIMAL:
 		return "minimal"
@@ -997,6 +1010,7 @@ func mapThemeToDB(theme pb.FormTheme) string {
 
 // Helper to map ProgressBarStyle enum to DB string
 func mapProgressBarStyleToDB(style pb.ProgressBarStyle) sqlc.FormProgressBarStyle {
+	log.Printf("[mapProgressBarStyleToDB] Input: %v (%s)", style, style.String())
 	switch style {
 	case pb.ProgressBarStyle_PROGRESS_BAR_STYLE_LINEAR:
 		return sqlc.FormProgressBarStyleLinear
@@ -1011,6 +1025,7 @@ func mapProgressBarStyleToDB(style pb.ProgressBarStyle) sqlc.FormProgressBarStyl
 
 // Helper to map DB string to ProgressBarStyle enum
 func mapProgressBarStyleFromDB(style sqlc.FormProgressBarStyle) pb.ProgressBarStyle {
+	log.Printf("[mapProgressBarStyleFromDB] Input: %s", style)
 	switch style {
 	case sqlc.FormProgressBarStyleLinear:
 		return pb.ProgressBarStyle_PROGRESS_BAR_STYLE_LINEAR

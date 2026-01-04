@@ -10,13 +10,15 @@ Weladee Form is an open-source TypeForm alternative built with:
 - **Database**: PostgreSQL with SQLC for type-safe queries
 - **Auth**: JWT token validation
 
-Users can create beautiful, one-question-at-a-time forms with 7 themes and 13 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
+Users can create beautiful, one-question-at-a-time forms with 10 themes and 15 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
 
 **Key Features:**
 - **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit)
 - **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (app/(form-player)/f/[slug])
 - **Response Dashboard** - View, search, filter, and export responses to CSV/JSON (app/(main)/dashboard/forms/[id]/responses)
-- **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
+- **Analytics Dashboard** - Visualize views, starts, completions, and question-level insights.
+- **Themes** - 10 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal, aurora, cyberpunk, desert (lib/themes.ts)
+- **Progress Bar Styles** - Multiple styles supported: none, linear, steps, circular (form.progress_bar_style enum)
 - **Authentication** - JWT token validation
 - **Smart Menu States** - Menu items automatically disable for draft forms (Responses, Copy Link) with visual feedback
 - **Language Switcher** - User can change language (English, Thai, French) from the user dropdown menu with flag icons and persistent cookie storage
@@ -30,7 +32,7 @@ The Go backend implements three gRPC services defined in `proto/`:
 **FormService** (`proto/form.proto`)
 - `CreateForm` - Create a new form with questions
 - `GetForm` - Get a form by ID (with optional questions)
-- `UpdateForm` - Update form properties
+- `UpdateForm` - Update form properties (with robust enum mapping and logging)
 - `DeleteForm` - Delete a form
 - `ListForms` - List user's forms with pagination
 - `PublishForm` - Publish a form
@@ -47,13 +49,17 @@ The Go backend implements three gRPC services defined in `proto/`:
 - `UploadFile` - Streaming file upload (for file upload questions)
 - `GetFileUrl` - Get a presigned URL for file download
 
+**AnalyticsService** (`proto/analytics.proto`)
+- `TrackView`, `TrackResponseStart` - Event tracking
+- `GetOverviewStats`, `GetQuestionAnalytics`, etc. - Data retrieval
+
 ### Database Layer (SQLC)
 
 The database layer uses SQLC for type-safe SQL queries:
 
 - **SQL Queries**: `sql/queries/*.sql`
   - `user.sql` - User queries (CreateFormUser, GetFormUserByWeladeeID)
-  - `form.sql` - Form queries (CreateForm, GetForm, ListUserForms, CountUserForms, etc.)
+  - `form.sql` - Form queries (CreateForm, GetForm, ListUserForms, CountUserForms, etc. supports progress_bar_style)
   - `question.sql` - Question queries (CreateQuestion, ListFormQuestions)
   - `response.sql` - Response queries (CreateResponse, GetResponse, CountFormResponses, etc.)
   - `analytics.sql` - Analytics queries (IncrementFormViews, etc.)
@@ -203,6 +209,12 @@ Weladee Form supports building as a single binary that contains both the Go back
 2. **Go Embed**: Go's `//go:embed` directive bundles the `internal/embed/dist/` directory
 3. **Single Binary**: Result is one executable containing everything
 
+### Robust Embedded Serving
+
+The server handles SPA routing and Next.js internal files with fallbacks:
+- Clean URLs (e.g. `/en/dashboard`) are automatically matched to `.html` files.
+- Next.js internal files (like `__next._tree.txt`) in dynamic routes fallback to static templates (`/f/form/`, `/forms/__dynamic__/`) to ensure prefetching works correctly.
+
 ### Build Commands
 
 ```bash
@@ -250,7 +262,7 @@ psql -d your_database -f sql/schema/form_schema.sql
 
 The schema creates the `form` schema with tables:
 - `users` - Form users (linked to Weladee user ID)
-- `forms` - Form definitions
+- `forms` - Form definitions (supports progress_bar_style enum)
 - `questions` - Form questions
 - `responses` - Form submissions
 - `answers` - Response answers
@@ -295,6 +307,7 @@ export S3_ENDPOINT="https://your-endpoint.com"
   - `forms/new` - Create new form
   - `forms/[id]/edit` - Form builder/editor
   - `forms/[id]/responses` - View and manage form responses
+  - `forms/[id]/analytics` - Analytics dashboard
   - `settings/` - User settings
 - `app/(form-player)/` - Public form pages (no auth required)
   - `f/[slug]` - Public form player
@@ -309,6 +322,7 @@ Frontend:
 - `components/form-player/` - Public form display with one-question-at-a-time navigation
 - `components/dashboard/` - Dashboard-specific components
 - `components/responses/` - Response management UI with search/filter/export
+- `components/analytics/` - Analytics visualization components
 - `lib/questions.ts` - Question type definitions and helper functions
 - `lib/themes.ts` - Theme configuration objects
 - `lib/grpc-client.ts` - gRPC client for backend communication
@@ -320,9 +334,10 @@ Backend:
 - `proto/` - Protocol buffer definitions
 - `proto/pb/` - Generated protobuf Go code
 - `internal/gapi/` - gRPC service implementations
-  - `rpc_form.go` - FormService implementation
+  - `rpc_form.go` - FormService implementation (with robust enum mapping)
   - `rpc_response.go` - ResponseService implementation
   - `rpc_file.go` - FileService implementation
+  - `rpc_analytics_*.go` - AnalyticsService implementation
   - `server.go` - Server constructors
 - `internal/db/` - Database layer
   - `database.go` - Database connection wrapper
@@ -349,9 +364,9 @@ Backend:
 - `id` (UUID, primary key)
 - `user_id` (UUID, references form.users)
 - `title`, `description` (text)
-- `theme` (enum: midnight, ocean, sunset, forest, lavender, weladee, minimal)
+- `theme` (enum: midnight, ocean, sunset, forest, lavender, weladee, minimal, aurora, cyberpunk, desert)
 - `is_published`, `is_accepting_responses`, `require_login`, `allow_multiple_submissions`
-- `show_progress_bar`
+- `progress_bar_style` (enum: none, linear, steps, circular)
 - `custom_thank_you_message`, `redirect_url`
 - `settings` (JSONB)
 - `created_at`, `updated_at`
@@ -359,7 +374,7 @@ Backend:
 **form.questions** - Form questions
 - `id` (UUID, primary key)
 - `form_id` (UUID, references form.forms)
-- `type` (enum: short_text, long_text, dropdown, checkboxes, email, phone, number, date, rating, opinion_scale, yes_no, file_upload, url)
+- `type` (enum: short_text, long_text, dropdown, checkboxes, email, phone, number, date, rating, opinion_scale, yes_no, file_upload, url, matrix, ranking)
 - `label`, `description`, `placeholder`
 - `required`
 - `order_index`
@@ -397,11 +412,12 @@ Backend:
 - `s3_key`, `s3_url`
 - `created_at`
 
-**form.analytics** - Daily analytics
+**form.daily_stats** - Aggregated analytics
 - `id` (UUID, primary key)
 - `form_id` (UUID)
-- `date` (date)
+- `stat_date` (date)
 - `total_views`, `total_starts`, `total_completions`
+- `desktop_views`, `mobile_views`, `tablet_views`
 
 ### SQLC Generated Types
 
@@ -411,10 +427,10 @@ Backend:
 - `FormResponse` - Response model
 - `FormAnswer` - Answer model
 - `FormFileUpload` - File upload model
-- `FormAnalytic` - Analytics model
+- `FormDailyStat` - Analytics model
 - `CreateFormParams`, `UpdateFormParams`, etc. - Query parameters
 
-## Question Types (13 total)
+## Question Types (15 total)
 
 Defined in `lib/questions.ts`:
 
@@ -433,6 +449,8 @@ Defined in `lib/questions.ts`:
 | `yes_no` | Binary choice | - |
 | `file_upload` | Images and PDFs | `allowedFileTypes[]`, `maxFileSize` (MB) |
 | `url` | Website URL | `placeholder` |
+| `matrix` | Grid rating | `rows[]`, `columns[]` |
+| `ranking` | Item reordering | `items[]` |
 
 Helper functions:
 - `getQuestionTypeInfo(type)` - Get info for a question type
@@ -440,7 +458,7 @@ Helper functions:
 
 ## Theme System
 
-Defined in `lib/themes.ts` with 7 presets. Each theme has:
+Defined in `lib/themes.ts` with 10 presets. Each theme has:
 - `primaryColor`, `backgroundColor`, `textColor`, `accentColor`
 - `fontFamily`
 
@@ -450,16 +468,16 @@ Helper functions:
 
 ## gRPC Client Usage
 
-The frontend will use a gRPC client (to be implemented in `lib/grpc-client.ts`) to communicate with the backend:
+The frontend uses a gRPC client (implemented in `lib/grpc-client.ts`) to communicate with the backend via gRPC-Web or Connect protocol.
 
 ```typescript
 // Example: Create a form
 const client = new WeladeeFormClient('http://localhost:50051');
 const form = await client.formService.createForm({
   title: 'My Form',
-  theme: FormTheme.FORM_THEME_MINIMAL,
+  theme: FormTheme.MINIMAL,
   questions: [{
-    type: QuestionType.QUESTION_TYPE_SHORT_TEXT,
+    type: QuestionType.SHORT_TEXT,
     label: 'What is your name?',
     required: true,
     orderIndex: 0,
@@ -477,9 +495,15 @@ The form player (`components/form-player/`) supports:
 ## File Upload Flow
 
 1. File selected in form player
-2. Upload via gRPC streaming to FileService.UploadFile
+2. Upload via gRPC streaming to FileService.UploadFile (or /api/upload for simpler handling)
 3. File stored in S3/R2, metadata saved to database
 4. Returns file URL to be stored in response answers
+
+## Clipboard API Fallback
+
+For robustness in non-secure (HTTP) environments (e.g. IP-based access), clipboard operations use a hybrid approach:
+- Use `navigator.clipboard.writeText` if available.
+- Fallback to `document.execCommand('copy')` with a temporary `textarea` if the modern API is blocked by security policies.
 
 ## Common Patterns
 
@@ -489,7 +513,7 @@ The form player (`components/form-player/`) supports:
 const client = new WeladeeFormClient('http://localhost:50051');
 const { form } = await client.formService.createForm({
   title: 'My Form',
-  theme: FormTheme.FORM_THEME_MINIMAL,
+  theme: FormTheme.MINIMAL,
   questions: [
     createDefaultQuestion('short_text'),
   ],
@@ -557,27 +581,25 @@ const { data, filename, mimeType } = await client.responseService.exportResponse
 ### SQLC Types
 
 Database types are defined in `internal/db/sqlc/models.go`:
-- `FormForm`, `FormQuestion`, `FormResponse`, `FormAnswer`, `FormUser`, `FormFileUpload`, `FormAnalytic`
+- `FormForm`, `FormQuestion`, `FormResponse`, `FormAnswer`, `FormUser`, `FormFileUpload`, `FormDailyStat`
 - `CreateFormParams`, `UpdateFormParams`, etc. - Query parameter types
 
 ### Protobuf Types
 
-gRPC types are defined in `proto/pb/*.pb.go`:
+gRPC types are defined in `proto/pb/*.pb.go` and `lib/proto/proto/*_pb.ts`:
 - `Form`, `Question`, `Response`, `Answer`
-- `CreateFormRequest`, `CreateFormResponse`, etc.
-- Enums: `FormTheme`, `QuestionType`, `FormStatus`
+- Request/Response types for all gRPC methods
+- Enums: `FormTheme`, `QuestionType`, `FormStatus`, `ProgressBarStyle`
 
 ### TypeScript Types
 
-Frontend types are generated from protobuf definitions (to be implemented):
-- `Form`, `Question`, `Response`, `Answer`
-- Request/Response types for all gRPC methods
+Frontend types are generated from protobuf definitions and also defined manually in `lib/database.types.ts`.
 
 ## Dependencies
 
 ### Backend
 - **Go 1.21+**
-- **gRPC** - RPC framework
+- **gRPC / ConnectRPC** - RPC framework
 - **PostgreSQL** - Database with pgx/v5 driver
 - **SQLC** - Type-safe SQL generation
 - **JWT** - Token validation
@@ -622,6 +644,6 @@ make clean           # Clean build artifacts
 
 - The backend uses gRPC reflection for development tools (grpcurl)
 - All gRPC calls require authentication except public endpoints (defined in `internal/auth/interceptor.go`)
-- File uploads use streaming gRPC for efficient handling of large files
+- File uploads use streaming gRPC or multi-part POST for efficient handling
 - Responses can be partially saved (completed=false) and finalized later
 - The database schema uses a separate `form` schema for organization
