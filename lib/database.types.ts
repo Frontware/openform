@@ -67,6 +67,7 @@ export interface QuestionConfig {
   // Matrix question properties
   rows?: string[] // For matrix questions
   columns?: string[] // For matrix questions
+  input_type?: 'radio' | 'checkbox' // For matrix questions
   allow_multiple_per_row?: boolean // For matrix questions
   // Ranking question properties
   items?: string[] // For ranking questions

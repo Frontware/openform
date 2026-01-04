@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Trash2, Plus, GripVertical, X } from 'lucide-react'
+import { MatrixQuestionConfig } from './question-configs/MatrixQuestionConfig'
+import { RankingQuestionConfig } from './question-configs/RankingQuestionConfig'
 
 interface QuestionEditorProps {
   question: QuestionConfig
@@ -216,6 +218,14 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
             />
           </div>
         </div>
+      )}
+
+      {question.type === 'matrix' && (
+        <MatrixQuestionConfig question={question} onChange={onUpdate} />
+      )}
+
+      {question.type === 'ranking' && (
+        <RankingQuestionConfig question={question} onChange={onUpdate} />
       )}
 
       <Separator />

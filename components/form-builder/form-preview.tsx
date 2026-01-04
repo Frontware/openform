@@ -216,6 +216,61 @@ export function FormPreview({
                 </p>
               </div>
             )}
+
+            {question.type === 'matrix' && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b" style={{ borderColor: `${theme.primaryColor}40` }}>
+                      <th className="p-2 text-left font-medium min-w-[100px]" style={{ color: theme.textColor }}></th>
+                      {(question.columns || ['Poor', 'Fair', 'Good', 'Excellent']).slice(0, 5).map((col, i) => (
+                        <th key={i} className="p-2 text-center font-medium min-w-[70px]" style={{ color: theme.textColor }}>
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(question.rows || ['Item 1', 'Item 2', 'Item 3']).slice(0, 4).map((row, i) => (
+                      <tr key={i} className="border-b last:border-b-0" style={{ borderColor: `${theme.primaryColor}40` }}>
+                        <td className="p-2" style={{ color: theme.textColor }}>{row}</td>
+                        {(question.columns || ['Poor', 'Fair', 'Good', 'Excellent']).slice(0, 5).map((_, j) => (
+                          <td key={j} className="p-2 text-center">
+                            <div
+                              className={`w-5 h-5 rounded-${question.input_type === 'checkbox' ? 'md' : 'full'} border-2 mx-auto opacity-50`}
+                              style={{ borderColor: theme.primaryColor }}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {question.type === 'ranking' && (
+              <div className="space-y-2">
+                {(question.items || ['Option 1', 'Option 2', 'Option 3', 'Option 4']).slice(0, 5).map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 p-3 rounded-lg border-2 opacity-70"
+                    style={{
+                      borderColor: `${theme.primaryColor}40`,
+                      color: theme.textColor
+                    }}
+                  >
+                    <div
+                      className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-sm font-bold"
+                      style={{ borderColor: theme.primaryColor }}
+                    >
+                      {i + 1}
+                    </div>
+                    <span className="flex-1">{item}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Keyboard hint */}
