@@ -94,6 +94,7 @@ function calculateDateRange(timeRange: string): { startDate: Date; endDate: Date
     default:
       startDate.setFullYear(2000);
   }
+  startDate.setHours(0, 0, 0, 0);
 
   return { startDate, endDate };
 }

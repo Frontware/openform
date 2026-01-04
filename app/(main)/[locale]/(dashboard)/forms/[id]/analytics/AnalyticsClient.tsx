@@ -57,6 +57,7 @@ export default function AnalyticsClient() {
         default:
           startDate.setFullYear(2000); // All time
       }
+      startDate.setHours(0, 0, 0, 0);
 
       // Fetch all analytics data in parallel
       const [
