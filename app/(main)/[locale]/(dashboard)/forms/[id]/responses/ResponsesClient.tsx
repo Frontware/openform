@@ -72,6 +72,8 @@ function mapPbFormToDBForm(pbForm: PbForm): Form {
     questions: pbForm.questions.map(mapPbQuestionToConfig),
     thank_you_message: pbForm.customThankYouMessage,
     force_captcha: pbForm.forceCaptcha,
+    show_progress_bar: pbForm.showProgressBar,
+    allow_multiple_submissions: pbForm.allowMultipleSubmissions,
     created_at: pbForm.createdAt?.toDate().toISOString() || '',
     updated_at: pbForm.updatedAt?.toDate().toISOString() || '',
   }

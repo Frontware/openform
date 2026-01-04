@@ -117,6 +117,8 @@ export interface Database {
           questions: QuestionConfig[]
           thank_you_message: string
           force_captcha: boolean
+          show_progress_bar: boolean
+          allow_multiple_submissions: boolean
           created_at: string
           updated_at: string
         }
@@ -131,6 +133,8 @@ export interface Database {
           questions?: QuestionConfig[]
           thank_you_message?: string
           force_captcha?: boolean
+          show_progress_bar?: boolean
+          allow_multiple_submissions?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -143,6 +147,8 @@ export interface Database {
           questions?: QuestionConfig[]
           thank_you_message?: string
           force_captcha?: boolean
+          show_progress_bar?: boolean
+          allow_multiple_submissions?: boolean
           updated_at?: string
         }
       }

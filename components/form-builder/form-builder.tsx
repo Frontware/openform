@@ -282,6 +282,12 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
         forceCaptcha: form.force_captcha,
 
 
+        showProgressBar: form.show_progress_bar !== undefined ? form.show_progress_bar : true,
+
+
+        allowMultipleSubmissions: form.allow_multiple_submissions !== undefined ? form.allow_multiple_submissions : false,
+
+
       })
 
 
@@ -1528,6 +1534,113 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
 
+
+                <div className="flex items-center justify-between py-3 border-t border-slate-100">
+
+
+                  <div className="flex-1">
+
+
+                    <Label htmlFor="show-progress-bar" className="text-sm font-medium cursor-pointer">
+
+
+                      Show Progress Bar
+
+
+                    </Label>
+
+
+                    <p className="text-xs text-slate-500 mt-1">
+
+
+                      Display question progress at the top of the form
+
+
+                    </p>
+
+
+                  </div>
+
+
+                  <Switch
+
+
+                    id="show-progress-bar"
+
+
+                    checked={form.show_progress_bar !== undefined ? form.show_progress_bar : true}
+
+
+                    onCheckedChange={(checked) => {
+
+
+                      setForm({ ...form, show_progress_bar: checked })
+
+
+                      setHasUnsavedChanges(true)
+
+
+                    }}
+
+
+                  />
+
+
+                </div>
+
+
+                <div className="flex items-center justify-between py-3 border-t border-slate-100">
+
+
+                  <div className="flex-1">
+
+
+                    <Label htmlFor="allow-multiple-submissions" className="text-sm font-medium cursor-pointer">
+
+
+                      Allow Multiple Submissions
+
+
+                    </Label>
+
+
+                    <p className="text-xs text-slate-500 mt-1">
+
+
+                      Allow users to submit the form more than once
+
+
+                    </p>
+
+
+                  </div>
+
+
+                  <Switch
+
+
+                    id="allow-multiple-submissions"
+
+
+                    checked={form.allow_multiple_submissions !== undefined ? form.allow_multiple_submissions : false}
+
+
+                    onCheckedChange={(checked) => {
+
+
+                      setForm({ ...form, allow_multiple_submissions: checked })
+
+
+                      setHasUnsavedChanges(true)
+
+
+                    }}
+
+
+                  />
+
+
+                </div>
 
 
                 <div className="flex items-center justify-between py-3 border-t border-slate-100">

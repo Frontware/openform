@@ -57,6 +57,36 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
     return token ? parseJWT(token) : null
   }, [])
 
+  // Check if user has already submitted this form (for allow_multiple_submissions)
+  const [hasAlreadySubmitted, setHasAlreadySubmitted] = useState(false)
+
+  // Cookie helper functions
+  const getFormSubmissionCookie = (formId: string): boolean => {
+    if (typeof document === 'undefined') return false
+    const cookieName = `form_submitted_${formId}`
+    const cookies = document.cookie.split(';')
+    return cookies.some(cookie => {
+      const [name] = cookie.trim().split('=')
+      return name === cookieName
+    })
+  }
+
+  const setFormSubmissionCookie = (formId: string) => {
+    if (typeof document === 'undefined') return
+    const cookieName = `form_submitted_${formId}`
+    // Set cookie to expire in 1 year
+    const expiry = new Date()
+    expiry.setFullYear(expiry.getFullYear() + 1)
+    document.cookie = `${cookieName}=true; expires=${expiry.toUTCString()}; path=/`
+  }
+
+  // Check if user has already submitted on mount
+  useEffect(() => {
+    if (!form.allow_multiple_submissions) {
+      setHasAlreadySubmitted(getFormSubmissionCookie(form.id))
+    }
+  }, [form.id, form.allow_multiple_submissions])
+
   const currentQuestion = questions[currentIndex]
   const isLastQuestion = currentIndex === questions.length - 1
   const isFirstQuestion = currentIndex === 0
@@ -196,6 +226,11 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
         complete: true,
         recaptchaToken: recaptchaToken
       })
+
+      // Set cookie to track submission if multiple submissions are not allowed
+      if (!form.allow_multiple_submissions) {
+        setFormSubmissionCookie(form.id)
+      }
 
       setIsSubmitted(true)
     } catch (error) {
@@ -388,6 +423,85 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
     )
   }
 
+  // Already submitted screen (when allow_multiple_submissions is false)
+  if (hasAlreadySubmitted) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center p-6"
+        style={{
+          ...themeStyles,
+          backgroundColor: theme.backgroundColor,
+          fontFamily: theme.fontFamily,
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center max-w-lg"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="w-20 h-20 mx-auto mb-8 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: `${theme.primaryColor}20` }}
+          >
+            <Check className="w-10 h-10" style={{ color: theme.primaryColor }} />
+          </motion.div>
+          <h1
+            className="text-3xl md:text-4xl font-bold mb-4"
+            style={{ color: theme.textColor }}
+          >
+            {t('alreadySubmitted') || 'Already Submitted'}
+          </h1>
+          <p
+            className="text-lg opacity-70"
+            style={{ color: theme.textColor }}
+          >
+            {t('alreadySubmittedMessage') || 'You have already submitted this form. Thank you for your response!'}
+          </p>
+
+          {/* Company branding (Enterprise) or Weladee Form branding */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-12"
+          >
+            {userClaims?.customerType === 'enterprise' ? (
+              <div className="inline-flex items-center gap-2 text-sm opacity-70">
+                {userClaims.logoUrl && (
+                  <img
+                    src={userClaims.logoUrl}
+                    alt="Company Logo"
+                    className="h-6 w-auto object-contain"
+                  />
+                )}
+                <span
+                  className="font-semibold"
+                  style={{ color: theme.textColor }}
+                >
+                  {userClaims.displayName}
+                </span>
+              </div>
+            ) : (
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm opacity-50 hover:opacity-70 transition-opacity"
+                style={{ color: theme.textColor }}
+              >
+                <span>{t('madeWith')}</span>
+                <span className="font-semibold">Weladee Form</span>
+              </a>
+            )}
+          </motion.div>
+        </motion.div>
+      </div>
+    )
+  }
+
   // Empty form
   if (questions.length === 0) {
     return (
@@ -430,19 +544,21 @@ export function FormPlayer({ form, sessionId }: FormPlayerProps) {
         fontFamily: theme.fontFamily,
       }}
     >
-      {/* Progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <Progress 
-          value={progress} 
-          className="h-1 rounded-none"
-          style={{ 
-            backgroundColor: `${theme.primaryColor}20`,
-          }}
-          indicatorStyle={{
-            backgroundColor: theme.primaryColor,
-          }}
-        />
-      </div>
+      {/* Progress bar - shown only if enabled in form settings */}
+      {form.show_progress_bar !== false && (
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <Progress
+            value={progress}
+            className="h-1 rounded-none"
+            style={{
+              backgroundColor: `${theme.primaryColor}20`,
+            }}
+            indicatorStyle={{
+              backgroundColor: theme.primaryColor,
+            }}
+          />
+        </div>
+      )}
 
       {/* Main content */}
       <main className="flex-1 flex items-center justify-center p-6 pt-12">

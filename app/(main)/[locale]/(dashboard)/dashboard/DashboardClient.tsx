@@ -37,6 +37,8 @@ function mapPbFormToDBForm(pbForm: PbForm): DBForm {
     questions: [],
     thank_you_message: pbForm.customThankYouMessage,
     force_captcha: pbForm.forceCaptcha,
+    show_progress_bar: pbForm.showProgressBar,
+    allow_multiple_submissions: pbForm.allowMultipleSubmissions,
     created_at: pbForm.createdAt?.toDate().toISOString() || new Date().toISOString(),
     updated_at: pbForm.updatedAt?.toDate().toISOString() || new Date().toISOString(),
   }
