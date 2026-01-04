@@ -1,18 +1,21 @@
 import { QuestionType, QuestionConfig } from './database.types'
-import { 
-  Type, 
-  AlignLeft, 
-  List, 
-  CheckSquare, 
-  Mail, 
-  Phone, 
-  Hash, 
-  Calendar, 
-  Star, 
-  Gauge, 
-  ThumbsUp, 
-  Upload, 
+import { v4 as uuidv4 } from 'uuid'
+import {
+  Type,
+  AlignLeft,
+  List,
+  CheckSquare,
+  Mail,
+  Phone,
+  Hash,
+  Calendar,
+  Star,
+  Gauge,
+  ThumbsUp,
+  Upload,
   Link,
+  Grid3x3,
+  ArrowUpDown,
   LucideIcon
 } from 'lucide-react'
 
@@ -141,6 +144,29 @@ export const questionTypes: QuestionTypeInfo[] = [
       placeholder: 'https://example.com',
     },
   },
+  {
+    type: 'matrix',
+    label: 'Matrix/Grid',
+    description: 'Rate multiple items using the same scale',
+    icon: Grid3x3,
+    defaultConfig: {
+      rows: ['Item 1', 'Item 2', 'Item 3'],
+      columns: ['Poor', 'Fair', 'Good', 'Excellent'],
+      allow_multiple_per_row: false,
+    },
+  },
+  {
+    type: 'ranking',
+    label: 'Ranking',
+    description: 'Order items by preference',
+    icon: ArrowUpDown,
+    defaultConfig: {
+      items: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
+      min_selections: null,
+      max_selections: null,
+      shuffle_items: false,
+    },
+  },
 ]
 
 export function getQuestionTypeInfo(type: QuestionType): QuestionTypeInfo | undefined {
@@ -149,7 +175,7 @@ export function getQuestionTypeInfo(type: QuestionType): QuestionTypeInfo | unde
 
 export function createDefaultQuestion(type: QuestionType): QuestionConfig {
   const typeInfo = getQuestionTypeInfo(type)
-  const id = crypto.randomUUID()
+  const id = uuidv4()
   
   return {
     id,

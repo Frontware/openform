@@ -224,7 +224,22 @@
       "opinion_scale": "Opinion Scale",
       "yes_no": "Yes/No",
       "file_upload": "File Upload",
-      "url": "Website URL"
+      "url": "Website URL",
+      "matrix": "Matrix/Grid",
+      "ranking": "Ranking"
+    },
+    "matrixQuestion": {
+      "rows": "Rows",
+      "columns": "Columns",
+      "addRow": "Add row",
+      "addColumn": "Add column"
+    },
+    "rankingQuestion": {
+      "items": "Items to rank",
+      "addItem": "Add item",
+      "minSelections": "Min selections",
+      "maxSelections": "Max selections",
+      "shuffleItems": "Shuffle items"
     }
   },
   "formPlayer": {

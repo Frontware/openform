@@ -21,6 +21,8 @@ export type QuestionType =
   | 'yes_no'
   | 'file_upload'
   | 'url'
+  | 'matrix'
+  | 'ranking'
 
 // Form status
 export type FormStatus = 'draft' | 'published' | 'closed'
@@ -62,6 +64,15 @@ export interface QuestionConfig {
   allowedFileTypes?: string[] // For file_upload
   maxFileSize?: number // In MB
   placeholder?: string
+  // Matrix question properties
+  rows?: string[] // For matrix questions
+  columns?: string[] // For matrix questions
+  allow_multiple_per_row?: boolean // For matrix questions
+  // Ranking question properties
+  items?: string[] // For ranking questions
+  min_selections?: number | null // For ranking questions
+  max_selections?: number | null // For ranking questions
+  shuffle_items?: boolean // For ranking questions
 }
 
 // Database tables

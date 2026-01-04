@@ -97,7 +97,8 @@ CREATE TABLE IF NOT EXISTS form.questions (
     type VARCHAR(50) NOT NULL CHECK (type IN (
         'short_text','long_text','dropdown','checkboxes',
         'email','phone','number','date','rating',
-        'opinion_scale','yes_no','file_upload','url'
+        'opinion_scale','yes_no','file_upload','url',
+        'matrix','ranking'
     )),
 
     label TEXT NOT NULL,

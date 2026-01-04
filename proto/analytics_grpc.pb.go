@@ -8,7 +8,6 @@ package pb
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -251,7 +250,7 @@ func RegisterAnalyticsServiceServer(s grpc.ServiceRegistrar, srv AnalyticsServic
 	s.RegisterService(&AnalyticsService_ServiceDesc, srv)
 }
 
-func _AnalyticsService_GetOverviewStats_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_GetOverviewStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetOverviewStatsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -263,13 +262,13 @@ func _AnalyticsService_GetOverviewStats_Handler(srv any, ctx context.Context, de
 		Server:     srv,
 		FullMethod: AnalyticsService_GetOverviewStats_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).GetOverviewStats(ctx, req.(*GetOverviewStatsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_GetResponseTrend_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_GetResponseTrend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetResponseTrendRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -281,13 +280,13 @@ func _AnalyticsService_GetResponseTrend_Handler(srv any, ctx context.Context, de
 		Server:     srv,
 		FullMethod: AnalyticsService_GetResponseTrend_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).GetResponseTrend(ctx, req.(*GetResponseTrendRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_GetDeviceBreakdown_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_GetDeviceBreakdown_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetDeviceBreakdownRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -299,13 +298,13 @@ func _AnalyticsService_GetDeviceBreakdown_Handler(srv any, ctx context.Context, 
 		Server:     srv,
 		FullMethod: AnalyticsService_GetDeviceBreakdown_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).GetDeviceBreakdown(ctx, req.(*GetDeviceBreakdownRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_GetCompletionFunnel_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_GetCompletionFunnel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCompletionFunnelRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -317,13 +316,13 @@ func _AnalyticsService_GetCompletionFunnel_Handler(srv any, ctx context.Context,
 		Server:     srv,
 		FullMethod: AnalyticsService_GetCompletionFunnel_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).GetCompletionFunnel(ctx, req.(*GetCompletionFunnelRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_GetQuestionAnalytics_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_GetQuestionAnalytics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetQuestionAnalyticsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -335,13 +334,13 @@ func _AnalyticsService_GetQuestionAnalytics_Handler(srv any, ctx context.Context
 		Server:     srv,
 		FullMethod: AnalyticsService_GetQuestionAnalytics_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).GetQuestionAnalytics(ctx, req.(*GetQuestionAnalyticsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_GetQuestionDropOff_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_GetQuestionDropOff_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetQuestionDropOffRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -353,13 +352,13 @@ func _AnalyticsService_GetQuestionDropOff_Handler(srv any, ctx context.Context, 
 		Server:     srv,
 		FullMethod: AnalyticsService_GetQuestionDropOff_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).GetQuestionDropOff(ctx, req.(*GetQuestionDropOffRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_GetGeographicDistribution_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_GetGeographicDistribution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetGeographicDistributionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -371,13 +370,13 @@ func _AnalyticsService_GetGeographicDistribution_Handler(srv any, ctx context.Co
 		Server:     srv,
 		FullMethod: AnalyticsService_GetGeographicDistribution_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).GetGeographicDistribution(ctx, req.(*GetGeographicDistributionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_GetTimeDistribution_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_GetTimeDistribution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetTimeDistributionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -389,13 +388,13 @@ func _AnalyticsService_GetTimeDistribution_Handler(srv any, ctx context.Context,
 		Server:     srv,
 		FullMethod: AnalyticsService_GetTimeDistribution_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).GetTimeDistribution(ctx, req.(*GetTimeDistributionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_TrackView_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_TrackView_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TrackViewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -407,13 +406,13 @@ func _AnalyticsService_TrackView_Handler(srv any, ctx context.Context, dec func(
 		Server:     srv,
 		FullMethod: AnalyticsService_TrackView_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).TrackView(ctx, req.(*TrackViewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_TrackResponseStart_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_TrackResponseStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TrackResponseStartRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -425,13 +424,13 @@ func _AnalyticsService_TrackResponseStart_Handler(srv any, ctx context.Context, 
 		Server:     srv,
 		FullMethod: AnalyticsService_TrackResponseStart_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).TrackResponseStart(ctx, req.(*TrackResponseStartRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticsService_ExportAnalytics_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AnalyticsService_ExportAnalytics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExportAnalyticsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -443,7 +442,7 @@ func _AnalyticsService_ExportAnalytics_Handler(srv any, ctx context.Context, dec
 		Server:     srv,
 		FullMethod: AnalyticsService_ExportAnalytics_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticsServiceServer).ExportAnalytics(ctx, req.(*ExportAnalyticsRequest))
 	}
 	return interceptor(ctx, in, info, handler)

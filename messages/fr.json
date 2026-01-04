@@ -224,7 +224,22 @@
       "opinion_scale": "Échelle d'Opinion",
       "yes_no": "Oui/Non",
       "file_upload": "Téléchargement de Fichier",
-      "url": "URL de Site Web"
+      "url": "URL de Site Web",
+      "matrix": "Matrice",
+      "ranking": "Classement"
+    },
+    "matrixQuestion": {
+      "rows": "Lignes",
+      "columns": "Colonnes",
+      "addRow": "Ajouter ligne",
+      "addColumn": "Ajouter colonne"
+    },
+    "rankingQuestion": {
+      "items": "Éléments à classer",
+      "addItem": "Ajouter élément",
+      "minSelections": "Min. sélections",
+      "maxSelections": "Max. sélections",
+      "shuffleItems": "Mélanger les éléments"
     }
   },
   "formPlayer": {

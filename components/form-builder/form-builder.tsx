@@ -87,6 +87,8 @@ function mapQuestionTypeToProto(type: QuestionConfig['type']): QuestionType {
     case 'yes_no': return QuestionType.YES_NO
     case 'file_upload': return QuestionType.FILE_UPLOAD
     case 'url': return QuestionType.URL
+    case 'matrix': return QuestionType.MATRIX
+    case 'ranking': return QuestionType.RANKING
     default: return QuestionType.UNSPECIFIED
   }
 }
@@ -192,10 +194,24 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
 
-    // Hide file_upload for non-enterprise users
+    // Filter question types based on customer type:
+    // - file_upload: Enterprise only
+    // - matrix: Standard and Enterprise only
+    // - ranking: Enterprise only
 
 
-    return questionTypes.filter(qt => qt.type !== 'file_upload' || customerType === 'enterprise')
+    return questionTypes.filter(qt => {
+      // File upload: Enterprise only
+      if (qt.type === 'file_upload' && customerType !== 'enterprise') return false
+
+      // Matrix: Standard and Enterprise only
+      if (qt.type === 'matrix' && customerType !== 'standard' && customerType !== 'enterprise') return false
+
+      // Ranking: Enterprise only
+      if (qt.type === 'ranking' && customerType !== 'enterprise') return false
+
+      return true
+    })
 
 
   }, [])

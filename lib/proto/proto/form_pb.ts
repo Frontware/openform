@@ -188,6 +188,16 @@ export enum QuestionType {
    * @generated from enum value: QUESTION_TYPE_URL = 13;
    */
   URL = 13,
+
+  /**
+   * @generated from enum value: QUESTION_TYPE_MATRIX = 14;
+   */
+  MATRIX = 14,
+
+  /**
+   * @generated from enum value: QUESTION_TYPE_RANKING = 15;
+   */
+  RANKING = 15,
 }
 // Retrieve enum metadata with: proto3.getEnumType(QuestionType)
 proto3.util.setEnumType(QuestionType, "weladee.form.v1.QuestionType", [
@@ -205,6 +215,8 @@ proto3.util.setEnumType(QuestionType, "weladee.form.v1.QuestionType", [
   { no: 11, name: "QUESTION_TYPE_YES_NO" },
   { no: 12, name: "QUESTION_TYPE_FILE_UPLOAD" },
   { no: 13, name: "QUESTION_TYPE_URL" },
+  { no: 14, name: "QUESTION_TYPE_MATRIX" },
+  { no: 15, name: "QUESTION_TYPE_RANKING" },
 ]);
 
 /**

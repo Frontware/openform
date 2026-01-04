@@ -10,6 +10,8 @@ This document outlines the available features and limitations for Weladee Form u
 | **Form Creation** | ✅ | ✅ | ✅ |
 | **Form Responses** | ✅ | ✅ | ✅ |
 | **File Upload Question** | ❌ | ❌ | ✅ |
+| **Matrix Question** | ❌ | ✅ | ✅ |
+| **Ranking Question** | ❌ | ❌ | ✅ |
 | **Company Branding** | ❌ | ❌ | ✅ (Logo & Name) |
 | **Export to CSV** | ✅ | ✅ | ✅ |
 | **Export to Excel** | ❌ | ❌ | ✅ |
@@ -26,12 +28,24 @@ This document outlines the available features and limitations for Weladee Form u
 - Only **Enterprise** users can add "File Upload" question types to their forms.
 - This allows respondents to upload files (images, PDFs) directly within the form.
 
-#### 3. Branding (White Labeling)
+#### 3. Matrix Questions (Standard & Enterprise)
+- **Standard** and **Enterprise** users can add matrix/grid questions to their forms.
+- This allows respondents to rate multiple items using the same scale.
+- Example: Rate "Product Quality", "Customer Service", "Delivery Speed" on a "Poor" to "Excellent" scale.
+- Supports 2-20 rows and 2-10 columns.
+
+#### 4. Ranking Questions (Enterprise)
+- Only **Enterprise** users can add ranking questions to their forms.
+- This allows respondents to drag and drop items to rank them by preference.
+- Example: Rank features "Feature A", "Feature B", "Feature C" by priority.
+- Supports 2-15 items with optional min/max selection limits.
+
+#### 5. Branding (White Labeling)
 - **Enterprise** users can have their Company Name and Company Logo displayed on the form.
 - The `display_name` field in the JWT is used as the Company Name.
 - The `logo_url` field in the JWT is used to display the logo.
 
-#### 4. Data Export
+#### 6. Data Export
 - All users can export response data.
 - **Enterprise** users have the additional option to export data in Microsoft Excel format (`.xlsx`), alongside the standard CSV format.
 

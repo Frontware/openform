@@ -31,6 +31,8 @@ Weladee Form enforces feature restrictions based on customer type:
 |:---|:---:|:---:|:---:|
 | Max Forms | 5 | 15 | Unlimited |
 | File Upload Questions | ❌ | ❌ | ✅ |
+| Matrix Questions | ❌ | ✅ | ✅ |
+| Ranking Questions | ❌ | ❌ | ✅ |
 | Company Branding | ❌ | ❌ | ✅ |
 | Export to CSV | ✅ | ✅ | ✅ |
 | Export to Excel | ❌ | ❌ | ✅ |
@@ -38,10 +40,12 @@ Weladee Form enforces feature restrictions based on customer type:
 **Backend Enforcement** (Go):
 - **Form Creation Limit** (`internal/gapi/rpc_form.go:CreateForm`): Checks `CountUserForms` before allowing creation
 - **File Upload Restriction** (`internal/gapi/rpc_form.go:CreateQuestion`): Blocks `QUESTION_TYPE_FILE_UPLOAD` for non-enterprise
+- **Matrix Question Restriction** (`internal/gapi/rpc_form.go:CreateQuestion`): Blocks `QUESTION_TYPE_MATRIX` for SME users
+- **Ranking Question Restriction** (`internal/gapi/rpc_form.go:CreateQuestion`): Blocks `QUESTION_TYPE_RANKING` for non-enterprise
 - **Excel Export Restriction** (`internal/gapi/rpc_response.go:ExportResponses`): Validates customer_type before Excel export
 
 **Frontend Enforcement** (TypeScript/React):
-- **Form Builder** (`components/form-builder/form-builder.tsx`): Filters out file_upload question type for non-enterprise
+- **Form Builder** (`components/form-builder/form-builder.tsx`): Filters out file_upload, matrix, and ranking question types based on customer type
 - **Export Menu** (`components/responses/responses-dashboard.tsx`): Hides Excel option for non-enterprise
 - **Form Player** (`components/form-player/form-player.tsx`): Shows company logo/name for enterprise users
 

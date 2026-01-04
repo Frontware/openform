@@ -13,7 +13,7 @@ A beautiful, open-source TypeForm alternative. Create engaging forms with a one-
 - **Customer-based feature tiers** - SME, Standard, and Enterprise with different capabilities
 - **Company branding** - Enterprise users can add their logo to forms
 - **Response dashboard** - View, search, filter, and export to CSV/JSON/Excel
-- **13 question types** - Text, multiple choice, rating, file upload (Enterprise), and more
+- **15 question types** - Text, multiple choice, rating, matrix (Standard+), ranking (Enterprise), file upload (Enterprise), and more
 - **Internationalization** - Support for English, Thai, and French with in-app language switcher
 - **Bot protection** - Optional Google reCAPTCHA v3 for form submissions
 
@@ -38,21 +38,23 @@ Feature restrictions are enforced at both backend and frontend levels:
 
 ## Question types
 
-| Type | Description |
-|------|-------------|
-| Short text | Single line text input |
-| Long text | Multi-line textarea |
-| Dropdown | Select one option |
-| Checkboxes | Select multiple options |
-| Email | Email with validation |
-| Phone | Phone number input |
-| Number | Numeric input |
-| Date | Date picker |
-| Rating | Star rating (1-5) |
-| Opinion scale | Numeric scale (1-10) |
-| Yes/No | Binary choice |
-| File upload | Images and PDFs |
-| Website URL | URL with validation |
+| Type | Description | Customer Type |
+|------|-------------|---------------|
+| Short text | Single line text input | All |
+| Long text | Multi-line textarea | All |
+| Dropdown | Select one option | All |
+| Checkboxes | Select multiple options | All |
+| Email | Email with validation | All |
+| Phone | Phone number input | All |
+| Number | Numeric input | All |
+| Date | Date picker | All |
+| Rating | Star rating (1-5) | All |
+| Opinion scale | Numeric scale (1-10) | All |
+| Yes/No | Binary choice | All |
+| Matrix | Rate multiple items using same scale | Standard & Enterprise |
+| Ranking | Drag-and-drop ordering by preference | Enterprise |
+| File upload | Images and PDFs | Enterprise |
+| Website URL | URL with validation | All |
 
 ## Tech stack
 

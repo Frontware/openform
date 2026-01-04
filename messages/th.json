@@ -224,7 +224,22 @@
       "opinion_scale": "สเกลความคิดเห็น",
       "yes_no": "ใช่/ไม่ใช่",
       "file_upload": "อัปโหลดไฟล์",
-      "url": "URL เว็บไซต์"
+      "url": "URL เว็บไซต์",
+      "matrix": "ตารางเมทริกซ์",
+      "ranking": "จัดอันดับ"
+    },
+    "matrixQuestion": {
+      "rows": "แถว",
+      "columns": "คอลัมน์",
+      "addRow": "เพิ่มแถว",
+      "addColumn": "เพิ่มคอลัมน์"
+    },
+    "rankingQuestion": {
+      "items": "รายการที่จะจัดอันดับ",
+      "addItem": "เพิ่มรายการ",
+      "minSelections": "จำนวนขั้นต่ำ",
+      "maxSelections": "จำนวนสูงสุด",
+      "shuffleItems": "สับเปลี่ยนรายการ"
     }
   },
   "formPlayer": {

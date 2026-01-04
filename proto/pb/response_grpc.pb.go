@@ -8,7 +8,6 @@ package pb
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -155,7 +154,7 @@ func RegisterResponseServiceServer(s grpc.ServiceRegistrar, srv ResponseServiceS
 	s.RegisterService(&ResponseService_ServiceDesc, srv)
 }
 
-func _ResponseService_SubmitResponse_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _ResponseService_SubmitResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SubmitResponseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -167,13 +166,13 @@ func _ResponseService_SubmitResponse_Handler(srv any, ctx context.Context, dec f
 		Server:     srv,
 		FullMethod: ResponseService_SubmitResponse_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ResponseServiceServer).SubmitResponse(ctx, req.(*SubmitResponseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResponseService_GetResponse_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _ResponseService_GetResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetResponseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -185,13 +184,13 @@ func _ResponseService_GetResponse_Handler(srv any, ctx context.Context, dec func
 		Server:     srv,
 		FullMethod: ResponseService_GetResponse_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ResponseServiceServer).GetResponse(ctx, req.(*GetResponseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResponseService_ListResponses_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _ResponseService_ListResponses_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListResponsesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -203,13 +202,13 @@ func _ResponseService_ListResponses_Handler(srv any, ctx context.Context, dec fu
 		Server:     srv,
 		FullMethod: ResponseService_ListResponses_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ResponseServiceServer).ListResponses(ctx, req.(*ListResponsesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResponseService_DeleteResponse_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _ResponseService_DeleteResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteResponseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -221,13 +220,13 @@ func _ResponseService_DeleteResponse_Handler(srv any, ctx context.Context, dec f
 		Server:     srv,
 		FullMethod: ResponseService_DeleteResponse_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ResponseServiceServer).DeleteResponse(ctx, req.(*DeleteResponseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResponseService_ExportResponses_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _ResponseService_ExportResponses_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExportResponsesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -239,7 +238,7 @@ func _ResponseService_ExportResponses_Handler(srv any, ctx context.Context, dec 
 		Server:     srv,
 		FullMethod: ResponseService_ExportResponses_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ResponseServiceServer).ExportResponses(ctx, req.(*ExportResponsesRequest))
 	}
 	return interceptor(ctx, in, info, handler)

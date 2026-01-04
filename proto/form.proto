@@ -43,8 +43,13 @@ enum QuestionType {
   QUESTION_TYPE_RATING = 9;
   QUESTION_TYPE_OPINION_SCALE = 10;
   QUESTION_TYPE_YES_NO = 11;
+  // Only for enterprise plans
   QUESTION_TYPE_FILE_UPLOAD = 12;
   QUESTION_TYPE_URL = 13;
+  // Not available to SME plans
+  QUESTION_TYPE_MATRIX = 14;
+  // Only for enterprise plans
+  QUESTION_TYPE_RANKING = 15;
 }
 
 // Messages

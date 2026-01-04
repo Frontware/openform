@@ -8,7 +8,6 @@ package pb
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -139,7 +138,7 @@ func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
 	s.RegisterService(&AuthService_ServiceDesc, srv)
 }
 
-func _AuthService_SendMagicLink_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AuthService_SendMagicLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SendMagicLinkRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -151,13 +150,13 @@ func _AuthService_SendMagicLink_Handler(srv any, ctx context.Context, dec func(a
 		Server:     srv,
 		FullMethod: AuthService_SendMagicLink_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).SendMagicLink(ctx, req.(*SendMagicLinkRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_HandleOAuthCallback_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AuthService_HandleOAuthCallback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HandleOAuthCallbackRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -169,13 +168,13 @@ func _AuthService_HandleOAuthCallback_Handler(srv any, ctx context.Context, dec 
 		Server:     srv,
 		FullMethod: AuthService_HandleOAuthCallback_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).HandleOAuthCallback(ctx, req.(*HandleOAuthCallbackRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_ValidateToken_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AuthService_ValidateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ValidateTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -187,13 +186,13 @@ func _AuthService_ValidateToken_Handler(srv any, ctx context.Context, dec func(a
 		Server:     srv,
 		FullMethod: AuthService_ValidateToken_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).ValidateToken(ctx, req.(*ValidateTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_GetUserSession_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _AuthService_GetUserSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserSessionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -205,7 +204,7 @@ func _AuthService_GetUserSession_Handler(srv any, ctx context.Context, dec func(
 		Server:     srv,
 		FullMethod: AuthService_GetUserSession_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).GetUserSession(ctx, req.(*GetUserSessionRequest))
 	}
 	return interceptor(ctx, in, info, handler)

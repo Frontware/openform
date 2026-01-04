@@ -166,6 +166,8 @@ const (
 	QuestionType_QUESTION_TYPE_YES_NO        QuestionType = 11
 	QuestionType_QUESTION_TYPE_FILE_UPLOAD   QuestionType = 12
 	QuestionType_QUESTION_TYPE_URL           QuestionType = 13
+	QuestionType_QUESTION_TYPE_MATRIX        QuestionType = 14
+	QuestionType_QUESTION_TYPE_RANKING       QuestionType = 15
 )
 
 // Enum value maps for QuestionType.
@@ -185,6 +187,8 @@ var (
 		11: "QUESTION_TYPE_YES_NO",
 		12: "QUESTION_TYPE_FILE_UPLOAD",
 		13: "QUESTION_TYPE_URL",
+		14: "QUESTION_TYPE_MATRIX",
+		15: "QUESTION_TYPE_RANKING",
 	}
 	QuestionType_value = map[string]int32{
 		"QUESTION_TYPE_UNSPECIFIED":   0,
@@ -201,6 +205,8 @@ var (
 		"QUESTION_TYPE_YES_NO":        11,
 		"QUESTION_TYPE_FILE_UPLOAD":   12,
 		"QUESTION_TYPE_URL":           13,
+		"QUESTION_TYPE_MATRIX":        14,
+		"QUESTION_TYPE_RANKING":       15,
 	}
 )
 
@@ -2329,7 +2335,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x11FORM_THEME_AURORA\x10\b\x12\x18\n" +
 	"\x14FORM_THEME_CYBERPUNK\x10\t\x12\x15\n" +
 	"\x11FORM_THEME_DESERT\x10\n" +
-	"*\x91\x03\n" +
+	"*\xc6\x03\n" +
 	"\fQuestionType\x12\x1d\n" +
 	"\x19QUESTION_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18QUESTION_TYPE_SHORT_TEXT\x10\x01\x12\x1b\n" +
@@ -2345,7 +2351,9 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x12\x18\n" +
 	"\x14QUESTION_TYPE_YES_NO\x10\v\x12\x1d\n" +
 	"\x19QUESTION_TYPE_FILE_UPLOAD\x10\f\x12\x15\n" +
-	"\x11QUESTION_TYPE_URL\x10\r*\x9d\x01\n" +
+	"\x11QUESTION_TYPE_URL\x10\r\x12\x18\n" +
+	"\x14QUESTION_TYPE_MATRIX\x10\x0e\x12\x19\n" +
+	"\x15QUESTION_TYPE_RANKING\x10\x0f*\x9d\x01\n" +
 	"\n" +
 	"FormSortBy\x12\x1c\n" +
 	"\x18FORM_SORT_BY_UNSPECIFIED\x10\x00\x12\x1b\n" +

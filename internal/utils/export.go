@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -435,4 +436,48 @@ func ExportResponsesToExcel(questions []sqlc.FormQuestion, rows []sqlc.GetFormRe
 	}
 
 	return exporter.GetBytes()
+}
+
+// formatMatrixAnswerCSV formats matrix answer choices for CSV export
+func formatMatrixAnswerCSV(answerChoices []byte) string {
+	var choices map[string]any
+	if err := json.Unmarshal(answerChoices, &choices); err != nil {
+		return string(answerChoices)
+	}
+
+	responses, ok := choices["matrix_responses"].(map[string]any)
+	if !ok {
+		return string(answerChoices)
+	}
+
+	var parts []string
+	for row, val := range responses {
+		parts = append(parts, fmt.Sprintf("%s: %v", row, val))
+	}
+	return fmt.Sprintf("[%s]", strings.Join(parts, "; "))
+}
+
+// formatRankingAnswerCSV formats ranking answer choices for CSV export
+func formatRankingAnswerCSV(answerChoices []byte) string {
+	var choices map[string]any
+	if err := json.Unmarshal(answerChoices, &choices); err != nil {
+		return string(answerChoices)
+	}
+
+	rankings, ok := choices["rankings"].([]any)
+	if !ok {
+		return string(answerChoices)
+	}
+
+	var parts []string
+	for _, r := range rankings {
+		rankMap, ok := r.(map[string]any)
+		if !ok {
+			continue
+		}
+		rank, _ := rankMap["rank"].(float64)
+		item, _ := rankMap["item"].(string)
+		parts = append(parts, fmt.Sprintf("#%d: %s", int(rank), item))
+	}
+	return fmt.Sprintf("[%s]", strings.Join(parts, "; "))
 }

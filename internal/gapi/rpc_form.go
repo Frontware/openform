@@ -607,6 +607,32 @@ func (s *FormServerImpl) CreateQuestion(ctx context.Context, req *pb.CreateQuest
 		}
 	}
 
+	// Check if matrix question type - Standard and Enterprise only
+	if req.Type == pb.QuestionType_QUESTION_TYPE_MATRIX {
+		claims, err := auth.GetUserClaims(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to get user claims: %v", err)
+		}
+
+		if claims.CustomerType != "standard" && claims.CustomerType != "enterprise" {
+			return nil, status.Errorf(codes.PermissionDenied,
+				"matrix questions are only available for Standard and Enterprise customers")
+		}
+	}
+
+	// Check if ranking question type - Enterprise only
+	if req.Type == pb.QuestionType_QUESTION_TYPE_RANKING {
+		claims, err := auth.GetUserClaims(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to get user claims: %v", err)
+		}
+
+		if claims.CustomerType != "enterprise" {
+			return nil, status.Errorf(codes.PermissionDenied,
+				"ranking questions are only available for Enterprise customers")
+		}
+	}
+
 	// Validate question type - reject UNSPECIFIED
 	typeStr := req.Type.String()
 	log.Printf("[CreateQuestion] Question type raw: %s", typeStr)
@@ -930,6 +956,10 @@ func mapQuestionTypeToDB(qt pb.QuestionType) string {
 		return "file_upload"
 	case pb.QuestionType_QUESTION_TYPE_URL:
 		return "url"
+	case pb.QuestionType_QUESTION_TYPE_MATRIX:
+		return "matrix"
+	case pb.QuestionType_QUESTION_TYPE_RANKING:
+		return "ranking"
 	default:
 		return ""
 	}
