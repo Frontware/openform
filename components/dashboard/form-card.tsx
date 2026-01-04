@@ -18,7 +18,8 @@ import {
   BarChart3,
   Pencil,
   Copy,
-  LineChart
+  LineChart,
+  Share2
 } from 'lucide-react'
 import { Form, FormStatus } from '@/lib/database.types'
 import { DeleteFormButton } from './delete-form-button'
@@ -73,6 +74,28 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
     const link = `${window.location.origin}/f/${form.slug}`
     navigator.clipboard.writeText(link)
     toast.success('Link copied to clipboard')
+  }
+
+  const shareFormLink = async () => {
+    if (isDraftForm) return
+
+    const link = `${window.location.origin}/f/${form.slug}`
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: form.title,
+          text: form.description || 'Check out this form',
+          url: link,
+        })
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Error sharing:', err)
+        }
+      }
+    } else {
+      copyFormLink()
+    }
   }
 
   return (
@@ -153,6 +176,17 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
             >
               <Copy className="mr-2 h-4 w-4" />
               Copy link
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={isDraftForm ? undefined : shareFormLink}
+              disabled={isDraftForm}
+              className={cn(
+                'cursor-pointer',
+                isDraftForm && 'opacity-50 cursor-not-allowed text-gray-400'
+              )}
+            >
+              <Share2 className="mr-2 h-4 w-4" />
+              Share link
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DeleteFormButton formId={form.id} formTitle={form.title} onDelete={onDelete} />
