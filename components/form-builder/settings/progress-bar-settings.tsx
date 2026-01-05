@@ -93,11 +93,11 @@ export function ProgressBarSettings({ value, onChange }: ProgressBarSettingsProp
             )}
 
             {/* Icon and preview */}
-            <div className="flex items-center gap-3 mb-2">
-              <div className={`${value === option.value ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+            <div className="flex items-center gap-3 mb-2 min-w-0">
+              <div className={`${value === option.value ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'} flex-shrink-0`}>
                 {option.icon}
               </div>
-              <div className="text-2xl">{option.preview}</div>
+              <div className="text-2xl truncate">{option.preview}</div>
             </div>
 
             {/* Label and description */}
@@ -123,11 +123,11 @@ export function ProgressBarSettings({ value, onChange }: ProgressBarSettingsProp
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             {value === 'linear' && (
-              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
                 {/* Progress bar */}
-                <div className="relative h-1.5">
+                <div className="relative h-1.5 w-full">
                   <div
-                    className="absolute top-0 left-0 h-full transition-all duration-500 ease-out w-3/5 bg-blue-500 dark:bg-blue-400 rounded-full overflow-hidden"
+                    className="absolute top-0 left-0 h-full transition-all duration-500 ease-out w-3/5 bg-blue-500 dark:bg-blue-400 overflow-hidden"
                   >
                     {/* Shimmer effect */}
                     <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
