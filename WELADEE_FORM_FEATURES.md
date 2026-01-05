@@ -93,8 +93,10 @@ import (
 
 // WeladeeUserClaims must match the structure expected by Weladee Form
 type WeladeeUserClaims struct {
+	// You will set it with company_id from Weladee, not the Weladee User's ID
 	UserID       int    `json:"user_id"`
 	Email        string `json:"email"`
+	// Set company name
 	DisplayName  string `json:"display_name"`
 	Role         string `json:"role"`
 	CustomerType string `json:"customer_type"` // enterprise, standard, sme
@@ -107,7 +109,7 @@ func main() {
 	// Path to your RSA Private Key
 	privateKeyPath := "private_key.pem"
 
-	// User Data
+	// Company ID Data
 	userID := 101
 	email := "contact@acmecorp.com"
 	companyName := "Acme Corporation"

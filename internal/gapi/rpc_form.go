@@ -767,7 +767,7 @@ func (s *FormServerImpl) UpdateQuestion(ctx context.Context, req *pb.UpdateQuest
 
 	// Override with provided values
 	if req.Type != nil {
-		log.Printf("[UpdateQuestion] req.Type = %d (QUESTION_TYPE_UNSPECIFIED = %d)", *req.Type, pb.QuestionType_QUESTION_TYPE_UNSPECIFIED)
+		log.Printf("[UpdateQuestion] req.Type = %d (%s)", *req.Type, *req.Type)
 		if *req.Type != pb.QuestionType_QUESTION_TYPE_UNSPECIFIED {
 			mappedType := mapQuestionTypeToDB(*req.Type)
 			log.Printf("[UpdateQuestion] Mapped type: '%s'", mappedType)
