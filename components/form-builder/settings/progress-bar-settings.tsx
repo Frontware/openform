@@ -123,13 +123,25 @@ export function ProgressBarSettings({ value, onChange }: ProgressBarSettingsProp
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             {value === 'linear' && (
-              <div className="space-y-2">
-                <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div className="h-full w-3/5 bg-blue-500 dark:bg-blue-400 rounded-full" />
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                {/* Progress bar */}
+                <div className="relative h-1.5">
+                  <div
+                    className="absolute top-0 left-0 h-full transition-all duration-500 ease-out w-3/5 bg-blue-500 dark:bg-blue-400 rounded-full overflow-hidden"
+                  >
+                    {/* Shimmer effect */}
+                    <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+                  </div>
                 </div>
-                <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                  <span>Question 3 of 5</span>
-                  <span>60% Complete</span>
+
+                {/* Question counter */}
+                <div className="px-4 py-2 flex items-center justify-between">
+                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Question 3 of 5
+                  </div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    60% Complete
+                  </div>
                 </div>
               </div>
             )}
