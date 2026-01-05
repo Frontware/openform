@@ -477,15 +477,21 @@ func (s *ResponseServerImpl) ExportResponses(ctx context.Context, req *pb.Export
 
 	// Check customer_type for Excel export access (Enterprise only)
 	format := strings.ToLower(req.Format)
-	if format == "excel" {
+	
+	if format == "excel" || format == "json" {
 		claims, err := auth.GetUserClaims(ctx)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to get user claims: %v", err)
 		}
 
-		if claims.CustomerType != "enterprise" {
+		if format == "excel" && claims.CustomerType != "enterprise" {
 			return nil, status.Errorf(codes.PermissionDenied,
 				"Excel export is only available for Enterprise customers")
+		}
+
+		if format == "json" && claims.CustomerType == "sme" {
+			return nil, status.Errorf(codes.PermissionDenied,
+				"JSON export is only available for Standard and Enterprise customers")
 		}
 	}
 

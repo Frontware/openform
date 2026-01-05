@@ -80,7 +80,7 @@ The database layer uses SQLC for type-safe SQL queries:
    - `Authorization` header: `Bearer <token>` (standard gRPC calls)
    - URL parameter: `?token=<jwt_token>` (initial access/gRPC-Web)
 3. **Validation:** Auth interceptor (`internal/auth/interceptor.go`) validates tokens using the configured secret. Invalid tokens result in an error.
-4. **Context:** User claims (UserID, Email, DisplayName) are extracted and added to the context.
+4. **Context:** User claims (UserID, Email, DisplayName, RedirectURL) are extracted and added to the context.
 5. **Public Endpoints:** Only specific public endpoints (like GetFormBySlug for answering forms) bypass auth.
 
 **Auth Files**:

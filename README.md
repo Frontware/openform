@@ -270,6 +270,9 @@ For testing and debugging purposes, you can generate JWT tokens using the built-
 # Generate JWT token interactively (will prompt for name and email)
 ./bin/weladee-form create-jwt
 
+# Generate with Redirect URL (for token expiration)
+./bin/weladee-form create-jwt --redirect-url "https://myapp.com/login"
+
 # Use custom JWT secret (defaults to built-in secret)
 JWT_SECRET="your-custom-secret" ./bin/weladee-form create-jwt --name "John Doe" --email "john@example.com"
 ```
@@ -279,6 +282,7 @@ JWT_SECRET="your-custom-secret" ./bin/weladee-form create-jwt --name "John Doe" 
 - `--email`: User email address (default: "eric.fairon@gmail.com")
 - `--customer-type`: Customer tier - `sme`, `standard`, or `enterprise` (default: "enterprise")
 - `--logo-url`: Company logo URL for enterprise branding (optional)
+- `--redirect-url`: URL to redirect when token expires (optional)
 
 The generated token will be valid for 2 hours and can be used for authentication with the backend API.
 

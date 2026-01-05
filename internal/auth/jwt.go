@@ -26,6 +26,7 @@ type WeladeeUserClaims struct {
 	CustomerType string `json:"customer_type"` // enterprise, standard, sme
 	LogoURL      string `json:"logo_url"`
 	Language     string `json:"language"`      // Language preference: en, fr, th (default: en)
+	RedirectURL  string `json:"redirect_url"`  // URL to redirect when token expires
 	jwt.RegisteredClaims
 }
 
@@ -99,7 +100,13 @@ func (j *JWTValidator) ValidateToken(token string) (*WeladeeUserClaims, error) {
 		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 	})
 
+	// Handle validation errors
 	if err != nil {
+		// If the error is due to expiration, we might still want to access the claims
+		// to get the RedirectURL. However, standard validation fails.
+		// We return the error wrapped, but if the caller checks for token expiration,
+		// they can't easily get the claims from here unless we return them.
+		// For now, we follow standard behavior.
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
 
@@ -118,7 +125,7 @@ func (j *JWTValidator) ValidateToken(token string) (*WeladeeUserClaims, error) {
 
 // GenerateToken generates a JWT token for testing purposes
 // In production, this would be done by the auth service
-func GenerateToken(userID int, email, displayName, role, customerType, logoURL, language string, secret string, privateKeyPath string, expiration time.Duration) (string, error) {
+func GenerateToken(userID int, email, displayName, role, customerType, logoURL, language, redirectURL string, secret string, privateKeyPath string, expiration time.Duration) (string, error) {
 	if secret == "" {
 		secret = "weladee-form-secret-change-in-production"
 	}
@@ -137,6 +144,7 @@ func GenerateToken(userID int, email, displayName, role, customerType, logoURL, 
 		CustomerType: customerType,
 		LogoURL:      logoURL,
 		Language:     language,
+		RedirectURL:  redirectURL,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(expiration)),
 			IssuedAt:  jwt.NewNumericDate(now),

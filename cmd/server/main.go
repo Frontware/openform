@@ -297,6 +297,7 @@ func main() {
 	createJWTCmd.Flags().String("email", "eric.fairon@gmail.com", "User email address")
 	createJWTCmd.Flags().String("customer-type", "enterprise", "Customer type (enterprise, standard, sme)")
 	createJWTCmd.Flags().String("logo-url", "", "Company logo URL (optional)")
+	createJWTCmd.Flags().String("redirect-url", "", "Redirect URL for token expiration (optional)")
 	config.AddFlags(createJWTCmd)
 	rootCmd.AddCommand(createJWTCmd)
 
@@ -597,7 +598,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		secret = "weladee-form-secret-change-in-production"
 	}
 
-	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", "enterprise", "", "en", secret, cfg.JWTPrivateKeyPath, 2*time.Hour)
+	token, err := auth.GenerateToken(1, "eric.fairon@gmail.com", "eric", "admin", "enterprise", "", "en", "", secret, cfg.JWTPrivateKeyPath, 2*time.Hour)
 	if err != nil {
 		log.Printf("⚠️ Failed to generate JWT token: %v", err)
 		log.Printf("💡 To get a valid JWT token, run: go run ./cmd/server create-jwt")
@@ -675,9 +676,10 @@ func runCreateJWT(cmd *cobra.Command, args []string) error {
 	email, _ := cmd.Flags().GetString("email")
 	customerType, _ := cmd.Flags().GetString("customer-type")
 	logoURL, _ := cmd.Flags().GetString("logo-url")
+	redirectURL, _ := cmd.Flags().GetString("redirect-url")
 
 	// Generate JWT token
-	token, err := auth.GenerateToken(1, email, name, "admin", customerType, logoURL, "en", cfg.JWTSecret, cfg.JWTPrivateKeyPath, 2*time.Hour)
+	token, err := auth.GenerateToken(1, email, name, "admin", customerType, logoURL, "en", redirectURL, cfg.JWTSecret, cfg.JWTPrivateKeyPath, 2*time.Hour)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT token: %w", err)
 	}
@@ -693,6 +695,9 @@ func runCreateJWT(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Customer Type: %s\n", customerType)
 	if logoURL != "" {
 		fmt.Printf("Logo URL: %s\n", logoURL)
+	}
+	if redirectURL != "" {
+		fmt.Printf("Redirect URL: %s\n", redirectURL)
 	}
 	fmt.Println("Token expires in 2 hours.")
 	return nil

@@ -915,23 +915,27 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
 
               <DropdownMenuContent align="end">
 
-                <DropdownMenuItem onClick={() => handleExport('csv')} disabled={isExporting}>
+                                <DropdownMenuItem onClick={() => handleExport('csv')} disabled={isExporting}>
 
-                  <FileText className="w-4 h-4 mr-2" />
+                                  <FileText className="w-4 h-4 mr-2" />
 
-                  {t('exportCsv')}
+                                  {t('exportCsv')}
 
-                </DropdownMenuItem>
+                                </DropdownMenuItem>
 
-                <DropdownMenuItem onClick={() => handleExport('json')} disabled={isExporting}>
+                                {customerType !== 'sme' && (
 
-                  <FileJson className="w-4 h-4 mr-2" />
+                                  <DropdownMenuItem onClick={() => handleExport('json')} disabled={isExporting}>
 
-                  {t('exportJson')}
+                                    <FileJson className="w-4 h-4 mr-2" />
 
-                </DropdownMenuItem>
+                                    {t('exportJson')}
 
-                {customerType === 'enterprise' && (
+                                  </DropdownMenuItem>
+
+                                )}
+
+                                {customerType === 'enterprise' && (
 
                   <DropdownMenuItem onClick={() => handleExport('excel')} disabled={isExporting}>
 

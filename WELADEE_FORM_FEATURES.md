@@ -2,6 +2,36 @@
 
 This document outlines the available features and limitations for Weladee Form users based on their customer type.
 
+## System Workflow & Use Cases
+
+```mermaid
+sequenceDiagram
+    participant Portal as Weladee Portal
+    participant Form as Weladee Form
+    participant Admin as Admin User
+    participant User as End User
+
+    %% Admin Authentication Flow
+    Admin->>Portal: Connect to Weladee Portal
+    Portal->>Form: Generate JWT (2h TTL)<br/>with redirect_url
+    Form-->>Admin: Redirect to Weladee Form<br/>with JWT token
+    Admin->>Form: Manage Forms<br/>(Create, Edit, Publish, Check Stats)
+    alt Token Expires
+        Form-->>Admin: Redirect to<br/>JWT redirect_url
+        Admin->>Portal: Re-authenticate
+    end
+
+    %% User Form Submission Flow
+    User->>User: Receive form URL<br/>(via Email, Line, Telegram)
+    User->>Form: Access form<br/>(No authentication)
+    alt Captcha Enabled
+        Form->>User: Display CAPTCHA
+        User->>Form: Complete CAPTCHA
+    end
+    User->>Form: Fill and Submit Form
+    Form-->>User: Confirmation
+```
+
 ## Customer Types & Features
 
 | Feature | SME | Standard | Enterprise |
@@ -14,6 +44,7 @@ This document outlines the available features and limitations for Weladee Form u
 | **Ranking Question** | ❌ | ❌ | ✅ |
 | **Company Branding** | ❌ | ❌ | ✅ (Logo & Name) |
 | **Export to CSV** | ✅ | ✅ | ✅ |
+| **Export to JSON** | ❌ | ✅ | ✅ |
 | **Export to Excel** | ❌ | ❌ | ✅ |
 | **JWT Generation** | Third-party | Third-party | Third-party |
 
@@ -68,6 +99,7 @@ The JWT payload must contain the following custom claims:
   "customer_type": "enterprise",   // "sme", "standard", or "enterprise"
   "language": "en",                // Language preference: "en", "fr", or "th" (default: "en")
   "logo_url": "https://example.com/logo.png", // Optional, for Enterprise
+  "redirect_url": "https://myapp.com/login",  // Optional, redirect when token expires
   "iss": "weladee-form",
   "exp": 1735689600
 }
@@ -102,6 +134,7 @@ type WeladeeUserClaims struct {
 	CustomerType string `json:"customer_type"` // enterprise, standard, sme
 	Language     string `json:"language"`      // Language preference: en, fr, th (default: en)
 	LogoURL      string `json:"logo_url"`
+	RedirectURL  string `json:"redirect_url"`
 	jwt.RegisteredClaims
 }
 
@@ -115,6 +148,7 @@ func main() {
 	companyName := "Acme Corporation"
 	customerType := "enterprise"
 	logoURL := "https://acmecorp.com/assets/logo.png"
+	redirectURL := "https://acmecorp.com/login"
 
 	// Load Private Key
 	keyBytes, err := os.ReadFile(privateKeyPath)
@@ -146,6 +180,7 @@ func main() {
 		CustomerType: customerType,
 		Language:     "en", // Default language
 		LogoURL:      logoURL,
+		RedirectURL:  redirectURL,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "weladee-portal",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
