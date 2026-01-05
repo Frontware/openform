@@ -1,23 +1,23 @@
-import { QuestionType, QuestionConfig } from './database.types'
-import { v4 as uuidv4 } from 'uuid'
 import {
-  Type,
   AlignLeft,
-  List,
+  ArrowUpDown,
+  Calendar,
   CheckSquare,
+  Gauge,
+  Grid3x3,
+  Hash,
+  Link,
+  List,
+  LucideIcon,
   Mail,
   Phone,
-  Hash,
-  Calendar,
   Star,
-  Gauge,
   ThumbsUp,
-  Upload,
-  Link,
-  Grid3x3,
-  ArrowUpDown,
-  LucideIcon
+  Type,
+  Upload
 } from 'lucide-react'
+import { v4 as uuidv4 } from 'uuid'
+import { QuestionConfig, QuestionType } from './database.types'
 
 export interface QuestionTypeInfo {
   type: QuestionType
@@ -70,7 +70,7 @@ export const questionTypes: QuestionTypeInfo[] = [
     description: 'An email address input',
     icon: Mail,
     defaultConfig: {
-      placeholder: 'name@example.com',
+      placeholder: 'info@weladee.com',
     },
   },
   {
@@ -79,7 +79,7 @@ export const questionTypes: QuestionTypeInfo[] = [
     description: 'A phone number input',
     icon: Phone,
     defaultConfig: {
-      placeholder: '+1 (555) 000-0000',
+      placeholder: '+6625592308',
     },
   },
   {
