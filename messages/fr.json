@@ -68,6 +68,7 @@
         "startFree": "Commencer à créer gratuitement",
         "seeHow": "Voir comment ça marche"
       },
+      "dashboardTooltip": "Cette application est disponible uniquement pour les clients Weladee. Accédez au portail Weladee et cliquez sur Weladee Form pour vous authentifier.",
       "features": {
         "title": "Tout ce dont vous avez besoin pour créer des formulaires incroyables",
         "subtitle": "Des fonctionnalités puissantes qui rendent la création de formulaires facile",
@@ -117,8 +118,8 @@
         "terms": "Conditions"
       },
       "privacy": {
-        "title": "Politique de Confidentialité",
-        "lastUpdated": "Dernière mise à jour : 5 janvier 2026",
+        "title": "WELADEE FORM - CONDITIONS DE CONFIDENTIALITÉ",
+        "lastUpdated": "Dernière mise à jour : 6 janvier 2026",
         "content": "Chez Weladee Form, nous prenons votre vie privée au sérieux. Vos données vous appartiennent et nous veillons à ce qu'elles restent protégées. Nous ne vendons pas vos informations personnelles à des tiers. Les réponses collectées via vos formulaires sont stockées de manière sécurisée et peuvent être exportées ou supprimées par vous à tout moment."
       },
       "terms": {

@@ -42,9 +42,10 @@ export default async function TermsPage({
           </p>
           
           <div className="prose prose-slate max-w-none">
-            <p className="text-lg text-slate-600 leading-relaxed">
-              {t('terms.content')}
-            </p>
+            <div 
+              className="text-slate-600 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: t('terms.content') }}
+            />
           </div>
         </div>
       </main>

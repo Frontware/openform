@@ -166,21 +166,11 @@ export function DashboardClient() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {userName ? tNav('userForms', { name: userName }) : t('title')}
-          </h1>
-          <p className="text-slate-600 mt-1">{t('subtitle')}</p>
-        </div>
-        {forms.length > 0 && (
-          <Link href="/forms/new">
-            <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
-              <Plus className="w-4 h-4 mr-2" />
-              {t('create')}
-            </Button>
-          </Link>
-        )}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-slate-900">
+          {userName ? tNav('userForms', { name: userName }) : t('title')}
+        </h1>
+        <p className="text-slate-600 mt-1">{t('subtitle')}</p>
       </div>
 
       {/* Filter Bar */}

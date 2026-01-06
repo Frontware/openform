@@ -42,9 +42,10 @@ export default async function PrivacyPage({
           </p>
           
           <div className="prose prose-slate max-w-none">
-            <p className="text-lg text-slate-600 leading-relaxed">
-              {t('privacy.content')}
-            </p>
+            <div 
+              className="text-slate-600 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: t('privacy.content') }}
+            />
           </div>
         </div>
       </main>
