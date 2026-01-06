@@ -1756,24 +1756,6 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
                 </div>
                 <div className="flex items-center justify-between py-3 border-t border-slate-100">
                   <div className="flex-1">
-                    <Label htmlFor="require-login" className="text-sm font-medium cursor-pointer">
-                      Require Login
-                    </Label>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Respondents must be logged in to submit
-                    </p>
-                  </div>
-                  <Switch
-                    id="require-login"
-                    checked={form.require_login || false}
-                    onCheckedChange={(checked) => {
-                      setForm({ ...form, require_login: checked })
-                      setHasUnsavedChanges(true)
-                    }}
-                  />
-                </div>
-                <div className="flex items-center justify-between py-3 border-t border-slate-100">
-                  <div className="flex-1">
                     <Label htmlFor="force-captcha" className="text-sm font-medium cursor-pointer">
                       Force CAPTCHA
                     </Label>
