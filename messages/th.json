@@ -31,6 +31,7 @@
   "nav": {
     "dashboard": "แผงควบคุม",
     "forms": "แบบฟอร์มของฉัน",
+    "userForms": "แบบฟอร์มของ {name}",
     "create": "สร้างแบบฟอร์ม",
     "settings": "การตั้งค่า",
     "signOut": "ออกจากระบบ",
@@ -190,6 +191,7 @@
     },
     "status": {
       "responses": "คำตอบ",
+      "response": "คำตอบ",
       "updated": "อัปเดตเมื่อ"
     }
   },
@@ -199,6 +201,7 @@
     "description": "คำอธิบาย",
     "descriptionPlaceholder": "คำอธิบายแบบฟอร์ม (ไม่จำเป็น)...",
     "thankYouMessage": "ข้อความขอบคุณ",
+    "thankYouMessageTooltip": "ข้อความนี้จะแสดงให้ผู้ตอบเห็นหลังจากส่งคำตอบสำเร็จแล้ว",
     "thankYouPlaceholder": "ขอบคุณสำหรับคำตอบของคุณ!",
     "url": "URL แบบฟอร์ม",
     "urlPrefix": "/f/",
@@ -337,6 +340,7 @@
     "responseTrends": "แนวโน้มการตอบกลับ",
     "views": "การเข้าชม",
     "responses": "การตอบกลับ",
+    "response": "การตอบกลับ",
     "completions": "การกรอกสำเร็จ",
     "completionFunnel": "ช่องทางการกรอกสำเร็จ",
     "conversion": "การเปลี่ยนเป็นคำตอบ",

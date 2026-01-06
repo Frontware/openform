@@ -40,7 +40,9 @@ function QuestionAnalyticsCard({ question }: { question: any }) {
       <div className="mb-6">
         <div className="flex items-start justify-between mb-2">
           <h3 className="text-base font-semibold text-gray-900">{question.questionLabel}</h3>
-          <span className="text-sm text-gray-500">{Number(question.responseCount)} {t('responses').toLowerCase()}</span>
+          <span className="text-sm text-gray-500">
+            {Number(question.responseCount)} {(Number(question.responseCount) <= 1 ? t('response') : t('responses')).toLowerCase()}
+          </span>
         </div>
         <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full">
           {question.questionType.replace('_', ' ')}

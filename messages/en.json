@@ -31,6 +31,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "forms": "My Forms",
+    "userForms": "{name}'s forms",
     "create": "Create Form",
     "settings": "Settings",
     "signOut": "Sign out",
@@ -190,6 +191,7 @@
     },
     "status": {
       "responses": "responses",
+      "response": "response",
       "updated": "Updated"
     }
   },
@@ -199,6 +201,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Optional form description...",
     "thankYouMessage": "Thank You Message",
+    "thankYouMessageTooltip": "This message will be shown to the respondent after they have successfully submitted their response.",
     "thankYouPlaceholder": "Thank you for your response!",
     "url": "Form URL",
     "urlPrefix": "/f/",
@@ -337,6 +340,7 @@
     "responseTrends": "Response Trends",
     "views": "Views",
     "responses": "Responses",
+    "response": "Response",
     "completions": "Completions",
     "completionFunnel": "Completion Funnel",
     "conversion": "Conversion",

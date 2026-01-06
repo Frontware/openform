@@ -31,6 +31,7 @@
   "nav": {
     "dashboard": "Tableau de bord",
     "forms": "Mes formulaires",
+    "userForms": "Formulaires de {name}",
     "create": "Créer un formulaire",
     "settings": "Paramètres",
     "signOut": "Se déconnecter",
@@ -190,6 +191,7 @@
     },
     "status": {
       "responses": "réponses",
+      "response": "réponse",
       "updated": "Mis à jour"
     }
   },
@@ -199,6 +201,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Description optionnelle du formulaire...",
     "thankYouMessage": "Message de Remerciement",
+    "thankYouMessageTooltip": "Ce message sera affiché au répondant après qu'il aura soumis sa réponse avec succès.",
     "thankYouPlaceholder": "Merci pour votre réponse !",
     "url": "URL du formulaire",
     "urlPrefix": "/f/",
@@ -337,6 +340,7 @@
     "responseTrends": "Tendances des réponses",
     "views": "Vues",
     "responses": "Réponses",
+    "response": "Réponse",
     "completions": "Complétions",
     "completionFunnel": "Entonnoir de complétion",
     "conversion": "Conversion",

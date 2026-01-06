@@ -53,7 +53,9 @@ export function DashboardNav({ user }: DashboardNavProps) {
               href="/dashboard"
               className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
             >
-              {t('forms')}
+              {user?.user_metadata?.full_name 
+                ? t('userForms', { name: user.user_metadata.full_name }) 
+                : t('forms')}
             </Link>
           </div>
         </div>
@@ -92,7 +94,9 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard" className="cursor-pointer">
                     <UserIcon className="mr-2 h-4 w-4" />
-                    {t('forms')}
+                    {user?.user_metadata?.full_name 
+                      ? t('userForms', { name: user.user_metadata.full_name }) 
+                      : t('forms')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

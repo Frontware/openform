@@ -27,6 +27,12 @@ import {
 import { toast } from 'sonner'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
   ArrowLeft,
   Plus,
   Trash2,
@@ -43,6 +49,7 @@ import {
   Pencil,
   LineChart,
   BarChart3,
+  HelpCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { QuestionEditor } from './question-editor'
@@ -160,6 +167,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
   const tDashboard = useTranslations('dashboard')
+  const tValidation = useTranslations('validation')
 
 
   
@@ -1148,37 +1156,39 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
           </Button>
 
 
-          <Button
-
-
-            size="sm"
-
-
-            onClick={() => setShowPublishDialog(true)}
-
-
-            className={form.status === 'published'
-
-
-              ? 'bg-amber-500 hover:bg-amber-600'
-
-
-              : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20'
-
-
-            }
-
-
-          >
-
-
-            <Globe className="w-4 h-4 mr-2" />
-
-
-            {form.status === 'published' ? t('actions.unpublish') : t('actions.publish')}
-
-
-          </Button>
+          {form.status !== 'published' && questions.length === 0 ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-not-allowed">
+                    <Button
+                      size="sm"
+                      disabled
+                      className="bg-blue-600/50 hover:bg-blue-600/50"
+                    >
+                      <Globe className="w-4 h-4 mr-2" />
+                      {t('actions.publish')}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{tValidation('atLeastOneQuestion')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() => setShowPublishDialog(true)}
+              className={form.status === 'published'
+                ? 'bg-amber-500 hover:bg-amber-600'
+                : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20'
+              }
+            >
+              <Globe className="w-4 h-4 mr-2" />
+              {form.status === 'published' ? t('actions.unpublish') : t('actions.publish')}
+            </Button>
+          )}
 
 
         </div>
@@ -1671,41 +1681,17 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
                 <div>
-
-
                   <Label htmlFor="description" className="text-sm font-medium">{t('description')}</Label>
-
-
                   <Input
-
-
                     id="description"
-
-
                     value={form.description || ''}
-
-
                     onChange={(e) => {
-
-
                       setForm({ ...form, description: e.target.value })
-
-
                       setHasUnsavedChanges(true)
-
-
                     }}
-
-
                     className="mt-2"
-
-
                     placeholder={t('descriptionPlaceholder')}
-
-
                   />
-
-
                 </div>
 
 
@@ -1713,46 +1699,31 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
                 <div>
-
-
-                  <Label htmlFor="thank_you" className="text-sm font-medium">{t('thankYouMessage')}</Label>
-
-
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="thank_you" className="text-sm font-medium">{t('thankYouMessage')}</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="w-4 h-4 text-slate-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs max-w-[200px]">{t('thankYouMessageTooltip')}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <Textarea
-
-
                     id="thank_you"
-
-
                     value={form.thank_you_message}
-
-
                     onChange={(e) => {
-
-
                       setForm({ ...form, thank_you_message: e.target.value })
-
-
                       setHasUnsavedChanges(true)
-
-
                     }}
-
-
                     className="mt-2"
-
-
                     placeholder={t('thankYouPlaceholder')}
-
-
                     rows={3}
-
-
                   />
-
-
                 </div>
-
 
 
 
@@ -1764,128 +1735,64 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
                       setHasUnsavedChanges(true)
                     }}
                   />
-
-
                 </div>
-
-
                 <div className="flex items-center justify-between py-3 border-t border-slate-100">
-
-
                   <div className="flex-1">
-
-
                     <Label htmlFor="allow-multiple-submissions" className="text-sm font-medium cursor-pointer">
-
-
                       Allow Multiple Submissions
-
-
                     </Label>
-
-
                     <p className="text-xs text-slate-500 mt-1">
-
-
                       Allow users to submit the form more than once
-
-
                     </p>
-
-
                   </div>
-
-
                   <Switch
-
-
                     id="allow-multiple-submissions"
-
-
                     checked={form.allow_multiple_submissions !== undefined ? form.allow_multiple_submissions : false}
-
-
                     onCheckedChange={(checked) => {
-
-
                       setForm({ ...form, allow_multiple_submissions: checked })
-
-
                       setHasUnsavedChanges(true)
-
-
                     }}
-
-
                   />
-
-
                 </div>
-
-
                 <div className="flex items-center justify-between py-3 border-t border-slate-100">
-
-
                   <div className="flex-1">
-
-
-                    <Label htmlFor="force-captcha" className="text-sm font-medium cursor-pointer">
-
-
-                      Force CAPTCHA
-
-
+                    <Label htmlFor="require-login" className="text-sm font-medium cursor-pointer">
+                      Require Login
                     </Label>
-
-
                     <p className="text-xs text-slate-500 mt-1">
-
-
-                      Require invisible reCAPTCHA verification to prevent bot submissions
-
-
+                      Respondents must be logged in to submit
                     </p>
-
-
                   </div>
-
-
                   <Switch
-
-
-                    id="force-captcha"
-
-
-                    checked={form.force_captcha || false}
-
-
+                    id="require-login"
+                    checked={form.require_login || false}
                     onCheckedChange={(checked) => {
-
-
-                      setForm({ ...form, force_captcha: checked })
-
-
+                      setForm({ ...form, require_login: checked })
                       setHasUnsavedChanges(true)
-
-
                     }}
-
-
                   />
-
-
                 </div>
-
-
+                <div className="flex items-center justify-between py-3 border-t border-slate-100">
+                  <div className="flex-1">
+                    <Label htmlFor="force-captcha" className="text-sm font-medium cursor-pointer">
+                      Force CAPTCHA
+                    </Label>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Require invisible reCAPTCHA verification to prevent bot submissions
+                    </p>
+                  </div>
+                  <Switch
+                    id="force-captcha"
+                    checked={form.force_captcha || false}
+                    onCheckedChange={(checked) => {
+                      setForm({ ...form, force_captcha: checked })
+                      setHasUnsavedChanges(true)
+                    }}
+                  />
+                </div>
               </div>
-
-
             </TabsContent>
-
-
           </Tabs>
-
-
         </aside>
 
 
@@ -2196,32 +2103,14 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
             <Button
-
-
               onClick={handlePublish}
-
-
-              disabled={isSaving}
-
-
+              disabled={isSaving || (form.status !== 'published' && questions.length === 0)}
               className={form.status === 'published'
-
-
                 ? 'bg-amber-500 hover:bg-amber-600'
-
-
                 : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20'
-
-
               }
-
-
             >
-
-
               {isSaving ? tCommon('loading') : form.status === 'published' ? t('actions.unpublish') : t('actions.publish')}
-
-
             </Button>
 
 

@@ -234,7 +234,7 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
         <div className="flex items-center gap-1 text-sm text-slate-500">
           <Link href={`/forms/${form.id}/responses`} className="hover:text-blue-600 transition-colors flex items-center gap-1">
             <BarChart3 className="w-4 h-4" />
-            <span>{responseCount} {t('status.responses')}</span>
+            <span>{responseCount} {responseCount <= 1 ? t('status.response') : t('status.responses')}</span>
           </Link>
         </div>
       </div>

@@ -11,6 +11,7 @@ import { FilterBar } from '@/components/dashboard/filter-bar'
 import { formClient } from '@/lib/grpc-client'
 import { Form as PbForm, FormTheme, FormSortBy, FormSortOrder, FormStatusFilter } from '@/lib/proto/proto/form_pb'
 import { Form as DBForm, ThemePreset } from '@/lib/database.types'
+import { getToken, parseJWT } from '@/lib/auth/weladee'
 
 // Mapper function to convert gRPC Form to UI Form
 function mapPbFormToDBForm(pbForm: PbForm): DBForm {
@@ -57,10 +58,16 @@ function mapPbFormToDBForm(pbForm: PbForm): DBForm {
 export function DashboardClient() {
   const locale = useLocale()
   const t = useTranslations('dashboard')
+  const tNav = useTranslations('nav')
   const [forms, setForms] = useState<DBForm[]>([])
   const [loading, setLoading] = useState(true)
   const [totalFormsCount, setTotalFormsCount] = useState(0)
   const [responseCounts, setResponseCounts] = useState<Map<string, number>>(new Map())
+
+  // Get user info for dynamic title
+  const token = getToken()
+  const user = token ? parseJWT(token) : null
+  const userName = user?.displayName
 
   // Filter and sort state
   const [searchQuery, setSearchQuery] = useState('')
@@ -160,7 +167,9 @@ export function DashboardClient() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {userName ? tNav('userForms', { name: userName }) : t('title')}
+          </h1>
           <p className="text-slate-600 mt-1">{t('subtitle')}</p>
         </div>
         <Link href="/forms/new">
