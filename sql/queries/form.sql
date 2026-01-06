@@ -181,7 +181,19 @@ SET last_sent_at = EXCLUDED.last_sent_at,
     updated_at = NOW()
 RETURNING *;
 
--- name: CountNewResponsesSince :one
+-- ----------------------------------------------------------------------
+-- CountNewResponsesSince
+--
+-- Counts the number of new responses for a given form
+-- since a given date.
+--
+-- Parameters:
+--   @form_id  uuid of the form
+--   @since     timestamp to count from
+--
+-- Returns:
+--   count       int8 of the number of new responses
+-- ----------------------------------------------------------------------
 SELECT COUNT(*) as count
 FROM form.responses
 WHERE form_id = @form_id::uuid
