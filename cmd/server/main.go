@@ -566,6 +566,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 				!strings.HasPrefix(r.URL.Path, "/static/") &&
 				!strings.HasPrefix(r.URL.Path, "/api/") &&
 				!strings.HasPrefix(r.URL.Path, "/f/") && // Public forms
+				!strings.HasPrefix(r.URL.Path, "/icons/") && // PWA icons
 				!strings.HasPrefix(r.URL.Path, "/en/") &&
 				!strings.HasPrefix(r.URL.Path, "/fr/") &&
 				!strings.HasPrefix(r.URL.Path, "/th/") &&
@@ -573,7 +574,10 @@ func runServe(cmd *cobra.Command, args []string) error {
 				!strings.HasSuffix(r.URL.Path, ".svg") &&
 				!strings.HasSuffix(r.URL.Path, ".png") &&
 				!strings.HasSuffix(r.URL.Path, ".css") &&
-				!strings.HasSuffix(r.URL.Path, ".js") {
+				!strings.HasSuffix(r.URL.Path, ".js") &&
+				!strings.HasSuffix(r.URL.Path, ".json") && // PWA manifest
+				r.URL.Path != "/manifest.json" && // PWA manifest (exact match)
+				r.URL.Path != "/sw.js" { // PWA service worker
 
 				// Check if the localized version exists (optional, but good for safety)
 				// For now, just assume any "clean" path without locale is intended for default locale
@@ -587,12 +591,15 @@ func runServe(cmd *cobra.Command, args []string) error {
 				strings.HasPrefix(r.URL.Path, "/static/") ||
 				r.URL.Path == "/" ||
 				strings.HasPrefix(r.URL.Path, "/f/") ||
+				strings.HasPrefix(r.URL.Path, "/icons/") || // PWA icons
 				strings.HasPrefix(r.URL.Path, "/dashboard") ||
 				strings.HasPrefix(r.URL.Path, "/en/") ||
 				strings.HasPrefix(r.URL.Path, "/fr/") ||
 				strings.HasPrefix(r.URL.Path, "/th/") ||
 				r.URL.Path == "/weladee-logo.png" ||
-				r.URL.Path == "/favicon.ico" {
+				r.URL.Path == "/favicon.ico" ||
+				r.URL.Path == "/manifest.json" || // PWA manifest
+				r.URL.Path == "/sw.js" { // PWA service worker
 				serveEmbeddedFiles(w, r)
 				return
 			}
