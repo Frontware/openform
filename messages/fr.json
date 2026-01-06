@@ -62,9 +62,8 @@
   "marketing": {
     "home": {
       "hero": {
-        "badge": "Gratuit et Open Source",
-        "title": "Des formulaires qui donnent une impression",
-        "titleHighlight": "humaine",
+        "badge": "Weladee : Votre solution RH",
+        "title": "Des formulaires plus <highlight>humains</highlight>",
         "subtitle": "Créez de beaux formulaires engageants que les gens ont vraiment envie de remplir. Une question à la fois, comme une conversation.",
         "startFree": "Commencer à créer gratuitement",
         "seeHow": "Voir comment ça marche"

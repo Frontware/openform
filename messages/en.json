@@ -62,9 +62,8 @@
   "marketing": {
     "home": {
       "hero": {
-        "badge": "Free & Open Source",
-        "title": "Your best HRMS solution",
-        "titleHighlight": "Weladee",
+        "badge": "Weladee: Your HRMS Solution",
+        "title": "Forms that feel <highlight>human</highlight>",
         "subtitle": "Create beautiful, engaging forms that people actually want to fill out. One question at a time, just like a conversation.",
         "startFree": "Start creating for free",
         "seeHow": "See how it works"

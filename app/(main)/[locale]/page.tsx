@@ -74,19 +74,17 @@ export default async function HomePage({
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-50 text-[#13a89e] text-sm font-medium mb-8 border border-teal-100">
             <Sparkles className="w-4 h-4" />
-            Weladee: Your HRMS Solution
+            {t('hero.badge')}
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-slate-900 leading-tight mb-6 tracking-tight">
-            Forms that feel{' '}
-            <span className="text-[#13a89e]">
-              human
-            </span>
+            {t.rich('hero.title', {
+              highlight: (chunks) => <span className="text-[#13a89e]">{chunks}</span>
+            })}
           </h1>
           
           <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Create beautiful, engaging forms that people actually want to fill out. 
-            One question at a time, just like a conversation.
+            {t('hero.subtitle')}
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -277,9 +275,6 @@ export default async function HomePage({
             </a>
           </p>
           <div className="flex items-center gap-6">
-            <a href="https://github.com" className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
-              {t('footer.github')}
-            </a>
             <Link href={`/${locale}/privacy`} className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
               {t('footer.privacy')}
             </Link>
