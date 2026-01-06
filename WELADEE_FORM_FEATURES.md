@@ -92,6 +92,7 @@ The JWT payload must contain the following custom claims:
 
 ```json
 {
+  // In Weladee Form, this is the Company ID, not the Weladee User ID 
   "user_id": 123,
   "email": "admin@company.com",
   "display_name": "Acme Corp",     // Used as Company Name for Enterprise
@@ -101,7 +102,7 @@ The JWT payload must contain the following custom claims:
   "logo_url": "https://example.com/logo.png", // Optional, for Enterprise
   "redirect_url": "https://myapp.com/login",  // Optional, redirect when token expires
   "iss": "weladee-form",
-  "exp": 1735689600
+  "exp": 1735689600 // 2 hours from issuance (time.Now() + 2h)
 }
 ```
 
