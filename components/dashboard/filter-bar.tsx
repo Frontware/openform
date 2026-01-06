@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Search, ChevronDown, ChevronUp, X, SortAsc } from 'lucide-react'
+import { getToken, parseJWT } from '@/lib/auth/weladee'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl'
@@ -54,6 +55,25 @@ export function FilterBar({
   ]
 
   const activeFilterCount = [searchQuery ? 1 : 0, statusFilter !== 'all' ? 1 : 0].reduce((a, b) => a + b, 0)
+
+  const customerType = useMemo(() => {
+    const token = getToken()
+    const user = token ? parseJWT(token) : null
+    return user?.customerType || 'sme'
+  }, [])
+
+  const maxForms = useMemo(() => {
+    switch (customerType) {
+      case 'sme':
+        return 5
+      case 'standard':
+        return 15
+      case 'enterprise':
+        return null // unlimited
+      default:
+        return 5
+    }
+  }, [customerType])
 
   return (
     <>
@@ -206,7 +226,13 @@ export function FilterBar({
             | {t('sortedBy')}: <span className="font-semibold text-gray-900">{sortOptions.find(o => o.value === sortBy)?.label}</span>
           </span>
           <span className="text-sm text-gray-600">
-            | <span className="font-semibold text-gray-900">{resultCount} {resultCount <= 1 ? t('form') : t('forms')}</span>
+            | <span className="font-semibold text-gray-900">{totalFormsCount} {totalFormsCount <= 1 ? t('form') : t('forms')}</span>
+            {maxForms && (
+              <>
+                {' '}/ {' '}
+                <span className="font-semibold text-gray-900">{maxForms} {t('forms')}</span>
+              </>
+            )}
           </span>
         </div>
       )}

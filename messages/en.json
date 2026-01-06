@@ -176,6 +176,7 @@
       "description": "Build beautiful, engaging forms that people actually want to fill out. One question at a time.",
       "button": "Create your first form"
     },
+    "create": "Create form",
     "empty": {
       "title": "No forms yet",
       "description": "Create your first form to get started"

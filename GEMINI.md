@@ -13,7 +13,7 @@ Weladee Form is an open-source TypeForm alternative built with:
 Users can create beautiful, one-question-at-a-time forms with 10 themes and 15 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
 
 **Key Features:**
-- **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit)
+- **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit). Includes validation to prevent publishing empty forms.
 - **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (app/(form-player)/f/[slug])
 - **Response Dashboard** - View, search, filter, and export responses to CSV/JSON (app/(main)/dashboard/forms/[id]/responses)
 - **Analytics Dashboard** - Visualize views, starts, completions, and question-level insights.
@@ -22,6 +22,8 @@ Users can create beautiful, one-question-at-a-time forms with 10 themes and 15 q
 - **Authentication** - JWT token validation
 - **Smart Menu States** - Menu items automatically disable for draft forms (Responses, Copy Link) with visual feedback
 - **Language Switcher** - User can change language (English, Thai, French) from the user dropdown menu with flag icons and persistent cookie storage
+- **Dynamic Branding** - Dashboard and navigation links dynamically reflect the user's name (e.g., "Frontware's forms").
+- **UX Standards** - Standardized singular/plural logic (0 and 1 use singular) and collapsible search filters when no data is present.
 
 ## Backend Architecture
 
@@ -40,7 +42,7 @@ The Go backend implements three gRPC services defined in `proto/`:
 - `CreateQuestion` - Add a question to a form
 
 **ResponseService** (`proto/response.proto`)
-- `SubmitResponse` - Submit or partially save form responses
+- `SubmitResponse` - Submit or partially save form responses. Any user with the URL can submit (no login required for respondents).
 - `GetResponse` - Get a response by ID
 - `ListResponses` - List form responses with pagination
 - `ExportResponses` - Export responses to CSV or JSON
@@ -365,7 +367,7 @@ Backend:
 - `user_id` (UUID, references form.users)
 - `title`, `description` (text)
 - `theme` (enum: midnight, ocean, sunset, forest, lavender, weladee, minimal, aurora, cyberpunk, desert)
-- `is_published`, `is_accepting_responses`, `require_login`, `allow_multiple_submissions`
+- `is_published`, `is_accepting_responses`, `allow_multiple_submissions`
 - `progress_bar_style` (enum: none, linear, steps, circular)
 - `custom_thank_you_message`, `redirect_url`
 - `settings` (JSONB)

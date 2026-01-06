@@ -176,6 +176,7 @@
       "description": "Construisez de beaux formulaires engageants que les gens ont vraiment envie de remplir. Une question à la fois.",
       "button": "Créer votre premier formulaire"
     },
+    "create": "Créer un formulaire",
     "empty": {
       "title": "Aucun formulaire pour le moment",
       "description": "Créez votre premier formulaire pour commencer"
