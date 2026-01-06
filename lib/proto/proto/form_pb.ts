@@ -542,22 +542,27 @@ export class Form extends Message<Form> {
   forceCaptcha = false;
 
   /**
-   * @generated from field: google.protobuf.Struct settings = 14;
+   * @generated from field: string email_notification_mode = 14;
+   */
+  emailNotificationMode = "";
+
+  /**
+   * @generated from field: google.protobuf.Struct settings = 15;
    */
   settings?: Struct;
 
   /**
-   * @generated from field: repeated weladee.form.v1.Question questions = 15;
+   * @generated from field: repeated weladee.form.v1.Question questions = 16;
    */
   questions: Question[] = [];
 
   /**
-   * @generated from field: google.protobuf.Timestamp created_at = 16;
+   * @generated from field: google.protobuf.Timestamp created_at = 17;
    */
   createdAt?: Timestamp;
 
   /**
-   * @generated from field: google.protobuf.Timestamp updated_at = 17;
+   * @generated from field: google.protobuf.Timestamp updated_at = 18;
    */
   updatedAt?: Timestamp;
 
@@ -582,10 +587,11 @@ export class Form extends Message<Form> {
     { no: 11, name: "custom_thank_you_message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 12, name: "redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 13, name: "force_captcha", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 14, name: "settings", kind: "message", T: Struct },
-    { no: 15, name: "questions", kind: "message", T: Question, repeated: true },
-    { no: 16, name: "created_at", kind: "message", T: Timestamp },
-    { no: 17, name: "updated_at", kind: "message", T: Timestamp },
+    { no: 14, name: "email_notification_mode", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 15, name: "settings", kind: "message", T: Struct },
+    { no: 16, name: "questions", kind: "message", T: Question, repeated: true },
+    { no: 17, name: "created_at", kind: "message", T: Timestamp },
+    { no: 18, name: "updated_at", kind: "message", T: Timestamp },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Form {

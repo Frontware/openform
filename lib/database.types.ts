@@ -43,6 +43,9 @@ export type ThemePreset =
 // Progress bar style options
 export type ProgressBarStyle = 'none' | 'linear' | 'steps' | 'circular'
 
+// Email notification mode options
+export type EmailNotificationMode = 'never' | 'immediate' | 'daily'
+
 export interface ThemeConfig {
   id: ThemePreset
   name: string
@@ -122,6 +125,7 @@ export interface Database {
           force_captcha: boolean
           progress_bar_style: ProgressBarStyle
           allow_multiple_submissions: boolean
+          email_notification_mode: EmailNotificationMode
           created_at: string
           updated_at: string
         }
@@ -138,6 +142,7 @@ export interface Database {
           force_captcha?: boolean
           progress_bar_style?: ProgressBarStyle
           allow_multiple_submissions?: boolean
+          email_notification_mode?: EmailNotificationMode
           created_at?: string
           updated_at?: string
         }
@@ -152,6 +157,7 @@ export interface Database {
           force_captcha?: boolean
           progress_bar_style?: ProgressBarStyle
           allow_multiple_submissions?: boolean
+          email_notification_mode?: EmailNotificationMode
           updated_at?: string
         }
       }

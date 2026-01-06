@@ -72,6 +72,17 @@ type FormAnswer struct {
 	UpdatedAt     time.Time      `db:"updated_at" json:"updatedAt"`
 }
 
+// Tracks when daily digest emails were sent for each form
+type FormDailyNotificationLog struct {
+	ID            uuid.UUID   `db:"id" json:"id"`
+	FormID        uuid.UUID   `db:"form_id" json:"formId"`
+	UserID        uuid.UUID   `db:"user_id" json:"userId"`
+	LastSentAt    time.Time   `db:"last_sent_at" json:"lastSentAt"`
+	ResponseCount pgtype.Int4 `db:"response_count" json:"responseCount"`
+	CreatedAt     time.Time   `db:"created_at" json:"createdAt"`
+	UpdatedAt     time.Time   `db:"updated_at" json:"updatedAt"`
+}
+
 type FormDailyStat struct {
 	ID                       uuid.UUID   `db:"id" json:"id"`
 	FormID                   uuid.UUID   `db:"form_id" json:"formId"`
@@ -116,6 +127,7 @@ type FormForm struct {
 	AllowMultipleSubmissions bool                 `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
 	ProgressBarStyle         FormProgressBarStyle `db:"progress_bar_style" json:"progressBarStyle"`
 	ForceCaptcha             bool                 `db:"force_captcha" json:"forceCaptcha"`
+	EmailNotificationMode    string               `db:"email_notification_mode" json:"emailNotificationMode"`
 	CustomThankYouMessage    pgtype.Text          `db:"custom_thank_you_message" json:"customThankYouMessage"`
 	RedirectUrl              pgtype.Text          `db:"redirect_url" json:"redirectUrl"`
 	Settings                 []byte               `db:"settings" json:"settings"`
@@ -214,6 +226,7 @@ type FormUser struct {
 	Email         string      `db:"email" json:"email"`
 	FullName      pgtype.Text `db:"full_name" json:"fullName"`
 	AvatarUrl     pgtype.Text `db:"avatar_url" json:"avatarUrl"`
+	Timezone      pgtype.Text `db:"timezone" json:"timezone"`
 	CreatedAt     time.Time   `db:"created_at" json:"createdAt"`
 	UpdatedAt     time.Time   `db:"updated_at" json:"updatedAt"`
 }

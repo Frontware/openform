@@ -404,6 +404,11 @@
     "progressBarStepsDesc": "Chronologie visuelle avec coches",
     "progressBarCircular": "Circulaire",
     "progressBarCircularDesc": "Cercle compact dans le coin",
-    "livePreview": "Aperçu en direct"
+    "livePreview": "Aperçu en direct",
+    "emailNotifications": "Notifications par e-mail",
+    "emailNotificationsDesc": "Soyez notifié lorsque votre formulaire reçoit des réponses",
+    "emailNever": "Jamais",
+    "emailImmediate": "Immédiatement",
+    "emailDaily": "Quotidien à 9h"
   }
 }

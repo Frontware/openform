@@ -11,7 +11,7 @@ import { ConnectError } from "@bufbuild/connect";
 // Use empty string for same-origin requests (embedded build where frontend is served from same Go binary)
 // Set NEXT_PUBLIC_GRPC_URL during build for external API configuration
 const getBaseUrl = () => {
-  const envUrl = process.env.NEXT_PUBLIC_GRPC_URL || "";
+  let envUrl = process.env.NEXT_PUBLIC_GRPC_URL || "";
   
   if (typeof window !== 'undefined') {
     // If the baked-in URL is localhost but the page is accessed via a real IP/hostname,
@@ -21,6 +21,11 @@ const getBaseUrl = () => {
     
     if (isLocalhostEnv && !isLocalhostPage) {
       return ""; // Use relative URL (same origin)
+    }
+
+    // Force HTTPS if not on localhost
+    if (!isLocalhostPage && envUrl.startsWith('http://')) {
+      envUrl = envUrl.replace('http://', 'https://');
     }
   }
   

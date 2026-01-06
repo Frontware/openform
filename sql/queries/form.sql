@@ -35,6 +35,7 @@ SET
     custom_thank_you_message = COALESCE(@custom_thank_you_message::text, custom_thank_you_message),
     redirect_url = COALESCE(@redirect_url::text, redirect_url),
     force_captcha = COALESCE(@force_captcha::boolean, force_captcha),
+    email_notification_mode = COALESCE(@email_notification_mode::text, email_notification_mode),
     settings = COALESCE(@settings::jsonb, settings)
 WHERE id = @id::uuid AND user_id = @user_id::uuid
 RETURNING *;

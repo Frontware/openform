@@ -91,10 +91,11 @@ message Form {
   string custom_thank_you_message = 11;
   string redirect_url = 12;
   bool force_captcha = 13;
-  google.protobuf.Struct settings = 14;
-  repeated Question questions = 15;
-  google.protobuf.Timestamp created_at = 16;
-  google.protobuf.Timestamp updated_at = 17;
+  string email_notification_mode = 14;  // "never", "immediate", "daily"
+  google.protobuf.Struct settings = 15;
+  repeated Question questions = 16;
+  google.protobuf.Timestamp created_at = 17;
+  google.protobuf.Timestamp updated_at = 18;
 }
 
 message FormStats {
@@ -147,7 +148,8 @@ message UpdateFormRequest {
   optional string custom_thank_you_message = 10;
   optional string redirect_url = 11;
   optional bool force_captcha = 12;
-  optional google.protobuf.Struct settings = 13;
+  optional string email_notification_mode = 13;  // "never", "immediate", "daily"
+  optional google.protobuf.Struct settings = 14;
 }
 
 message UpdateFormResponse {

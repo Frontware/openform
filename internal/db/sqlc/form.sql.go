@@ -38,7 +38,7 @@ VALUES (
     $6::boolean, $7::boolean, $8::boolean,
     $9::form.progress_bar_style, $10::text, $11::text, $12::jsonb
 )
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, email_notification_mode, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
 `
 
 type CreateFormParams struct {
@@ -85,6 +85,7 @@ func (q *Queries) CreateForm(ctx context.Context, arg CreateFormParams) (FormFor
 		&i.AllowMultipleSubmissions,
 		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
+		&i.EmailNotificationMode,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
 		&i.Settings,
@@ -113,7 +114,7 @@ func (q *Queries) DeleteForm(ctx context.Context, arg DeleteFormParams) error {
 }
 
 const getForm = `-- name: GetForm :one
-SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, email_notification_mode, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at FROM form.forms
 WHERE id = $1::uuid
 `
 
@@ -133,6 +134,7 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 		&i.AllowMultipleSubmissions,
 		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
+		&i.EmailNotificationMode,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
 		&i.Settings,
@@ -146,7 +148,7 @@ func (q *Queries) GetForm(ctx context.Context, id uuid.UUID) (FormForm, error) {
 }
 
 const getFormBySlug = `-- name: GetFormBySlug :one
-SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at FROM form.forms
+SELECT id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, email_notification_mode, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at FROM form.forms
 WHERE $1::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND id = $1::uuid
    OR slug = $1::text
 `
@@ -168,6 +170,7 @@ func (q *Queries) GetFormBySlug(ctx context.Context, slug string) (FormForm, err
 		&i.AllowMultipleSubmissions,
 		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
+		&i.EmailNotificationMode,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
 		&i.Settings,
@@ -215,7 +218,7 @@ func (q *Queries) GetFormStats(ctx context.Context, formID uuid.UUID) (GetFormSt
 
 const getFormWithQuestions = `-- name: GetFormWithQuestions :one
 SELECT
-    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.progress_bar_style, f.force_captcha, f.custom_thank_you_message, f.redirect_url, f.settings, f.view_count, f.response_count, f.completion_count, f.created_at, f.updated_at,
+    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.progress_bar_style, f.force_captcha, f.email_notification_mode, f.custom_thank_you_message, f.redirect_url, f.settings, f.view_count, f.response_count, f.completion_count, f.created_at, f.updated_at,
     q.id as question_id,
     q.type as question_type,
     q.label as question_label,
@@ -247,6 +250,7 @@ type GetFormWithQuestionsRow struct {
 	AllowMultipleSubmissions bool                 `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
 	ProgressBarStyle         FormProgressBarStyle `db:"progress_bar_style" json:"progressBarStyle"`
 	ForceCaptcha             bool                 `db:"force_captcha" json:"forceCaptcha"`
+	EmailNotificationMode    string               `db:"email_notification_mode" json:"emailNotificationMode"`
 	CustomThankYouMessage    pgtype.Text          `db:"custom_thank_you_message" json:"customThankYouMessage"`
 	RedirectUrl              pgtype.Text          `db:"redirect_url" json:"redirectUrl"`
 	Settings                 []byte               `db:"settings" json:"settings"`
@@ -285,6 +289,7 @@ func (q *Queries) GetFormWithQuestions(ctx context.Context, id uuid.UUID) (GetFo
 		&i.AllowMultipleSubmissions,
 		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
+		&i.EmailNotificationMode,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
 		&i.Settings,
@@ -391,7 +396,7 @@ const listUserForms = `-- name: ListUserForms :many
  * @return The list of forms that match the filter criteria.
  */
 SELECT 
-    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.progress_bar_style, f.force_captcha, f.custom_thank_you_message, f.redirect_url, f.settings, f.view_count, f.response_count, f.completion_count, f.created_at, f.updated_at,
+    f.id, f.user_id, f.title, f.description, f.slug, f.theme, f.is_published, f.is_accepting_responses, f.require_login, f.allow_multiple_submissions, f.progress_bar_style, f.force_captcha, f.email_notification_mode, f.custom_thank_you_message, f.redirect_url, f.settings, f.view_count, f.response_count, f.completion_count, f.created_at, f.updated_at,
     COUNT(r.id)::bigint as response_count
 FROM form.forms f
 LEFT JOIN form.responses r ON f.id = r.form_id
@@ -438,6 +443,7 @@ type ListUserFormsRow struct {
 	AllowMultipleSubmissions bool                 `db:"allow_multiple_submissions" json:"allowMultipleSubmissions"`
 	ProgressBarStyle         FormProgressBarStyle `db:"progress_bar_style" json:"progressBarStyle"`
 	ForceCaptcha             bool                 `db:"force_captcha" json:"forceCaptcha"`
+	EmailNotificationMode    string               `db:"email_notification_mode" json:"emailNotificationMode"`
 	CustomThankYouMessage    pgtype.Text          `db:"custom_thank_you_message" json:"customThankYouMessage"`
 	RedirectUrl              pgtype.Text          `db:"redirect_url" json:"redirectUrl"`
 	Settings                 []byte               `db:"settings" json:"settings"`
@@ -479,6 +485,7 @@ func (q *Queries) ListUserForms(ctx context.Context, arg ListUserFormsParams) ([
 			&i.AllowMultipleSubmissions,
 			&i.ProgressBarStyle,
 			&i.ForceCaptcha,
+			&i.EmailNotificationMode,
 			&i.CustomThankYouMessage,
 			&i.RedirectUrl,
 			&i.Settings,
@@ -512,7 +519,7 @@ const publishForm = `-- name: PublishForm :one
 UPDATE form.forms
 SET is_published = true
 WHERE id = $1::uuid AND user_id = $2::uuid
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, email_notification_mode, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
 `
 
 type PublishFormParams struct {
@@ -536,6 +543,7 @@ func (q *Queries) PublishForm(ctx context.Context, arg PublishFormParams) (FormF
 		&i.AllowMultipleSubmissions,
 		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
+		&i.EmailNotificationMode,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
 		&i.Settings,
@@ -562,9 +570,10 @@ SET
     custom_thank_you_message = COALESCE($9::text, custom_thank_you_message),
     redirect_url = COALESCE($10::text, redirect_url),
     force_captcha = COALESCE($11::boolean, force_captcha),
-    settings = COALESCE($12::jsonb, settings)
-WHERE id = $13::uuid AND user_id = $14::uuid
-RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
+    email_notification_mode = COALESCE($12::text, email_notification_mode),
+    settings = COALESCE($13::jsonb, settings)
+WHERE id = $14::uuid AND user_id = $15::uuid
+RETURNING id, user_id, title, description, slug, theme, is_published, is_accepting_responses, require_login, allow_multiple_submissions, progress_bar_style, force_captcha, email_notification_mode, custom_thank_you_message, redirect_url, settings, view_count, response_count, completion_count, created_at, updated_at
 `
 
 type UpdateFormParams struct {
@@ -579,6 +588,7 @@ type UpdateFormParams struct {
 	CustomThankYouMessage    string               `db:"custom_thank_you_message" json:"customThankYouMessage"`
 	RedirectUrl              string               `db:"redirect_url" json:"redirectUrl"`
 	ForceCaptcha             bool                 `db:"force_captcha" json:"forceCaptcha"`
+	EmailNotificationMode    string               `db:"email_notification_mode" json:"emailNotificationMode"`
 	Settings                 json.RawMessage      `db:"settings" json:"settings"`
 	ID                       uuid.UUID            `db:"id" json:"id"`
 	UserID                   uuid.UUID            `db:"user_id" json:"userId"`
@@ -597,6 +607,7 @@ func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormFor
 		arg.CustomThankYouMessage,
 		arg.RedirectUrl,
 		arg.ForceCaptcha,
+		arg.EmailNotificationMode,
 		arg.Settings,
 		arg.ID,
 		arg.UserID,
@@ -615,6 +626,7 @@ func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormFor
 		&i.AllowMultipleSubmissions,
 		&i.ProgressBarStyle,
 		&i.ForceCaptcha,
+		&i.EmailNotificationMode,
 		&i.CustomThankYouMessage,
 		&i.RedirectUrl,
 		&i.Settings,

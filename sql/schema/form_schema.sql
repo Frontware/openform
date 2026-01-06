@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS form.users (
     email VARCHAR(255) NOT NULL UNIQUE,
     full_name VARCHAR(255),
     avatar_url TEXT,
+    timezone VARCHAR(100) DEFAULT 'Asia/Bangkok',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -75,6 +76,8 @@ CREATE TABLE IF NOT EXISTS form.forms (
     allow_multiple_submissions BOOLEAN NOT NULL DEFAULT false,
     progress_bar_style form.progress_bar_style NOT NULL DEFAULT 'none',
     force_captcha BOOLEAN NOT NULL DEFAULT false,
+    email_notification_mode VARCHAR(20) NOT NULL DEFAULT 'never'
+        CHECK (email_notification_mode IN ('never', 'immediate', 'daily')),
 
     custom_thank_you_message TEXT,
     redirect_url TEXT,
@@ -321,3 +324,30 @@ CREATE TABLE IF NOT EXISTS form.question_stats (
 
 CREATE INDEX IF NOT EXISTS idx_question_stats_question_id
 ON form.question_stats(question_id);
+
+-- ============================================================
+-- Daily Notification Log
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS form.daily_notification_log (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    form_id UUID NOT NULL REFERENCES form.forms(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES form.users(id) ON DELETE CASCADE,
+    last_sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    response_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(form_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_notification_log_form_user
+ON form.daily_notification_log(form_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_daily_notification_log_last_sent
+ON form.daily_notification_log(last_sent_at);
+
+DROP TRIGGER IF EXISTS update_daily_notification_log_updated_at ON form.daily_notification_log;
+CREATE TRIGGER update_daily_notification_log_updated_at
+BEFORE UPDATE ON form.daily_notification_log
+FOR EACH ROW EXECUTE FUNCTION form.update_updated_at_column();
+
+COMMENT ON TABLE form.daily_notification_log IS 'Tracks when daily digest emails were sent for each form';

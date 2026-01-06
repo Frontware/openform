@@ -42,9 +42,36 @@ run: ## Run the compiled binary
 	@echo "Running $(BINARY_NAME)..."
 	./$(BINARY_DIR)/$(BINARY_NAME)
 
+# Environment setup target
+.PHONY: set-grpc-url
+set-grpc-url: ## Set NEXT_PUBLIC_GRPC_URL based on current git branch
+	@echo "Setting GRPC URL based on current branch..."
+	@if [ -n "$$(git branch --show-current 2>/dev/null)" ]; then \
+		CURRENT_BRANCH=$$(git branch --show-current); \
+		if [ "$$CURRENT_BRANCH" = "main" ]; then \
+			GRPC_URL="https://form.weladee.com"; \
+		else \
+			GRPC_URL="https://dev-form.weladee.com"; \
+		fi; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=.*|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
+		echo "Set NEXT_PUBLIC_GRPC_URL to $$GRPC_URL for branch $$CURRENT_BRANCH"; \
+	else \
+		echo "Not in a git repository or unable to determine branch. Using dev URL."; \
+		sed -i 's|^NEXT_PUBLIC_GRPC_URL=.*|NEXT_PUBLIC_GRPC_URL=https://dev-form.weladee.com|' .env.local; \
+	fi
+
 # Client build targets
 .PHONY: build-client
-build-client: ## Build Next.js client for embedding
+build-client: set-grpc-url ## Build Next.js client for embedding
 	@echo "Building Next.js client..."
 	@echo "Note: For embedded builds, frontend uses same-origin by default."
 	@echo "      Set NEXT_PUBLIC_GRPC_URL or NEXT_PUBLIC_API_URL to use external API."

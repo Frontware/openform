@@ -404,6 +404,11 @@
     "progressBarStepsDesc": "Visual timeline with checkmarks",
     "progressBarCircular": "Circular",
     "progressBarCircularDesc": "Compact circle in corner",
-    "livePreview": "Live Preview"
+    "livePreview": "Live Preview",
+    "emailNotifications": "Email Notifications",
+    "emailNotificationsDesc": "Get notified when your form receives responses",
+    "emailNever": "Never",
+    "emailImmediate": "Immediately",
+    "emailDaily": "Daily at 9am"
   }
 }

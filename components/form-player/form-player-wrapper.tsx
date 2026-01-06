@@ -87,6 +87,7 @@ function mapPbFormToDBForm(pbForm: PbForm): Form {
     force_captcha: pbForm.forceCaptcha,
     progress_bar_style: progress_bar_style,
     allow_multiple_submissions: pbForm.allowMultipleSubmissions,
+    email_notification_mode: (pbForm.emailNotificationMode || 'never') as 'never' | 'immediate' | 'daily',
     created_at: pbForm.createdAt?.toDate().toISOString() || '',
     updated_at: pbForm.updatedAt?.toDate().toISOString() || '',
   }

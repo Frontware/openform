@@ -1,11 +1,12 @@
 -- name: CreateFormUser :one
-INSERT INTO form.users (weladee_user_id, email, full_name, avatar_url)
-VALUES (@weladee_user_id::int, @email::text, @full_name::text, @avatar_url::text)
+INSERT INTO form.users (weladee_user_id, email, full_name, avatar_url, timezone)
+VALUES (@weladee_user_id::int, @email::text, @full_name::text, @avatar_url::text, @timezone::text)
 ON CONFLICT (weladee_user_id) DO UPDATE
 SET
     email = EXCLUDED.email,
     full_name = EXCLUDED.full_name,
     avatar_url = EXCLUDED.avatar_url,
+    timezone = COALESCE(EXCLUDED.timezone, form.users.timezone),
     updated_at = NOW()
 RETURNING *;
 

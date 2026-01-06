@@ -70,6 +70,7 @@ func (s *FormServerImpl) convertFormWithQuestions(form sqlc.FormForm, questions 
 		CustomThankYouMessage: form.CustomThankYouMessage.String,
 		RedirectUrl:           form.RedirectUrl.String,
 		ForceCaptcha:          form.ForceCaptcha,
+		EmailNotificationMode: form.EmailNotificationMode,
 		Settings:              &structpb.Struct{},
 		CreatedAt:             timestamppb.New(form.CreatedAt),
 		UpdatedAt:             timestamppb.New(form.UpdatedAt),
@@ -370,6 +371,9 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 	}
 	if req.RedirectUrl != nil {
 		params.RedirectUrl = *req.RedirectUrl
+	}
+	if req.EmailNotificationMode != nil {
+		params.EmailNotificationMode = *req.EmailNotificationMode
 	}
 	if req.Settings != nil {
 		if jsonBytes, err := json.Marshal(req.Settings.AsMap()); err == nil {

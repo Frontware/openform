@@ -404,6 +404,11 @@
     "progressBarStepsDesc": "ไทม์ไลน์ภาพพร้อมเครื่องหมายถูก",
     "progressBarCircular": "วงกลม",
     "progressBarCircularDesc": "วงกลมขนาดกะทัดรัดที่มุม",
-    "livePreview": "ดูตัวอย่างสด"
+    "livePreview": "ดูตัวอย่างสด",
+    "emailNotifications": "การแจ้งเตือนทางอีเมล",
+    "emailNotificationsDesc": "รับการแจ้งเตือนเมื่อแบบฟอร์มของคุณได้รับคำตอบ",
+    "emailNever": "ไม่ได้รับ",
+    "emailImmediate": "ทันที",
+    "emailDaily": "ทุกวันเวลา 9 โมง"
   }
 }

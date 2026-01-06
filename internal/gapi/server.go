@@ -3,6 +3,7 @@ package gapi
 import (
 	"github.com/weladee/weladee-form/config"
 	"github.com/weladee/weladee-form/internal/db"
+	"github.com/weladee/weladee-form/internal/email"
 	"github.com/weladee/weladee-form/internal/storage"
 	pb "github.com/weladee/weladee-form/proto/pb"
 )
@@ -38,11 +39,12 @@ func NewFormServer(database *db.Database, storage *storage.S3Storage) pb.FormSer
 	}
 }
 
-func NewResponseServer(database *db.Database, recaptchaConfig config.RecaptchaConfig) pb.ResponseServiceServer {
+func NewResponseServer(database *db.Database, recaptchaConfig config.RecaptchaConfig, emailSender *email.EmailSender) pb.ResponseServiceServer {
 	return &ResponseServer{
 		ResponseServerImpl: &ResponseServerImpl{
 			db:              database,
 			recaptchaConfig: recaptchaConfig,
+			emailSender:     emailSender,
 		},
 	}
 }

@@ -608,10 +608,11 @@ type Form struct {
 	CustomThankYouMessage    string                 `protobuf:"bytes,11,opt,name=custom_thank_you_message,json=customThankYouMessage,proto3" json:"custom_thank_you_message,omitempty"`
 	RedirectUrl              string                 `protobuf:"bytes,12,opt,name=redirect_url,json=redirectUrl,proto3" json:"redirect_url,omitempty"`
 	ForceCaptcha             bool                   `protobuf:"varint,13,opt,name=force_captcha,json=forceCaptcha,proto3" json:"force_captcha,omitempty"`
-	Settings                 *structpb.Struct       `protobuf:"bytes,14,opt,name=settings,proto3" json:"settings,omitempty"`
-	Questions                []*Question            `protobuf:"bytes,15,rep,name=questions,proto3" json:"questions,omitempty"`
-	CreatedAt                *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt                *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	EmailNotificationMode    string                 `protobuf:"bytes,14,opt,name=email_notification_mode,json=emailNotificationMode,proto3" json:"email_notification_mode,omitempty"` // "never", "immediate", "daily"
+	Settings                 *structpb.Struct       `protobuf:"bytes,15,opt,name=settings,proto3" json:"settings,omitempty"`
+	Questions                []*Question            `protobuf:"bytes,16,rep,name=questions,proto3" json:"questions,omitempty"`
+	CreatedAt                *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt                *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -735,6 +736,13 @@ func (x *Form) GetForceCaptcha() bool {
 		return x.ForceCaptcha
 	}
 	return false
+}
+
+func (x *Form) GetEmailNotificationMode() string {
+	if x != nil {
+		return x.EmailNotificationMode
+	}
+	return ""
 }
 
 func (x *Form) GetSettings() *structpb.Struct {
@@ -1152,7 +1160,8 @@ type UpdateFormRequest struct {
 	CustomThankYouMessage    *string                `protobuf:"bytes,10,opt,name=custom_thank_you_message,json=customThankYouMessage,proto3,oneof" json:"custom_thank_you_message,omitempty"`
 	RedirectUrl              *string                `protobuf:"bytes,11,opt,name=redirect_url,json=redirectUrl,proto3,oneof" json:"redirect_url,omitempty"`
 	ForceCaptcha             *bool                  `protobuf:"varint,12,opt,name=force_captcha,json=forceCaptcha,proto3,oneof" json:"force_captcha,omitempty"`
-	Settings                 *structpb.Struct       `protobuf:"bytes,13,opt,name=settings,proto3,oneof" json:"settings,omitempty"`
+	EmailNotificationMode    *string                `protobuf:"bytes,13,opt,name=email_notification_mode,json=emailNotificationMode,proto3,oneof" json:"email_notification_mode,omitempty"` // "never", "immediate", "daily"
+	Settings                 *structpb.Struct       `protobuf:"bytes,14,opt,name=settings,proto3,oneof" json:"settings,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -1269,6 +1278,13 @@ func (x *UpdateFormRequest) GetForceCaptcha() bool {
 		return *x.ForceCaptcha
 	}
 	return false
+}
+
+func (x *UpdateFormRequest) GetEmailNotificationMode() string {
+	if x != nil && x.EmailNotificationMode != nil {
+		return *x.EmailNotificationMode
+	}
+	return ""
 }
 
 func (x *UpdateFormRequest) GetSettings() *structpb.Struct {
@@ -2233,7 +2249,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x8b\x06\n" +
+	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xc3\x06\n" +
 	"\x04Form\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
@@ -2248,13 +2264,14 @@ const file_proto_form_proto_rawDesc = "" +
 	" \x01(\x0e2!.weladee.form.v1.ProgressBarStyleR\x10progressBarStyle\x127\n" +
 	"\x18custom_thank_you_message\x18\v \x01(\tR\x15customThankYouMessage\x12!\n" +
 	"\fredirect_url\x18\f \x01(\tR\vredirectUrl\x12#\n" +
-	"\rforce_captcha\x18\r \x01(\bR\fforceCaptcha\x123\n" +
-	"\bsettings\x18\x0e \x01(\v2\x17.google.protobuf.StructR\bsettings\x127\n" +
-	"\tquestions\x18\x0f \x03(\v2\x19.weladee.form.v1.QuestionR\tquestions\x129\n" +
+	"\rforce_captcha\x18\r \x01(\bR\fforceCaptcha\x126\n" +
+	"\x17email_notification_mode\x18\x0e \x01(\tR\x15emailNotificationMode\x123\n" +
+	"\bsettings\x18\x0f \x01(\v2\x17.google.protobuf.StructR\bsettings\x127\n" +
+	"\tquestions\x18\x10 \x03(\v2\x19.weladee.form.v1.QuestionR\tquestions\x129\n" +
 	"\n" +
-	"created_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x92\x01\n" +
+	"updated_at\x18\x12 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x92\x01\n" +
 	"\tFormStats\x12'\n" +
 	"\x0ftotal_responses\x18\x01 \x01(\x03R\x0etotalResponses\x12/\n" +
 	"\x13completed_responses\x18\x02 \x01(\x03R\x12completedResponses\x12+\n" +
@@ -2276,7 +2293,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x14GetFormBySlugRequest\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\"B\n" +
 	"\x15GetFormBySlugResponse\x12)\n" +
-	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"\xf1\x06\n" +
+	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"\xca\a\n" +
 	"\x11UpdateFormRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
@@ -2291,8 +2308,9 @@ const file_proto_form_proto_rawDesc = "" +
 	" \x01(\tH\bR\x15customThankYouMessage\x88\x01\x01\x12&\n" +
 	"\fredirect_url\x18\v \x01(\tH\tR\vredirectUrl\x88\x01\x01\x12(\n" +
 	"\rforce_captcha\x18\f \x01(\bH\n" +
-	"R\fforceCaptcha\x88\x01\x01\x128\n" +
-	"\bsettings\x18\r \x01(\v2\x17.google.protobuf.StructH\vR\bsettings\x88\x01\x01B\b\n" +
+	"R\fforceCaptcha\x88\x01\x01\x12;\n" +
+	"\x17email_notification_mode\x18\r \x01(\tH\vR\x15emailNotificationMode\x88\x01\x01\x128\n" +
+	"\bsettings\x18\x0e \x01(\v2\x17.google.protobuf.StructH\fR\bsettings\x88\x01\x01B\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\b\n" +
 	"\x06_themeB\x0f\n" +
@@ -2303,7 +2321,8 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x13_progress_bar_styleB\x1b\n" +
 	"\x19_custom_thank_you_messageB\x0f\n" +
 	"\r_redirect_urlB\x10\n" +
-	"\x0e_force_captchaB\v\n" +
+	"\x0e_force_captchaB\x1a\n" +
+	"\x18_email_notification_modeB\v\n" +
 	"\t_settings\"?\n" +
 	"\x12UpdateFormResponse\x12)\n" +
 	"\x04form\x18\x01 \x01(\v2\x15.weladee.form.v1.FormR\x04form\"#\n" +

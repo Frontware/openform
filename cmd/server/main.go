@@ -26,6 +26,7 @@ import (
 	"github.com/weladee/weladee-form/config"
 	"github.com/weladee/weladee-form/internal/auth"
 	"github.com/weladee/weladee-form/internal/db"
+	"github.com/weladee/weladee-form/internal/email"
 	"github.com/weladee/weladee-form/internal/gapi"
 	"github.com/weladee/weladee-form/internal/storage"
 	pb "github.com/weladee/weladee-form/proto/pb"
@@ -365,6 +366,17 @@ func runServe(cmd *cobra.Command, args []string) error {
 		log.Println("⚠ S3 not configured, file uploads will be disabled")
 	}
 
+	// Setup email sender
+	emailSender, err := email.NewEmailSender(cfg.SMTP)
+	if err != nil {
+		return fmt.Errorf("failed to setup email sender: %w", err)
+	}
+	if emailSender != nil {
+		log.Println("✓ Email sender initialized")
+	} else {
+		log.Println("⚠ SMTP not configured, email notifications will be disabled")
+	}
+
 	// Create gRPC server with auth interceptor
 	authInterceptor := auth.NewAuthInterceptor(tokenValidator)
 
@@ -376,7 +388,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 
 	// Register services (database mode)
 	formServer := gapi.NewFormServer(database, s3Storage)
-	responseServer := gapi.NewResponseServer(database, cfg.Recaptcha)
+	responseServer := gapi.NewResponseServer(database, cfg.Recaptcha, emailSender)
 	fileServer := gapi.NewFileServer(database, s3Storage)
 	analyticsServer := gapi.NewAnalyticsServer(database)
 

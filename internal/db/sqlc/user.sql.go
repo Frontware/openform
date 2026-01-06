@@ -12,15 +12,16 @@ import (
 )
 
 const createFormUser = `-- name: CreateFormUser :one
-INSERT INTO form.users (weladee_user_id, email, full_name, avatar_url)
-VALUES ($1::int, $2::text, $3::text, $4::text)
+INSERT INTO form.users (weladee_user_id, email, full_name, avatar_url, timezone)
+VALUES ($1::int, $2::text, $3::text, $4::text, $5::text)
 ON CONFLICT (weladee_user_id) DO UPDATE
 SET
     email = EXCLUDED.email,
     full_name = EXCLUDED.full_name,
     avatar_url = EXCLUDED.avatar_url,
+    timezone = COALESCE(EXCLUDED.timezone, form.users.timezone),
     updated_at = NOW()
-RETURNING id, weladee_user_id, email, full_name, avatar_url, created_at, updated_at
+RETURNING id, weladee_user_id, email, full_name, avatar_url, timezone, created_at, updated_at
 `
 
 type CreateFormUserParams struct {
@@ -28,6 +29,7 @@ type CreateFormUserParams struct {
 	Email         string `db:"email" json:"email"`
 	FullName      string `db:"full_name" json:"fullName"`
 	AvatarUrl     string `db:"avatar_url" json:"avatarUrl"`
+	Timezone      string `db:"timezone" json:"timezone"`
 }
 
 func (q *Queries) CreateFormUser(ctx context.Context, arg CreateFormUserParams) (FormUser, error) {
@@ -36,6 +38,7 @@ func (q *Queries) CreateFormUser(ctx context.Context, arg CreateFormUserParams) 
 		arg.Email,
 		arg.FullName,
 		arg.AvatarUrl,
+		arg.Timezone,
 	)
 	var i FormUser
 	err := row.Scan(
@@ -44,6 +47,7 @@ func (q *Queries) CreateFormUser(ctx context.Context, arg CreateFormUserParams) 
 		&i.Email,
 		&i.FullName,
 		&i.AvatarUrl,
+		&i.Timezone,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -51,7 +55,7 @@ func (q *Queries) CreateFormUser(ctx context.Context, arg CreateFormUserParams) 
 }
 
 const getFormUser = `-- name: GetFormUser :one
-SELECT id, weladee_user_id, email, full_name, avatar_url, created_at, updated_at FROM form.users
+SELECT id, weladee_user_id, email, full_name, avatar_url, timezone, created_at, updated_at FROM form.users
 WHERE id = $1::uuid
 `
 
@@ -64,6 +68,7 @@ func (q *Queries) GetFormUser(ctx context.Context, id uuid.UUID) (FormUser, erro
 		&i.Email,
 		&i.FullName,
 		&i.AvatarUrl,
+		&i.Timezone,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -71,7 +76,7 @@ func (q *Queries) GetFormUser(ctx context.Context, id uuid.UUID) (FormUser, erro
 }
 
 const getFormUserByWeladeeID = `-- name: GetFormUserByWeladeeID :one
-SELECT id, weladee_user_id, email, full_name, avatar_url, created_at, updated_at FROM form.users
+SELECT id, weladee_user_id, email, full_name, avatar_url, timezone, created_at, updated_at FROM form.users
 WHERE weladee_user_id = $1::int
 `
 
@@ -84,6 +89,7 @@ func (q *Queries) GetFormUserByWeladeeID(ctx context.Context, weladeeUserID int3
 		&i.Email,
 		&i.FullName,
 		&i.AvatarUrl,
+		&i.Timezone,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

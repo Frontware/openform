@@ -15,6 +15,13 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { getToken, parseJWT } from '@/lib/auth/weladee'
 import {
   Dialog,
@@ -168,6 +175,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
   const tDashboard = useTranslations('dashboard')
   const tValidation = useTranslations('validation')
+  const tFormBuilder = useTranslations('formBuilder')
 
 
   
@@ -1771,6 +1779,32 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
                       setHasUnsavedChanges(true)
                     }}
                   />
+                </div>
+                <div className="flex items-center justify-between py-3 border-t border-slate-100">
+                  <div className="flex-1">
+                    <Label htmlFor="email-notification-mode" className="text-sm font-medium cursor-pointer">
+                      {tFormBuilder('emailNotifications')}
+                    </Label>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {tFormBuilder('emailNotificationsDesc')}
+                    </p>
+                  </div>
+                  <Select
+                    value={form.email_notification_mode || 'never'}
+                    onValueChange={(value: 'never' | 'immediate' | 'daily') => {
+                      setForm({ ...form, email_notification_mode: value })
+                      setHasUnsavedChanges(true)
+                    }}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="never">{tFormBuilder('emailNever')}</SelectItem>
+                      <SelectItem value="immediate">{tFormBuilder('emailImmediate')}</SelectItem>
+                      <SelectItem value="daily">{tFormBuilder('emailDaily')}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </TabsContent>

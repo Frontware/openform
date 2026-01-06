@@ -20,6 +20,7 @@ import (
 	"github.com/weladee/weladee-form/internal/auth"
 	"github.com/weladee/weladee-form/internal/db"
 	"github.com/weladee/weladee-form/internal/db/sqlc"
+	"github.com/weladee/weladee-form/internal/email"
 	"github.com/weladee/weladee-form/internal/utils"
 	"github.com/weladee/weladee-form/proto/pb"
 )
@@ -28,6 +29,7 @@ type ResponseServerImpl struct {
 	pb.UnimplementedResponseServiceServer
 	db              *db.Database
 	recaptchaConfig config.RecaptchaConfig
+	emailSender     *email.EmailSender
 }
 
 // Helper: get form and check access
@@ -348,6 +350,35 @@ func (s *ResponseServerImpl) SubmitResponse(ctx context.Context, req *pb.SubmitR
 	// Update daily stats asynchronously when response is completed
 	if req.Complete {
 		go UpdateDailyStats(s.db, formID)
+	}
+
+	// Send immediate notification if enabled
+	if req.Complete && s.emailSender != nil && s.emailSender.IsEnabled() && form.EmailNotificationMode == "immediate" {
+		go func() {
+			// Get form owner email
+			owner, err := s.db.Queries.GetFormUser(context.Background(), form.UserID)
+			if err != nil || owner.Email == "" {
+				return // Silently skip if owner not found or no email
+			}
+
+			// Count total responses for this form
+			stats, err := s.db.Queries.GetFormStats(context.Background(), formID)
+			if err != nil {
+				return
+			}
+
+			// Build dashboard URL
+			dashboardURL := fmt.Sprintf("/dashboard/forms/%s/responses", form.ID)
+
+			// Send notification
+			_ = s.emailSender.SendNewResponseNotification(context.Background(), email.NotificationRequest{
+				ToEmail:       owner.Email,
+				FormName:      form.Title,
+				ResponseCount: int(stats.TotalResponses),
+				IsDaily:       false,
+				DashboardURL:  dashboardURL,
+			})
+		}()
 	}
 
 	// Fetch full response with answers
