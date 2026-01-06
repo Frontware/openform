@@ -12,6 +12,7 @@ import { formClient } from '@/lib/grpc-client'
 import { Form as PbForm, FormTheme, FormSortBy, FormSortOrder, FormStatusFilter } from '@/lib/proto/proto/form_pb'
 import { Form as DBForm, ThemePreset } from '@/lib/database.types'
 import { getToken, parseJWT } from '@/lib/auth/weladee'
+import Image from 'next/image'
 
 // Mapper function to convert gRPC Form to UI Form
 function mapPbFormToDBForm(pbForm: PbForm): DBForm {
@@ -69,6 +70,8 @@ export function DashboardClient() {
   const token = getToken()
   const user = token ? parseJWT(token) : null
   const userName = user?.displayName
+  const customerType = user?.customerType
+  const logoUrl = user?.logoUrl
 
   // Filter and sort state
   const [searchQuery, setSearchQuery] = useState('')
@@ -167,8 +170,19 @@ export function DashboardClient() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
           {userName ? tNav('userForms', { name: userName }) : t('title')}
+          {customerType === 'enterprise' && logoUrl && (
+            <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-200">
+              <Image
+                src={logoUrl}
+                alt="Company logo"
+                fill
+                className="object-cover"
+                sizes="32px"
+              />
+            </div>
+          )}
         </h1>
         <p className="text-slate-600 mt-1">{t('subtitle')}</p>
       </div>
