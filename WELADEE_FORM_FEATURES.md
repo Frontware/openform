@@ -92,13 +92,14 @@ The JWT payload must contain the following custom claims:
 
 ```json
 {
-  // In Weladee Form, this is the Company ID, not the Weladee User ID 
+  // In Weladee Form, this is the Company ID, not the Weladee User ID
   "user_id": 123,
   "email": "admin@company.com",
   "display_name": "Acme Corp",     // Used as Company Name for Enterprise
   "role": "admin",                 // usually "admin" or "user"
   "customer_type": "enterprise",   // "sme", "standard", or "enterprise"
   "language": "en",                // Language preference: "en", "fr", or "th" (default: "en")
+  "timezone": "Asia/Bangkok",      // IANA timezone for daily email notifications (default: "Asia/Bangkok" = UTC+7)
   "logo_url": "https://example.com/logo.png", // Optional, for Enterprise
   "redirect_url": "https://myapp.com/login",  // Optional, redirect when token expires
   "iss": "weladee-form",
@@ -134,6 +135,7 @@ type WeladeeUserClaims struct {
 	Role         string `json:"role"`
 	CustomerType string `json:"customer_type"` // enterprise, standard, sme
 	Language     string `json:"language"`      // Language preference: en, fr, th (default: en)
+	Timezone     string `json:"timezone"`       // IANA timezone for email notifications (default: "Asia/Bangkok")
 	LogoURL      string `json:"logo_url"`
 	RedirectURL  string `json:"redirect_url"`
 	jwt.RegisteredClaims
@@ -179,7 +181,8 @@ func main() {
 		DisplayName:  companyName,
 		Role:         "admin",
 		CustomerType: customerType,
-		Language:     "en", // Default language
+		Language:     "en",               // Default language
+		Timezone:     "Asia/Bangkok",     // Default timezone (UTC+7)
 		LogoURL:      logoURL,
 		RedirectURL:  redirectURL,
 		RegisteredClaims: jwt.RegisteredClaims{

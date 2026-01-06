@@ -25,6 +25,9 @@ type Config struct {
 
 	// reCAPTCHA Configuration
 	Recaptcha RecaptchaConfig `mapstructure:"recaptcha" yaml:"recaptcha"`
+
+	// SMTP Configuration
+	SMTP SMTPConfig `mapstructure:"smtp" yaml:"smtp"`
 }
 
 // RecaptchaConfig holds reCAPTCHA configuration
@@ -33,6 +36,17 @@ type RecaptchaConfig struct {
 	SiteKey   string  `mapstructure:"site_key" yaml:"site_key"`
 	SecretKey string  `mapstructure:"secret_key" yaml:"secret_key"`
 	Threshold float64 `mapstructure:"threshold" yaml:"threshold"`
+}
+
+// SMTPConfig holds SMTP configuration for email sending
+type SMTPConfig struct {
+	Enabled     bool   `mapstructure:"enabled" yaml:"enabled"`
+	Host        string `mapstructure:"host" yaml:"host"`
+	Port        int    `mapstructure:"port" yaml:"port"`
+	Username    string `mapstructure:"username" yaml:"username"`
+	Password    string `mapstructure:"password" yaml:"password"`
+	FromAddress string `mapstructure:"from_address" yaml:"from_address"`
+	FromName    string `mapstructure:"from_name" yaml:"from_name"`
 }
 
 // LoadConfig loads configuration from config file, environment variables, and command line flags
@@ -78,6 +92,13 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 		"recaptcha.site_key":   "RECAPTCHA_SITE_KEY",
 		"recaptcha.secret_key": "RECAPTCHA_SECRET_KEY",
 		"recaptcha.threshold":  "RECAPTCHA_THRESHOLD",
+		"smtp.enabled":         "SMTP_ENABLED",
+		"smtp.host":            "SMTP_HOST",
+		"smtp.port":            "SMTP_PORT",
+		"smtp.username":        "SMTP_USERNAME",
+		"smtp.password":        "SMTP_PASSWORD",
+		"smtp.from_address":    "SMTP_FROM_ADDRESS",
+		"smtp.from_name":       "SMTP_FROM_NAME",
 	}
 
 	for configKey, envVar := range envBindings {
@@ -115,6 +136,13 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 			"recaptcha-site-key":   "recaptcha.site_key",
 			"recaptcha-secret-key": "recaptcha.secret_key",
 			"recaptcha-threshold":  "recaptcha.threshold",
+			"smtp-enabled":         "smtp.enabled",
+			"smtp-host":            "smtp.host",
+			"smtp-port":            "smtp.port",
+			"smtp-username":        "smtp.username",
+			"smtp-password":        "smtp.password",
+			"smtp-from-address":    "smtp.from_address",
+			"smtp-from-name":       "smtp.from_name",
 		}
 
 		for flagName, configKey := range flagBindings {
@@ -151,6 +179,9 @@ func setDefaults(v *viper.Viper) {
 		"s3_region":           "auto",
 		"recaptcha.enabled":   false,
 		"recaptcha.threshold": 0.5,
+		"smtp.enabled":        false,
+		"smtp.port":           587,
+		"smtp.from_name":      "Weladee Form",
 	}
 
 	for key, value := range defaults {
@@ -174,6 +205,25 @@ func validateConfig(config *Config) error {
 		}
 		if config.Recaptcha.Threshold <= 0 || config.Recaptcha.Threshold > 1 {
 			return fmt.Errorf("recaptcha.threshold must be between 0 and 1")
+		}
+	}
+
+	// Validate SMTP configuration if enabled
+	if config.SMTP.Enabled {
+		if config.SMTP.Host == "" {
+			return fmt.Errorf("smtp.host is required when smtp.enabled is true")
+		}
+		if config.SMTP.Port <= 0 || config.SMTP.Port > 65535 {
+			return fmt.Errorf("smtp.port must be between 1 and 65535")
+		}
+		if config.SMTP.Username == "" {
+			return fmt.Errorf("smtp.username is required when smtp.enabled is true")
+		}
+		if config.SMTP.Password == "" {
+			return fmt.Errorf("smtp.password is required when smtp.enabled is true")
+		}
+		if config.SMTP.FromAddress == "" {
+			return fmt.Errorf("smtp.from_address is required when smtp.enabled is true")
 		}
 	}
 
@@ -203,6 +253,13 @@ func AddFlags(cmd *cobra.Command) {
 		{"recaptcha-site-key", "", "", "reCAPTCHA site key"},
 		{"recaptcha-secret-key", "", "", "reCAPTCHA secret key"},
 		{"recaptcha-threshold", "", "0.5", "reCAPTCHA score threshold (0.0-1.0)"},
+		{"smtp-enabled", "", "false", "Enable SMTP for email notifications"},
+		{"smtp-host", "", "", "SMTP server host"},
+		{"smtp-port", "", "587", "SMTP server port"},
+		{"smtp-username", "", "", "SMTP username"},
+		{"smtp-password", "", "", "SMTP password"},
+		{"smtp-from-address", "", "", "From email address for notifications"},
+		{"smtp-from-name", "", "Weladee Form", "From name for notifications"},
 	}
 
 	for _, flag := range flags {

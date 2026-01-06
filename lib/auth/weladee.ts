@@ -8,6 +8,7 @@ export interface WeladeeUser {
   customerType: 'sme' | 'standard' | 'enterprise'
   logoUrl?: string
   language?: string
+  timezone?: string // IANA timezone (e.g., "Asia/Bangkok", "America/New_York")
 }
 
 export function getToken(): string | null {
@@ -73,6 +74,7 @@ export function parseJWT(token: string): WeladeeUser | null {
       customerType: 'enterprise',
       logoUrl: 'https://weladee.com/logo.png',
       language: 'en',
+      timezone: 'Asia/Bangkok', // Default to UTC+7
     }
   }
 
@@ -99,6 +101,7 @@ export function parseJWT(token: string): WeladeeUser | null {
       customerType: claims.customer_type || 'sme',
       logoUrl: claims.logo_url,
       language: claims.language || 'en',
+      timezone: claims.timezone || 'Asia/Bangkok', // Default to UTC+7
     }
   } catch {
     return null
