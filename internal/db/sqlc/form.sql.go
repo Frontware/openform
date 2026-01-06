@@ -14,6 +14,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countNewResponsesSince = `-- name: CountNewResponsesSince :one
+SELECT COUNT(*) as count
+FROM form.responses
+WHERE form_id = $1::uuid
+  AND completed = true
+  AND submitted_at > $2::timestamptz
+`
+
+type CountNewResponsesSinceParams struct {
+	FormID uuid.UUID `db:"form_id" json:"formId"`
+	Since  time.Time `db:"since" json:"since"`
+}
+
+func (q *Queries) CountNewResponsesSince(ctx context.Context, arg CountNewResponsesSinceParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countNewResponsesSince, arg.FormID, arg.Since)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countUserForms = `-- name: CountUserForms :one
 SELECT COUNT(*) as count
 FROM form.forms
@@ -111,6 +131,31 @@ type DeleteFormParams struct {
 func (q *Queries) DeleteForm(ctx context.Context, arg DeleteFormParams) error {
 	_, err := q.db.Exec(ctx, deleteForm, arg.ID, arg.UserID)
 	return err
+}
+
+const getDailyNotificationLog = `-- name: GetDailyNotificationLog :one
+SELECT id, form_id, user_id, last_sent_at, response_count, created_at, updated_at FROM form.daily_notification_log
+WHERE form_id = $1::uuid AND user_id = $2::uuid
+`
+
+type GetDailyNotificationLogParams struct {
+	FormID uuid.UUID `db:"form_id" json:"formId"`
+	UserID uuid.UUID `db:"user_id" json:"userId"`
+}
+
+func (q *Queries) GetDailyNotificationLog(ctx context.Context, arg GetDailyNotificationLogParams) (FormDailyNotificationLog, error) {
+	row := q.db.QueryRow(ctx, getDailyNotificationLog, arg.FormID, arg.UserID)
+	var i FormDailyNotificationLog
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.UserID,
+		&i.LastSentAt,
+		&i.ResponseCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getForm = `-- name: GetForm :one
@@ -312,6 +357,58 @@ func (q *Queries) GetFormWithQuestions(ctx context.Context, id uuid.UUID) (GetFo
 		&i.QuestionUpdatedAt,
 	)
 	return i, err
+}
+
+const getFormsWithDailyNotifications = `-- name: GetFormsWithDailyNotifications :many
+
+SELECT
+    f.id,
+    f.user_id,
+    f.title,
+    u.email,
+    u.timezone
+FROM form.forms f
+JOIN form.users u ON f.user_id = u.id
+WHERE f.email_notification_mode = 'daily'
+  AND f.is_published = true
+  AND f.is_accepting_responses = true
+`
+
+type GetFormsWithDailyNotificationsRow struct {
+	ID       uuid.UUID   `db:"id" json:"id"`
+	UserID   uuid.UUID   `db:"user_id" json:"userId"`
+	Title    string      `db:"title" json:"title"`
+	Email    string      `db:"email" json:"email"`
+	Timezone pgtype.Text `db:"timezone" json:"timezone"`
+}
+
+// ============================================================
+// Daily Digest Queries
+// ============================================================
+func (q *Queries) GetFormsWithDailyNotifications(ctx context.Context) ([]GetFormsWithDailyNotificationsRow, error) {
+	rows, err := q.db.Query(ctx, getFormsWithDailyNotifications)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetFormsWithDailyNotificationsRow{}
+	for rows.Next() {
+		var i GetFormsWithDailyNotificationsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Title,
+			&i.Email,
+			&i.Timezone,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getQuestion = `-- name: GetQuestion :one
@@ -633,6 +730,43 @@ func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) (FormFor
 		&i.ViewCount,
 		&i.ResponseCount,
 		&i.CompletionCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const upsertDailyNotificationLog = `-- name: UpsertDailyNotificationLog :one
+INSERT INTO form.daily_notification_log (form_id, user_id, last_sent_at, response_count)
+VALUES ($1::uuid, $2::uuid, $3::timestamptz, $4::int)
+ON CONFLICT (form_id, user_id) DO UPDATE
+SET last_sent_at = EXCLUDED.last_sent_at,
+    response_count = EXCLUDED.response_count,
+    updated_at = NOW()
+RETURNING id, form_id, user_id, last_sent_at, response_count, created_at, updated_at
+`
+
+type UpsertDailyNotificationLogParams struct {
+	FormID        uuid.UUID `db:"form_id" json:"formId"`
+	UserID        uuid.UUID `db:"user_id" json:"userId"`
+	LastSentAt    time.Time `db:"last_sent_at" json:"lastSentAt"`
+	ResponseCount int32     `db:"response_count" json:"responseCount"`
+}
+
+func (q *Queries) UpsertDailyNotificationLog(ctx context.Context, arg UpsertDailyNotificationLogParams) (FormDailyNotificationLog, error) {
+	row := q.db.QueryRow(ctx, upsertDailyNotificationLog,
+		arg.FormID,
+		arg.UserID,
+		arg.LastSentAt,
+		arg.ResponseCount,
+	)
+	var i FormDailyNotificationLog
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.UserID,
+		&i.LastSentAt,
+		&i.ResponseCount,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

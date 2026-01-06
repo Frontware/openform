@@ -28,6 +28,7 @@ import (
 	"github.com/weladee/weladee-form/internal/db"
 	"github.com/weladee/weladee-form/internal/email"
 	"github.com/weladee/weladee-form/internal/gapi"
+	"github.com/weladee/weladee-form/internal/scheduler"
 	"github.com/weladee/weladee-form/internal/storage"
 	pb "github.com/weladee/weladee-form/proto/pb"
 	pbconnect "github.com/weladee/weladee-form/proto/pbconnect"
@@ -377,6 +378,13 @@ func runServe(cmd *cobra.Command, args []string) error {
 		log.Println("⚠ SMTP not configured, email notifications will be disabled")
 	}
 
+	// Setup daily digest scheduler (only if email sender is configured)
+	var dailyScheduler *scheduler.DailyDigestScheduler
+	if emailSender != nil {
+		dailyScheduler = scheduler.NewDailyDigestScheduler(database, emailSender)
+		log.Println("✓ Daily digest scheduler initialized")
+	}
+
 	// Create gRPC server with auth interceptor
 	authInterceptor := auth.NewAuthInterceptor(tokenValidator)
 
@@ -621,6 +629,9 @@ func runServe(cmd *cobra.Command, args []string) error {
 		log.Printf("💡 To generate a new token, run: go run ./cmd/server create-jwt")
 	}
 
+	// Create context for scheduler cancellation
+	schedulerCtx, cancelScheduler := context.WithCancel(context.Background())
+
 	// Graceful shutdown
 	go func() {
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -628,12 +639,22 @@ func runServe(cmd *cobra.Command, args []string) error {
 		}
 	}()
 
+	// Start daily digest scheduler (if configured)
+	if dailyScheduler != nil {
+		go func() {
+			dailyScheduler.Start(schedulerCtx)
+		}()
+	}
+
 	// Wait for interrupt signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
 	log.Println("Shutting down server...")
+
+	// Stop the scheduler first
+	cancelScheduler()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

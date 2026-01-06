@@ -69,6 +69,40 @@ set-grpc-url: ## Set NEXT_PUBLIC_GRPC_URL based on current git branch
 		sed -i 's|^NEXT_PUBLIC_GRPC_URL=.*|NEXT_PUBLIC_GRPC_URL=https://dev-form.weladee.com|' .env.local; \
 	fi
 
+# Environment setup target
+.PHONY: set-grpc-url
+set-grpc-url: ## Set NEXT_PUBLIC_GRPC_URL based on current git branch
+	@echo "Setting GRPC URL based on current branch..."
+	@if [ -n "$$(git branch --show-current 2>/dev/null)" ]; then \
+		CURRENT_BRANCH=$$(git branch --show-current); \
+		if [ "$$CURRENT_BRANCH" = "main" ]; then \
+			GRPC_URL="https://form.weladee.com"; \
+		else \
+			GRPC_URL="https://dev-form.weladee.com"; \
+		fi; \
+		if [ -f .env.local ]; then \
+			if grep -q "NEXT_PUBLIC_GRPC_URL" .env.local; then \
+				sed -i "s|^NEXT_PUBLIC_GRPC_URL=.*|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|" .env.local; \
+			else \
+				echo "NEXT_PUBLIC_GRPC_URL=$$GRPC_URL" >> .env.local; \
+			fi; \
+		else \
+			echo "NEXT_PUBLIC_GRPC_URL=$$GRPC_URL" > .env.local; \
+		fi; \
+		echo "Set NEXT_PUBLIC_GRPC_URL to $$GRPC_URL for branch $$CURRENT_BRANCH"; \
+	else \
+		echo "Not in a git repository or unable to determine branch. Using dev URL."; \
+		if [ -f .env.local ]; then \
+			if grep -q "NEXT_PUBLIC_GRPC_URL" .env.local; then \
+				sed -i "s|^NEXT_PUBLIC_GRPC_URL=.*|NEXT_PUBLIC_GRPC_URL=https://dev-form.weladee.com|" .env.local; \
+			else \
+				echo "NEXT_PUBLIC_GRPC_URL=https://dev-form.weladee.com" >> .env.local; \
+			fi; \
+		else \
+			echo "NEXT_PUBLIC_GRPC_URL=https://dev-form.weladee.com" > .env.local; \
+		fi; \
+	fi
+
 # Client build targets
 .PHONY: build-client
 build-client: set-grpc-url ## Build Next.js client for embedding

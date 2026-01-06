@@ -34,12 +34,12 @@ func (s *DailyDigestScheduler) Start(ctx context.Context) {
 	ticker := time.NewTicker(1 * time.Hour)
 	defer ticker.Stop()
 
-	log.Println("Daily digest scheduler started")
+	log.Println("[DailyDigestScheduler] Started - checking every hour for users at 9am in their timezone")
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Daily digest scheduler stopped")
+			log.Println("[DailyDigestScheduler] Stopped")
 			return
 		case <-ticker.C:
 			s.processDailyDigests(ctx)
@@ -49,91 +49,168 @@ func (s *DailyDigestScheduler) Start(ctx context.Context) {
 
 // processDailyDigests checks for users who need daily digests and sends them
 func (s *DailyDigestScheduler) processDailyDigests(ctx context.Context) {
-	// Get all users with forms that have daily notification enabled
-	// For now, we'll check all forms and process based on user timezone
-	// TODO: Optimize by adding a database query to get only relevant forms
+	// Get all forms with daily notification enabled
+	forms, err := s.db.Queries.GetFormsWithDailyNotifications(ctx)
+	if err != nil {
+		log.Printf("[DailyDigestScheduler] Failed to get forms with daily notifications: %v", err)
+		return
+	}
 
-	// Query all published forms with daily notification mode
-	// We need to add this query to SQLC, for now we'll skip this implementation
-	// The scheduler will be completed once we regenerate SQLC code
+	if len(forms) == 0 {
+		return
+	}
+
+	log.Printf("[DailyDigestScheduler] Found %d forms with daily notifications", len(forms))
+
+	// Group forms by user
+	userForms := make(map[uuid.UUID][]dailyForm)
+	userTimezones := make(map[uuid.UUID]string)
+	userEmails := make(map[uuid.UUID]string)
+
+	for _, form := range forms {
+		userForms[form.UserID] = append(userForms[form.UserID], dailyForm{
+			ID:    form.ID,
+			Title: form.Title,
+		})
+		// Extract timezone string from pgtype.Text
+		timezoneStr := "Asia/Bangkok" // Default
+		if form.Timezone.Valid {
+			timezoneStr = form.Timezone.String
+		}
+		userTimezones[form.UserID] = timezoneStr
+		userEmails[form.UserID] = form.Email
+	}
+
+	// Check each user if it's 9am in their timezone
+	now := time.Now()
+	for userID, forms := range userForms {
+		timezoneStr := userTimezones[userID]
+		if timezoneStr == "" {
+			timezoneStr = "Asia/Bangkok" // Default to UTC+7
+		}
+
+		// Parse timezone
+		userTimezone, err := time.LoadLocation(timezoneStr)
+		if err != nil {
+			log.Printf("[DailyDigestScheduler] Invalid timezone %s for user %s: %v", timezoneStr, userID, err)
+			continue
+		}
+
+		userNow := now.In(userTimezone)
+
+		// Check if it's 9am (within the last hour)
+		if userNow.Hour() != 9 {
+			continue
+		}
+
+		// Check if we already sent today (last_sent_at is today)
+		lastSentToday := false
+		for _, form := range forms {
+			logEntry, err := s.db.Queries.GetDailyNotificationLog(ctx, sqlc.GetDailyNotificationLogParams{
+				FormID: form.ID,
+				UserID: userID,
+			})
+			if err == nil {
+				lastSent := logEntry.LastSentAt.In(userTimezone)
+				if lastSent.Year() == userNow.Year() && lastSent.YearDay() == userNow.YearDay() {
+					lastSentToday = true
+					break
+				}
+			}
+		}
+
+		if lastSentToday {
+			log.Printf("[DailyDigestScheduler] Already sent digest for user %s today, skipping", userID)
+			continue
+		}
+
+		// Send daily digest for this user
+		userEmail := userEmails[userID]
+		if userEmail == "" {
+			log.Printf("[DailyDigestScheduler] User %s has no email address, skipping", userID)
+			continue
+		}
+
+		err = s.sendDailyDigest(ctx, userID, userEmail, forms)
+		if err != nil {
+			log.Printf("[DailyDigestScheduler] Failed to send daily digest for user %s: %v", userID, err)
+		}
+	}
 }
 
 // sendDailyDigest sends a daily digest email to a user for their forms
-func (s *DailyDigestScheduler) sendDailyDigest(ctx context.Context, userID uuid.UUID, userTimezone string, forms []digestForm) error {
-	if len(forms) == 0 {
-		return nil // No forms with new responses
-	}
+func (s *DailyDigestScheduler) sendDailyDigest(ctx context.Context, userID uuid.UUID, userEmail string, forms []dailyForm) error {
+	now := time.Now()
 
-	// Get user email
-	user, err := s.db.Queries.GetFormUser(ctx, userID)
-	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
-	}
-
-	if user.Email == "" {
-		return fmt.Errorf("user has no email address")
-	}
-
-	// For each form, count new responses since last sent
 	for _, form := range forms {
 		// Get the last sent time from daily_notification_log
 		lastSentAt, _ := s.getLastSentTime(ctx, form.ID, userID)
 
 		// Count new responses since last sent
-		newResponses, err := s.countNewResponses(ctx, form.ID, lastSentAt)
+		newResponseCount, err := s.db.Queries.CountNewResponsesSince(ctx, sqlc.CountNewResponsesSinceParams{
+			FormID: form.ID,
+			Since:  lastSentAt,
+		})
 		if err != nil {
-			log.Printf("Failed to count new responses for form %s: %v", form.ID, err)
+			log.Printf("[DailyDigestScheduler] Failed to count new responses for form %s: %v", form.ID, err)
 			continue
 		}
 
-		if newResponses == 0 {
-			continue // No new responses, skip this form
+		if newResponseCount == 0 {
+			log.Printf("[DailyDigestScheduler] No new responses for form %s (%s), skipping", form.ID, form.Title)
+			continue
 		}
+
+		log.Printf("[DailyDigestScheduler] Sending digest for form %s (%s): %d new responses", form.ID, form.Title, newResponseCount)
 
 		// Send notification email
 		dashboardURL := fmt.Sprintf("/dashboard/forms/%s/responses", form.ID)
 		err = s.emailSender.SendNewResponseNotification(ctx, email.NotificationRequest{
-			ToEmail:       user.Email,
+			ToEmail:       userEmail,
 			FormName:      form.Title,
-			ResponseCount: newResponses,
+			ResponseCount: int(newResponseCount),
 			IsDaily:       true,
 			DashboardURL:  dashboardURL,
 		})
 		if err != nil {
-			log.Printf("Failed to send daily digest for form %s: %v", form.ID, err)
+			log.Printf("[DailyDigestScheduler] Failed to send daily digest for form %s: %v", form.ID, err)
 			continue
 		}
 
 		// Update last sent time
-		_ = s.updateLastSentTime(ctx, form.ID, userID, newResponses)
+		_ = s.updateLastSentTime(ctx, form.ID, userID, int(newResponseCount), now)
 	}
 
 	return nil
 }
 
-// digestForm represents a form with daily notification enabled
-type digestForm struct {
+// dailyForm represents a form with daily notification enabled
+type dailyForm struct {
 	ID    uuid.UUID
 	Title string
 }
 
 // getLastSentTime gets the last sent time for a form's daily notification
 func (s *DailyDigestScheduler) getLastSentTime(ctx context.Context, formID, userID uuid.UUID) (time.Time, error) {
-	// Query daily_notification_log table
-	// TODO: Implement this query in SQLC
-	return time.Time{}.AddDate(-1, 0, 0), nil // Default: 24 hours ago
-}
+	logEntry, err := s.db.Queries.GetDailyNotificationLog(ctx, sqlc.GetDailyNotificationLogParams{
+		FormID: formID,
+		UserID: userID,
+	})
+	if err != nil {
+		// No previous entry, default to 24 hours ago
+		return time.Now().Add(-24 * time.Hour), nil
+	}
 
-// countNewResponses counts the number of new responses since a given time
-func (s *DailyDigestScheduler) countNewResponses(ctx context.Context, formID uuid.UUID, since time.Time) (int, error) {
-	// Count responses where completed = true and submitted_at > since
-	// TODO: Implement this query in SQLC
-	return 0, nil
+	return logEntry.LastSentAt, nil
 }
 
 // updateLastSentTime updates the last sent time for a form's daily notification
-func (s *DailyDigestScheduler) updateLastSentTime(ctx context.Context, formID, userID uuid.UUID, responseCount int) error {
-	// Insert or update daily_notification_log table
-	// TODO: Implement this query in SQLC
-	return nil
+func (s *DailyDigestScheduler) updateLastSentTime(ctx context.Context, formID, userID uuid.UUID, responseCount int, sentAt time.Time) error {
+	_, err := s.db.Queries.UpsertDailyNotificationLog(ctx, sqlc.UpsertDailyNotificationLogParams{
+		FormID:        formID,
+		UserID:        userID,
+		LastSentAt:    sentAt,
+		ResponseCount: int32(responseCount),
+	})
+	return err
 }

@@ -150,3 +150,40 @@ WHERE id = @id::uuid;
 SELECT COUNT(*) as count
 FROM form.forms
 WHERE user_id = @user_id::uuid;
+
+-- ============================================================
+-- Daily Digest Queries
+-- ============================================================
+
+-- name: GetFormsWithDailyNotifications :many
+SELECT
+    f.id,
+    f.user_id,
+    f.title,
+    u.email,
+    u.timezone
+FROM form.forms f
+JOIN form.users u ON f.user_id = u.id
+WHERE f.email_notification_mode = 'daily'
+  AND f.is_published = true
+  AND f.is_accepting_responses = true;
+
+-- name: GetDailyNotificationLog :one
+SELECT * FROM form.daily_notification_log
+WHERE form_id = @form_id::uuid AND user_id = @user_id::uuid;
+
+-- name: UpsertDailyNotificationLog :one
+INSERT INTO form.daily_notification_log (form_id, user_id, last_sent_at, response_count)
+VALUES (@form_id::uuid, @user_id::uuid, @last_sent_at::timestamptz, @response_count::int)
+ON CONFLICT (form_id, user_id) DO UPDATE
+SET last_sent_at = EXCLUDED.last_sent_at,
+    response_count = EXCLUDED.response_count,
+    updated_at = NOW()
+RETURNING *;
+
+-- name: CountNewResponsesSince :one
+SELECT COUNT(*) as count
+FROM form.responses
+WHERE form_id = @form_id::uuid
+  AND completed = true
+  AND submitted_at > @since::timestamptz;

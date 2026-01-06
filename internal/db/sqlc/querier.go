@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	CompleteResponse(ctx context.Context, id uuid.UUID) (FormResponse, error)
 	CountFormResponses(ctx context.Context, formID uuid.UUID) (int64, error)
+	CountNewResponsesSince(ctx context.Context, arg CountNewResponsesSinceParams) (int64, error)
 	CountUserForms(ctx context.Context, userID uuid.UUID) (int64, error)
 	CreateAnswer(ctx context.Context, arg CreateAnswerParams) (FormAnswer, error)
 	CreateFileUpload(ctx context.Context, arg CreateFileUploadParams) (uuid.UUID, error)
@@ -26,6 +27,7 @@ type Querier interface {
 	GetChoiceQuestionStats(ctx context.Context, questionID uuid.UUID) ([]GetChoiceQuestionStatsRow, error)
 	GetCompletionFunnel(ctx context.Context, arg GetCompletionFunnelParams) (GetCompletionFunnelRow, error)
 	GetCompletionStatsForDate(ctx context.Context, arg GetCompletionStatsForDateParams) ([]GetCompletionStatsForDateRow, error)
+	GetDailyNotificationLog(ctx context.Context, arg GetDailyNotificationLogParams) (FormDailyNotificationLog, error)
 	GetDailyStatsRange(ctx context.Context, arg GetDailyStatsRangeParams) ([]FormDailyStat, error)
 	GetDayOfWeekDistribution(ctx context.Context, arg GetDayOfWeekDistributionParams) ([]GetDayOfWeekDistributionRow, error)
 	GetDeviceBreakdown(ctx context.Context, formID uuid.UUID) ([]GetDeviceBreakdownRow, error)
@@ -39,6 +41,10 @@ type Querier interface {
 	GetFormUser(ctx context.Context, id uuid.UUID) (FormUser, error)
 	GetFormUserByWeladeeID(ctx context.Context, weladeeUserID int32) (FormUser, error)
 	GetFormWithQuestions(ctx context.Context, id uuid.UUID) (GetFormWithQuestionsRow, error)
+	// ============================================================
+	// Daily Digest Queries
+	// ============================================================
+	GetFormsWithDailyNotifications(ctx context.Context) ([]GetFormsWithDailyNotificationsRow, error)
 	GetGeographicDistribution(ctx context.Context, formID uuid.UUID) ([]GetGeographicDistributionRow, error)
 	GetHourlyDistribution(ctx context.Context, arg GetHourlyDistributionParams) ([]GetHourlyDistributionRow, error)
 	GetNPSScore(ctx context.Context, questionID uuid.UUID) (GetNPSScoreRow, error)
@@ -66,6 +72,7 @@ type Querier interface {
 	UpdateDailyStats(ctx context.Context, arg UpdateDailyStatsParams) (FormDailyStat, error)
 	UpdateForm(ctx context.Context, arg UpdateFormParams) (FormForm, error)
 	UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (FormQuestion, error)
+	UpsertDailyNotificationLog(ctx context.Context, arg UpsertDailyNotificationLogParams) (FormDailyNotificationLog, error)
 }
 
 var _ Querier = (*Queries)(nil)
