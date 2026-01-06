@@ -173,12 +173,14 @@ export function DashboardClient() {
           </h1>
           <p className="text-slate-600 mt-1">{t('subtitle')}</p>
         </div>
-        <Link href="/forms/new">
-          <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
-            <Plus className="w-4 h-4 mr-2" />
-            {totalFormsCount > 0 ? t('create') : t('createFirst.button')}
-          </Button>
-        </Link>
+        {forms.length > 0 && (
+          <Link href="/forms/new">
+            <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/30 hover:-translate-y-0.5">
+              <Plus className="w-4 h-4 mr-2" />
+              {t('create')}
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filter Bar */}
