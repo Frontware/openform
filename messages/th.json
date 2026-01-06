@@ -186,6 +186,9 @@
       "responses": "คำตอบ",
       "stats": "สถิติ",
       "copyLink": "คัดลอกลิงก์",
+      "copyLinkUrl": "URL",
+      "copyLinkHtml": "HTML",
+      "copyLinkMarkdown": "Markdown",
       "shareLink": "แชร์ลิงก์",
       "more": "เพิ่มเติม"
     },
@@ -193,6 +196,12 @@
       "responses": "คำตอบ",
       "response": "คำตอบ",
       "updated": "อัปเดตเมื่อ"
+    },
+    "toasts": {
+      "linkCopied": "คัดลอกลิงก์แล้ว",
+      "htmlLinkCopied": "คัดลอกลิงก์ HTML แล้ว",
+      "markdownLinkCopied": "คัดลอกลิงก์ Markdown แล้ว",
+      "copyFailed": "คัดลอกไม่สำเร็จ"
     }
   },
   "form": {

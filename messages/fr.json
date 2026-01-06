@@ -186,6 +186,9 @@
       "responses": "Réponses",
       "stats": "Statistiques",
       "copyLink": "Copier le lien",
+      "copyLinkUrl": "URL",
+      "copyLinkHtml": "HTML",
+      "copyLinkMarkdown": "Markdown",
       "shareLink": "Partager le lien",
       "more": "Plus"
     },
@@ -193,6 +196,12 @@
       "responses": "réponses",
       "response": "réponse",
       "updated": "Mis à jour"
+    },
+    "toasts": {
+      "linkCopied": "Lien copié dans le presse-papiers",
+      "htmlLinkCopied": "Lien HTML copié dans le presse-papiers",
+      "markdownLinkCopied": "Lien Markdown copié dans le presse-papiers",
+      "copyFailed": "Échec de la copie"
     }
   },
   "form": {

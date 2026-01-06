@@ -11,6 +11,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu'
 import { 
   MoreVertical, 
@@ -69,53 +72,70 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
   const tForm = useTranslations('form')
   const isDraftForm = form.status === 'draft'
   
-  const copyFormLink = async () => {
-    if (isDraftForm) {
-      return
-    }
-    const link = `${window.location.origin}/f/${form.slug}`
-    
-    // Fallback for insecure contexts or browsers without clipboard API
+  const copyToClipboard = async (text: string, successMessage: string) => {
+    // Fallback for browsers without clipboard API
     if (!navigator.clipboard) {
       const textArea = document.createElement('textarea')
-      textArea.value = link
-      textArea.style.position = 'fixed' // Avoid scrolling to bottom
+      textArea.value = text
+      textArea.style.position = 'fixed'
       textArea.style.left = '-9999px'
       textArea.style.top = '0'
       document.body.appendChild(textArea)
       textArea.focus()
       textArea.select()
-      
+
       try {
         const successful = document.execCommand('copy')
         if (successful) {
-          toast.success('Link copied to clipboard')
+          toast.success(successMessage)
         } else {
-          toast.error('Failed to copy link')
+          toast.error(t('toasts.copyFailed'))
         }
       } catch (err) {
         console.error('Fallback: Oops, unable to copy', err)
-        toast.error('Failed to copy link')
+        toast.error(t('toasts.copyFailed'))
       }
-      
+
       document.body.removeChild(textArea)
       return
     }
 
     try {
-      await navigator.clipboard.writeText(link)
-      toast.success('Link copied to clipboard')
+      await navigator.clipboard.writeText(text)
+      toast.success(successMessage)
     } catch (err) {
-      console.error('Failed to copy link:', err)
-      toast.error('Failed to copy link')
+      console.error('Failed to copy:', err)
+      toast.error(t('toasts.copyFailed'))
     }
+  }
+
+  const copyUrl = async () => {
+    if (isDraftForm) return
+    const link = `${window.location.origin}/f/${form.slug}`
+    await copyToClipboard(link, t('toasts.linkCopied'))
+  }
+
+  const copyHtml = async () => {
+    if (isDraftForm) return
+    const link = `${window.location.origin}/f/${form.slug}`
+    const title = form.title || tForm('untitled')
+    const html = `<a href="${link}">${title}</a>`
+    await copyToClipboard(html, t('toasts.htmlLinkCopied'))
+  }
+
+  const copyMarkdown = async () => {
+    if (isDraftForm) return
+    const link = `${window.location.origin}/f/${form.slug}`
+    const title = form.title || tForm('untitled')
+    const markdown = `[${title}](${link})`
+    await copyToClipboard(markdown, t('toasts.markdownLinkCopied'))
   }
 
   const shareFormLink = async () => {
     if (isDraftForm) return
 
     const link = `${window.location.origin}/f/${form.slug}`
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -129,7 +149,7 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
         }
       }
     } else {
-      await copyFormLink()
+      await copyUrl()
     }
   }
 
@@ -201,17 +221,28 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
                 {t('actions.stats')}
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={isDraftForm ? undefined : copyFormLink}
-              disabled={isDraftForm}
-              className={cn(
-                'cursor-pointer',
-                isDraftForm && 'opacity-50 cursor-not-allowed text-gray-400'
-              )}
-            >
-              <Copy className="mr-2 h-4 w-4" />
-              {t('actions.copyLink')}
-            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                disabled={isDraftForm}
+                className={cn(
+                  isDraftForm && 'opacity-50 cursor-not-allowed text-gray-400'
+                )}
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                {t('actions.copyLink')}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onClick={() => copyUrl()}>
+                  {t('actions.copyLinkUrl')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => copyHtml()}>
+                  {t('actions.copyLinkHtml')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => copyMarkdown()}>
+                  {t('actions.copyLinkMarkdown')}
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
             <DropdownMenuItem 
               onClick={isDraftForm ? undefined : shareFormLink}
               disabled={isDraftForm}

@@ -186,6 +186,9 @@
       "responses": "Responses",
       "stats": "Stats",
       "copyLink": "Copy link",
+      "copyLinkUrl": "URL",
+      "copyLinkHtml": "HTML",
+      "copyLinkMarkdown": "Markdown",
       "shareLink": "Share link",
       "more": "More"
     },
@@ -193,6 +196,12 @@
       "responses": "responses",
       "response": "response",
       "updated": "Updated"
+    },
+    "toasts": {
+      "linkCopied": "Link copied to clipboard",
+      "htmlLinkCopied": "HTML link copied to clipboard",
+      "markdownLinkCopied": "Markdown link copied to clipboard",
+      "copyFailed": "Failed to copy"
     }
   },
   "form": {
