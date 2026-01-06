@@ -776,6 +776,33 @@ make clean           # Clean build artifacts
 4. **Run tests**: `make test`
 5. **Build for deployment**: `make build`
 
+## Code Completion Checklist
+
+**CRITICAL:** Before marking any code change as complete, you MUST run `make build` and ensure it succeeds without errors.
+
+```bash
+make build
+# or for frontend-only changes
+npm run build
+```
+
+**The build must pass** before:
+- Marking todos as completed
+- Telling the user the code is "done"
+- Moving to the next task
+
+If the build fails:
+1. Fix TypeScript errors
+2. Fix import issues
+3. Resolve dependency problems
+4. Re-run build until it succeeds
+
+**Example workflow:**
+1. Make code changes
+2. Run `npm run build` (for frontend) or `make build` (for full project)
+3. If build fails → fix errors → repeat step 2
+4. Only after build succeeds → mark task complete
+
 ## Notes
 
 - The backend uses gRPC reflection for development tools (grpcurl)

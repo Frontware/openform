@@ -189,6 +189,7 @@
       "copyLinkUrl": "URL",
       "copyLinkHtml": "HTML",
       "copyLinkMarkdown": "Markdown",
+      "qrCode": "Code QR",
       "shareLink": "Partager le lien",
       "more": "Plus"
     },
@@ -202,6 +203,12 @@
       "htmlLinkCopied": "Lien HTML copié dans le presse-papiers",
       "markdownLinkCopied": "Lien Markdown copié dans le presse-papiers",
       "copyFailed": "Échec de la copie"
+    },
+    "qrCode": {
+      "title": "Code QR",
+      "description": "Scannez ce code QR pour ouvrir le formulaire sur votre appareil mobile",
+      "download": "Télécharger PNG",
+      "downloaded": "Code QR téléchargé"
     }
   },
   "form": {

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react'
 import { Form, FormStatus } from '@/lib/database.types'
 import { DeleteFormButton } from './delete-form-button'
+import { QRCodeDialog } from './qr-code-dialog'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -71,6 +73,7 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
   const t = useTranslations('dashboard')
   const tForm = useTranslations('form')
   const isDraftForm = form.status === 'draft'
+  const [qrDialogOpen, setQrDialogOpen] = useState(false)
   
   const copyToClipboard = async (text: string, successMessage: string) => {
     // Fallback for browsers without clipboard API
@@ -241,6 +244,9 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
                 <DropdownMenuItem onClick={() => copyMarkdown()}>
                   {t('actions.copyLinkMarkdown')}
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setQrDialogOpen(true)}>
+                  {t('actions.qrCode')}
+                </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
             <DropdownMenuItem 
@@ -319,6 +325,13 @@ export function FormCard({ form, responseCount, onDelete }: FormCardProps) {
         </div>
       </div>
       </div>
+
+      <QRCodeDialog
+        open={qrDialogOpen}
+        onOpenChange={setQrDialogOpen}
+        formUrl={`${window.location.origin}/f/${form.slug}`}
+        formTitle={form.title || tForm('untitled')}
+      />
     </Card>
   )
 }

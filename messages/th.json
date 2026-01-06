@@ -189,6 +189,7 @@
       "copyLinkUrl": "URL",
       "copyLinkHtml": "HTML",
       "copyLinkMarkdown": "Markdown",
+      "qrCode": "คิวอาร์โค้ด",
       "shareLink": "แชร์ลิงก์",
       "more": "เพิ่มเติม"
     },
@@ -202,6 +203,12 @@
       "htmlLinkCopied": "คัดลอกลิงก์ HTML แล้ว",
       "markdownLinkCopied": "คัดลอกลิงก์ Markdown แล้ว",
       "copyFailed": "คัดลอกไม่สำเร็จ"
+    },
+    "qrCode": {
+      "title": "คิวอาร์โค้ด",
+      "description": "สแกนคิวอาร์โค้ดเพื่อเปิดแบบฟอร์มบนอุปกรณ์มือถือของคุณ",
+      "download": "ดาวน์โหลด PNG",
+      "downloaded": "ดาวน์โหลดคิวอาร์โค้ดแล้ว"
     }
   },
   "form": {
