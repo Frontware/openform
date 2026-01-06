@@ -59,6 +59,7 @@ export function DashboardClient() {
   const t = useTranslations('dashboard')
   const [forms, setForms] = useState<DBForm[]>([])
   const [loading, setLoading] = useState(true)
+  const [totalFormsCount, setTotalFormsCount] = useState(0)
   const [responseCounts, setResponseCounts] = useState<Map<string, number>>(new Map())
 
   // Filter and sort state
@@ -114,6 +115,7 @@ export function DashboardClient() {
       })
       const mappedForms = response.forms.map(mapPbFormToDBForm)
       setForms(mappedForms)
+      setTotalFormsCount(Number(response.pagination?.total || 0))
 
       // Fetch response counts for each form
       const countsMap = new Map<string, number>()
@@ -143,6 +145,7 @@ export function DashboardClient() {
   const handleDeleteForm = (formId: string) => {
     // Remove the form from state immediately for better UX
     setForms(forms.filter(f => f.id !== formId))
+    setTotalFormsCount(prev => Math.max(0, prev - 1))
   }
 
   if (loading) {
@@ -177,6 +180,7 @@ export function DashboardClient() {
         sortBy={sortBy}
         onSortChange={setSortBy}
         resultCount={forms.length}
+        totalFormsCount={totalFormsCount}
       />
 
       {forms.length === 0 ? (

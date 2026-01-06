@@ -743,11 +743,11 @@ export function ResponsesDashboard({ form, responses: initialResponses }: Respon
 
             </div>
 
-            <p className="text-slate-600 mt-1">
+                        <p className="text-slate-600 mt-1">
 
-              {responses.length} {responses.length === 1 ? t('response') : t('responses')}
+                          {responses.length} {responses.length <= 1 ? t('response') : t('responses')}
 
-            </p>
+                        </p>
 
           </div>
 

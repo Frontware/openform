@@ -21,6 +21,7 @@ interface FilterBarProps {
   sortBy: string
   onSortChange: (sort: string) => void
   resultCount: number
+  totalFormsCount: number
 }
 
 export function FilterBar({
@@ -31,9 +32,10 @@ export function FilterBar({
   sortBy,
   onSortChange,
   resultCount,
+  totalFormsCount,
 }: FilterBarProps) {
   const t = useTranslations('dashboard.filters')
-  const [isFilterExpanded, setIsFilterExpanded] = useState(true)
+  const [isFilterExpanded, setIsFilterExpanded] = useState(totalFormsCount > 0)
 
   const statusOptions = [
     { value: 'all', label: t('status.all') },
@@ -167,7 +169,7 @@ export function FilterBar({
           {/* Results Summary */}
           <div className="px-6 py-3 bg-gray-50 flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              {t('showing')} <span className="font-semibold text-gray-900">{resultCount} {resultCount === 1 ? t('form') : t('forms')}</span>
+              {t('showing')} <span className="font-semibold text-gray-900">{resultCount} {resultCount <= 1 ? t('form') : t('forms')}</span>
             </div>
             {searchQuery && (
               <div className="flex items-center gap-2">
@@ -190,7 +192,7 @@ export function FilterBar({
       </div>
 
       {/* Quick Summary When Collapsed */}
-      {!isFilterExpanded && (
+      {!isFilterExpanded && totalFormsCount > 0 && (
         <div className="mb-6 flex items-center gap-4 px-4 py-3 bg-white rounded-xl border border-gray-200">
           <span className="text-sm text-gray-600">
             {t('viewing')}: <span className="font-semibold text-gray-900">{statusOptions.find(o => o.value === statusFilter)?.label}</span>
@@ -204,7 +206,7 @@ export function FilterBar({
             | {t('sortedBy')}: <span className="font-semibold text-gray-900">{sortOptions.find(o => o.value === sortBy)?.label}</span>
           </span>
           <span className="text-sm text-gray-600">
-            | <span className="font-semibold text-gray-900">{resultCount} {resultCount === 1 ? t('form') : t('forms')}</span>
+            | <span className="font-semibold text-gray-900">{resultCount} {resultCount <= 1 ? t('form') : t('forms')}</span>
           </span>
         </div>
       )}
