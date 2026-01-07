@@ -157,11 +157,9 @@ export function EditFormClient({ id: propId }: { id?: string } = {}) {
   const [form, setForm] = useState<Form | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // DEBUG: Track renders
-  const renderCount = useRef(0)
+  // Use ref to maintain stable object reference for FormBuilder
+  // This prevents unnecessary remounts when EditFormClient re-renders
   const formRef = useRef<Form | null>(null)
-  renderCount.current++
-  console.log('[EditFormClient] RENDER #', renderCount.current, 'form.id:', form?.id, 'form object ref changed:', !formRef.current || formRef.current !== form)
 
   // Extract form ID from window.location as the primary source of truth
   // This works with static export where useParams may return build-time values
@@ -180,35 +178,19 @@ export function EditFormClient({ id: propId }: { id?: string } = {}) {
 
   useEffect(() => {
     async function load() {
-      console.log('[EditFormClient] window.location.pathname:', typeof window !== 'undefined' ? window.location.pathname : 'server')
-      console.log('[EditFormClient] URL params from useParams:', params)
-      console.log('[EditFormClient] Extracted form ID from URL:', id)
-      console.log('[EditFormClient] propId was:', propId)
       const token = getToken()
-      console.log('[EditFormClient] Token present:', !!token)
 
       try {
-        console.log('[EditFormClient] Calling formClient.getForm()...')
         const response = await formClient.getForm({
           id,
           includeQuestions: true
         })
-        console.log('[EditFormClient] GetForm response received:', response)
-        console.log('[EditFormClient] Form in response:', response.form)
 
         if (response.form) {
-            console.log('[EditFormClient] Form loaded successfully, mapping to UI format')
             setForm(mapPbFormToDBForm(response.form))
-        } else {
-            console.error('[EditFormClient] Response.form is null/undefined')
         }
       } catch (error) {
         console.error('[EditFormClient] Failed to load form:', error)
-        console.error('[EditFormClient] Error details:', {
-          message: error instanceof Error ? error.message : 'Unknown error',
-          name: error instanceof Error ? error.name : 'Unknown',
-          stack: error instanceof Error ? error.stack : undefined
-        })
       } finally {
         setLoading(false)
       }
@@ -229,7 +211,6 @@ export function EditFormClient({ id: propId }: { id?: string } = {}) {
   // Use ref to maintain stable object reference for FormBuilder
   // This prevents unnecessary remounts when EditFormClient re-renders
   if (formRef.current?.id !== form.id) {
-    console.log('[EditFormClient] Updating formRef from', formRef.current?.id, 'to', form.id)
     formRef.current = form
   }
 

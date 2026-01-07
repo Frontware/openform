@@ -1,0 +1,17 @@
+# Target modern browsers that support Baseline features
+# This tells build tools to avoid transpiling features that are
+# already supported by modern browsers
+
+# Modern evergreen browsers
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Safari versions
+last 2 Edge versions
+
+# Maintained Node.js versions
+maintained node versions
+
+# Exclude older browsers that don't support Baseline features
+not IE 11
+not dead
+not op_mini all
