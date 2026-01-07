@@ -2,16 +2,16 @@ import { AuthMessage } from '@/components/auth/auth-message'
 import { TokenHandler } from '@/components/auth/token-handler'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
-import { ArrowRight, Palette, Shield, Sparkles, Zap } from 'lucide-react'
-import Link from 'next/link'
-import { setRequestLocale, getTranslations } from 'next-intl/server'
-import { routing } from '@/i18n/routing'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { routing } from '@/i18n/routing'
+import { ArrowRight, Palette, Shield, Sparkles, Zap } from 'lucide-react'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import Link from 'next/link'
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -125,7 +125,7 @@ export default async function HomePage({
               </div>
               <div className="flex-1 flex justify-center">
                 <div className="px-4 py-1 bg-white rounded-md text-xs text-slate-500 font-medium">
-                  forms.weladee.com/your-form
+                  form.weladee.com/your-form
                 </div>
               </div>
             </div>
