@@ -1,4 +1,5 @@
 import { AuthMessage } from '@/components/auth/auth-message'
+import { DashboardButton } from '@/components/dashboard/dashboard-button'
 import { TokenHandler } from '@/components/auth/token-handler'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
@@ -62,12 +63,10 @@ export default async function HomePage({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href={`/${locale}/dashboard`}>
-                    <Button className="bg-[#13a89e] hover:bg-[#0f8a82] shadow-lg shadow-[#13a89e]/20 transition-all hover:shadow-[#13a89e]/30 hover:-translate-y-0.5">
-                      Dashboard
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </Link>
+                  <DashboardButton className="bg-[#13a89e] hover:bg-[#0f8a82] shadow-lg shadow-[#13a89e]/20 transition-all hover:shadow-[#13a89e]/30 hover:-translate-y-0.5">
+                    Dashboard
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </DashboardButton>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p>{t('dashboardTooltip')}</p>
@@ -97,12 +96,10 @@ export default async function HomePage({
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href={`/${locale}/dashboard`}>
-              <Button size="lg" className="h-14 px-8 text-lg bg-[#13a89e] hover:bg-[#0f8a82] shadow-xl shadow-[#13a89e]/25 transition-all hover:shadow-[#13a89e]/35 hover:-translate-y-0.5">
-                Start creating
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
+            <DashboardButton size="lg" className="h-14 px-8 text-lg bg-[#13a89e] hover:bg-[#0f8a82] shadow-xl shadow-[#13a89e]/25 transition-all hover:shadow-[#13a89e]/35 hover:-translate-y-0.5">
+              Start creating
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </DashboardButton>
             <Link href="#features">
               <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-slate-300 hover:border-slate-400 hover:bg-slate-50">
                 See how it works
@@ -263,12 +260,10 @@ export default async function HomePage({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href={`/${locale}/dashboard`}>
-                    <Button size="lg" className="h-14 px-8 text-lg bg-white text-[#13a89e] hover:bg-teal-50 shadow-xl shadow-teal-900/20 relative transition-all hover:-translate-y-0.5">
-                      Go to dashboard
-                      <ArrowRight className="ml-2 w-5 h-5" />
-                    </Button>
-                  </Link>
+                  <DashboardButton size="lg" className="h-14 px-8 text-lg bg-white text-[#13a89e] hover:bg-teal-50 shadow-xl shadow-teal-900/20 relative transition-all hover:-translate-y-0.5">
+                    Go to dashboard
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </DashboardButton>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p>{t('dashboardTooltip')}</p>

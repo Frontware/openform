@@ -53,33 +53,6 @@ set-grpc-url: ## Set NEXT_PUBLIC_GRPC_URL based on current git branch
 		else \
 			GRPC_URL="https://dev-form.weladee.com"; \
 		fi; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=.*|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=\$$GRPC_URL|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|' .env.local; \
-		echo "Set NEXT_PUBLIC_GRPC_URL to $$GRPC_URL for branch $$CURRENT_BRANCH"; \
-	else \
-		echo "Not in a git repository or unable to determine branch. Using dev URL."; \
-		sed -i 's|^NEXT_PUBLIC_GRPC_URL=.*|NEXT_PUBLIC_GRPC_URL=https://dev-form.weladee.com|' .env.local; \
-	fi
-
-# Environment setup target
-.PHONY: set-grpc-url
-set-grpc-url: ## Set NEXT_PUBLIC_GRPC_URL based on current git branch
-	@echo "Setting GRPC URL based on current branch..."
-	@if [ -n "$$(git branch --show-current 2>/dev/null)" ]; then \
-		CURRENT_BRANCH=$$(git branch --show-current); \
-		if [ "$$CURRENT_BRANCH" = "main" ]; then \
-			GRPC_URL="https://form.weladee.com"; \
-		else \
-			GRPC_URL="https://dev-form.weladee.com"; \
-		fi; \
 		if [ -f .env.local ]; then \
 			if grep -q "NEXT_PUBLIC_GRPC_URL" .env.local; then \
 				sed -i "s|^NEXT_PUBLIC_GRPC_URL=.*|NEXT_PUBLIC_GRPC_URL=$$GRPC_URL|" .env.local; \
@@ -103,9 +76,43 @@ set-grpc-url: ## Set NEXT_PUBLIC_GRPC_URL based on current git branch
 		fi; \
 	fi
 
+# Environment setup target for Weladee base URL
+.PHONY: set-weladee-base-url
+set-weladee-base-url: ## Set NEXT_PUBLIC_WELADEE_BASE_URL based on current git branch
+	@echo "Setting Weladee base URL based on current branch..."
+	@if [ -n "$$(git branch --show-current 2>/dev/null)" ]; then \
+		CURRENT_BRANCH=$$(git branch --show-current); \
+		if [ "$$CURRENT_BRANCH" = "main" ]; then \
+			BASE_URL="https://weladee.com"; \
+		else \
+			BASE_URL="https://dev.weladee.com"; \
+		fi; \
+		if [ -f .env.local ]; then \
+			if grep -q "NEXT_PUBLIC_WELADEE_BASE_URL" .env.local; then \
+				sed -i "s|^NEXT_PUBLIC_WELADEE_BASE_URL=.*|NEXT_PUBLIC_WELADEE_BASE_URL=$$BASE_URL|" .env.local; \
+			else \
+				echo "NEXT_PUBLIC_WELADEE_BASE_URL=$$BASE_URL" >> .env.local; \
+			fi; \
+		else \
+			echo "NEXT_PUBLIC_WELADEE_BASE_URL=$$BASE_URL" > .env.local; \
+		fi; \
+		echo "Set NEXT_PUBLIC_WELADEE_BASE_URL to $$BASE_URL for branch $$CURRENT_BRANCH"; \
+	else \
+		echo "Not in a git repository or unable to determine branch. Using dev URL."; \
+		if [ -f .env.local ]; then \
+			if grep -q "NEXT_PUBLIC_WELADEE_BASE_URL" .env.local; then \
+				sed -i "s|^NEXT_PUBLIC_WELADEE_BASE_URL=.*|NEXT_PUBLIC_WELADEE_BASE_URL=https://dev.weladee.com|" .env.local; \
+			else \
+				echo "NEXT_PUBLIC_WELADEE_BASE_URL=https://dev.weladee.com" >> .env.local; \
+			fi; \
+		else \
+			echo "NEXT_PUBLIC_WELADEE_BASE_URL=https://dev.weladee.com" > .env.local; \
+		fi; \
+	fi
+
 # Client build targets
 .PHONY: build-client
-build-client: set-grpc-url ## Build Next.js client for embedding
+build-client: set-grpc-url set-weladee-base-url ## Build Next.js client for embedding
 	@echo "Building Next.js client..."
 	@echo "Note: For embedded builds, frontend uses same-origin by default."
 	@echo "      Set NEXT_PUBLIC_GRPC_URL or NEXT_PUBLIC_API_URL to use external API."
