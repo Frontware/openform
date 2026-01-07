@@ -309,6 +309,12 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 	}
 
 	// Build update parameters - use current values as defaults
+	// Handle legacy NULL values for email_notification_mode by defaulting to "never"
+	emailNotificationMode := currentForm.EmailNotificationMode
+	if emailNotificationMode == "" {
+		emailNotificationMode = "never"
+	}
+
 	params := sqlc.UpdateFormParams{
 		ID:                       formID,
 		UserID:                   user.ID,
@@ -323,6 +329,7 @@ func (s *FormServerImpl) UpdateForm(ctx context.Context, req *pb.UpdateFormReque
 		CustomThankYouMessage:    currentForm.CustomThankYouMessage.String,
 		RedirectUrl:              currentForm.RedirectUrl.String,
 		ForceCaptcha:             currentForm.ForceCaptcha,
+		EmailNotificationMode:    emailNotificationMode,
 		Settings:                 currentForm.Settings,
 	}
 
