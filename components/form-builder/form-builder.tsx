@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useMemo } from 'react'
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { Form, QuestionConfig, ThemePreset, FormStatus } from '@/lib/database.types'
@@ -177,6 +177,15 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
   const tValidation = useTranslations('validation')
   const tFormBuilder = useTranslations('formBuilder')
 
+  // DEBUG: Add a unique instance ID to track remounts
+  const instanceId = useRef(Math.random().toString(36).substr(2, 9))
+  useEffect(() => {
+    console.log('[FormBuilder] MOUNT instance:', instanceId.current, 'formId:', form.id, 'questions:', questions.length)
+    return () => {
+      console.log('[FormBuilder] UNMOUNT instance:', instanceId.current)
+    }
+  }, [])
+
 
   
 
@@ -277,7 +286,13 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
   const handleSave = useCallback(async () => {
-
+    console.log('[handleSave] ===== SAVE START =====', {
+      formId: form.id,
+      totalQuestions: questions.length,
+      originalQuestions: originalQuestions.length,
+      instance: instanceId.current,
+      questionIds: questions.map(q => ({ id: q.id, type: q.type }))
+    })
 
     setIsSaving(true)
 
@@ -601,21 +616,14 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
   const addQuestion = (type: QuestionConfig['type']) => {
-
-
+    console.log('[addQuestion] START type:', type, 'current questions:', questions.length, 'instance:', instanceId.current)
     const newQuestion = createDefaultQuestion(type)
-
-
+    console.log('[addQuestion] Created question:', newQuestion.id, 'type:', newQuestion.type)
     setQuestions([...questions, newQuestion])
-
-
     setSelectedQuestionId(newQuestion.id)
-
-
     setShowAddQuestion(false)
-
-
     setHasUnsavedChanges(true)
+    console.log('[addQuestion] COMPLETE - questions now:', questions.length + 1)
 
 
   }

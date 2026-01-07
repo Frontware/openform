@@ -21,6 +21,7 @@ interface QuestionEditorProps {
 
 export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
   const t = useTranslations('form')
+  const tCommon = useTranslations('common')
   const typeInfo = getQuestionTypeInfo(question.type)
 
   const addOption = () => {
@@ -251,7 +252,7 @@ export function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorP
         className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
       >
         <Trash2 className="w-4 h-4 mr-2" />
-        {t('actions.save')}
+        {tCommon('delete')}
       </Button>
     </div>
   )

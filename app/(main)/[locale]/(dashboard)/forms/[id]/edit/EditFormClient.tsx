@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { notFound } from 'next/navigation'
 import { useParams } from 'next/navigation'
 import { FormBuilder } from '@/components/form-builder/form-builder'
@@ -157,6 +157,12 @@ export function EditFormClient({ id: propId }: { id?: string } = {}) {
   const [form, setForm] = useState<Form | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // DEBUG: Track renders
+  const renderCount = useRef(0)
+  const formRef = useRef<Form | null>(null)
+  renderCount.current++
+  console.log('[EditFormClient] RENDER #', renderCount.current, 'form.id:', form?.id, 'form object ref changed:', !formRef.current || formRef.current !== form)
+
   // Extract form ID from window.location as the primary source of truth
   // This works with static export where useParams may return build-time values
   const getFormIdFromUrl = (): string => {
@@ -220,5 +226,12 @@ export function EditFormClient({ id: propId }: { id?: string } = {}) {
 
   if (!form) return <div>Form not found</div>
 
-  return <FormBuilder form={form} />
+  // Use ref to maintain stable object reference for FormBuilder
+  // This prevents unnecessary remounts when EditFormClient re-renders
+  if (formRef.current?.id !== form.id) {
+    console.log('[EditFormClient] Updating formRef from', formRef.current?.id, 'to', form.id)
+    formRef.current = form
+  }
+
+  return <FormBuilder form={formRef.current!} />
 }
