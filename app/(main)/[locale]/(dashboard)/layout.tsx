@@ -2,8 +2,8 @@
 
 import { DashboardNav } from '@/components/dashboard/nav'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { getToken, parseJWT, WeladeeUser } from '@/lib/auth/weladee'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { getToken, parseJWT, setToken, WeladeeUser } from '@/lib/auth/weladee'
 
 interface User {
   id: string
@@ -22,8 +22,17 @@ export default function DashboardLayout({
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
+    // First, check if token is in URL parameter and store it
+    const urlToken = searchParams.get('token')
+    if (urlToken) {
+      setToken(urlToken)
+      console.log('[Dashboard] Token from URL stored')
+      // Continue with auth check below using the newly stored token
+    }
+
     const token = getToken()
     if (!token) {
       // No token - redirect to home
@@ -50,7 +59,7 @@ export default function DashboardLayout({
       }
     })
     setIsLoading(false)
-  }, [router])
+  }, [router, searchParams])
 
   if (isLoading || !user) {
     return (
