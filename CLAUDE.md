@@ -10,14 +10,28 @@ Weladee Form is an open-source TypeForm alternative built with:
 - **Database**: PostgreSQL with SQLC for type-safe queries
 - **Auth**: JWT token validation
 
-Users can create beautiful, one-question-at-a-time forms with 7 themes and 15 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
+Users can create beautiful, one-question-at-a-time forms with 10 themes and 15 question types. Forms are published publicly via unique slugs and responses are collected with optional authentication.
+
+### Architecture Documentation
+
+Comprehensive architecture documentation is available in `docs/architecture/`:
+- **[Architecture Summary](docs/architecture/00-architecture-summary.md)** - Interactive overview with visual diagrams
+- **[System Context (C4 Level 1)](docs/architecture/01-system-context.md)** - Users, external systems, and boundaries
+- **[Container Architecture (C4 Level 2)](docs/architecture/02-containers.md)** - Next.js SPA/SSR, Go gRPC Server, PostgreSQL
+- **[Component Architecture (C4 Level 3)](docs/architecture/03-components.md)** - Internal component breakdown
+- **[Data Model](docs/architecture/04-data-model.md)** - Complete database schema with ER diagrams
+- **[Security Architecture](docs/architecture/05-security.md)** - JWT auth and customer type enforcement
+- **[Quality Attributes](docs/architecture/06-quality-attributes.md)** - Performance, scalability, maintainability
+- **[Deployment Architecture](docs/architecture/07-deployment.md)** - Deployment options (single binary, Docker, K8s)
+- **[gRPC Services API](docs/architecture/api/grpc-services.md)** - Complete API documentation
+- **[Architecture Decision Records](docs/architecture/adr/)** - Historical architectural decisions
 
 **Key Features:**
 - **Form Builder** - Create forms with drag-and-drop question ordering (app/(main)/dashboard/forms/[id]/edit)
 - **Form Player** - TypeForm-style one-question-at-a-time taking experience with keyboard navigation (app/(form-player)/f/[slug])
 - **Progress Bar** - User-selectable progress indicators with 4 styles: none, linear bar, step indicator, and circular progress
 - **Response Dashboard** - View, search, filter, and export responses to CSV/JSON/Excel (app/(main)/dashboard/forms/[id]/responses)
-- **Themes** - 7 preset themes: midnight, ocean, sunset, forest, lavender, weladee, minimal (lib/themes.ts)
+- **Themes** - 10 preset themes: minimal, midnight, ocean, sunset, forest, lavender, weladee, aurora, cyberpunk, desert (lib/themes.ts)
 - **Authentication** - JWT token validation with RSA key support (RS256)
 - **Customer Type Enforcement** - Three tiers (SME, Standard, Enterprise) with different feature limits
 - **Company Branding** - Enterprise users can display their logo on forms
@@ -409,7 +423,7 @@ Backend:
 - `id` (UUID, primary key)
 - `user_id` (UUID, references form.users)
 - `title`, `description` (text)
-- `theme` (enum: midnight, ocean, sunset, forest, lavender, weladee, minimal)
+- `theme` (enum: minimal, midnight, ocean, sunset, forest, lavender, weladee, aurora, cyberpunk, desert)
 - `is_published`, `is_accepting_responses`, `require_login`, `allow_multiple_submissions`
 - `progress_bar_style` (enum: none, linear, steps, circular)
 - `custom_thank_you_message`, `redirect_url`
@@ -419,7 +433,7 @@ Backend:
 **form.questions** - Form questions
 - `id` (UUID, primary key)
 - `form_id` (UUID, references form.forms)
-- `type` (enum: short_text, long_text, dropdown, checkboxes, email, phone, number, date, rating, opinion_scale, yes_no, file_upload, url)
+- `type` (enum: short_text, long_text, dropdown, checkboxes, email, phone, number, date, rating, opinion_scale, yes_no, file_upload, url, matrix, ranking)
 - `label`, `description`, `placeholder`
 - `required`
 - `order_index`
@@ -474,9 +488,9 @@ Backend:
 - `FormAnalytic` - Analytics model
 - `CreateFormParams`, `UpdateFormParams`, etc. - Query parameters
 
-## Question Types (13 total)
+## Question Types (15 total)
 
-Defined in `lib/questions.ts`:
+Defined in `lib/questions.ts` (and proto/form.proto):
 
 | Type | Description | Config Properties |
 |------|-------------|-------------------|
@@ -493,6 +507,8 @@ Defined in `lib/questions.ts`:
 | `yes_no` | Binary choice | - |
 | `file_upload` | Images and PDFs | `allowedFileTypes[]`, `maxFileSize` (MB) |
 | `url` | Website URL | `placeholder` |
+| `matrix` | Matrix question (rows × columns) | `rows[]`, `columns[]`, `allowMultiple` |
+| `ranking` | Rank options in order | `options[]`, `maxRankings` |
 
 Helper functions:
 - `getQuestionTypeInfo(type)` - Get info for a question type
@@ -500,7 +516,7 @@ Helper functions:
 
 ## Theme System
 
-Defined in `lib/themes.ts` with 7 presets. Each theme has:
+Defined in `lib/themes.ts` with 10 presets: minimal, midnight, ocean, sunset, forest, lavender, weladee, aurora, cyberpunk, desert. Each theme has:
 - `primaryColor`, `backgroundColor`, `textColor`, `accentColor`
 - `fontFamily`
 

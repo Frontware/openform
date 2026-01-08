@@ -89,8 +89,13 @@ export function parseJWT(token: string): WeladeeUser | null {
     const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
     const padded = base64 + '='.repeat((4 - base64.length % 4) % 4)
 
-    // Parse JSON
-    const decoded = atob(padded)
+    // Parse JSON with proper UTF-8 decoding
+    const binaryString = atob(padded)
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+    const decoded = new TextDecoder().decode(bytes)
     const claims = JSON.parse(decoded)
 
     return {
