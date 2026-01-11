@@ -54,8 +54,10 @@ Feature restrictions are enforced at both backend and frontend levels:
 | Yes/No | Binary choice | All |
 | Matrix | Rate multiple items using same scale | Standard & Enterprise |
 | Ranking | Drag-and-drop ordering by preference | Enterprise |
-| File upload | Images and PDFs | Enterprise |
+| File upload | Images and PDFs | Enterprise + S3 configured |
 | Website URL | URL with validation | All |
+
+**Note:** File Upload questions require both Enterprise customer type AND S3 storage to be configured on the server.
 
 ## Tech stack
 
@@ -410,6 +412,7 @@ weladee-form/
 - `PublishForm` - Publish a form
 - `GetFormStats` - Get form response statistics
 - `CreateQuestion` - Add a question to a form
+- `GetServerConfig` - Get server configuration status (e.g., S3 enabled)
 
 **ResponseService**
 - `SubmitResponse` - Submit or partially save form responses

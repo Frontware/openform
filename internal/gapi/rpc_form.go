@@ -1048,3 +1048,12 @@ func mapProgressBarStyleFromDB(style sqlc.FormProgressBarStyle) pb.ProgressBarSt
 		return pb.ProgressBarStyle_PROGRESS_BAR_STYLE_NONE
 	}
 }
+
+// GetServerConfig returns server configuration status (public endpoint)
+func (s *FormServerImpl) GetServerConfig(ctx context.Context, req *pb.GetServerConfigRequest) (*pb.GetServerConfigResponse, error) {
+	return &pb.GetServerConfigResponse{
+		Config: &pb.ServerConfig{
+			S3Enabled: s.storage != nil,
+		},
+	}, nil
+}

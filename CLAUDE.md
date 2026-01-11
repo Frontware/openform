@@ -45,22 +45,25 @@ Weladee Form enforces feature restrictions based on customer type:
 | Feature | SME | Standard | Enterprise |
 |:---|:---:|:---:|:---:|
 | Max Forms | 5 | 15 | Unlimited |
-| File Upload Questions | ❌ | ❌ | ✅ |
+| File Upload Questions | ❌ | ❌ | ✅ + S3 configured |
 | Matrix Questions | ❌ | ✅ | ✅ |
 | Ranking Questions | ❌ | ❌ | ✅ |
 | Company Branding | ❌ | ❌ | ✅ |
 | Export to CSV | ✅ | ✅ | ✅ |
 | Export to Excel | ❌ | ❌ | ✅ |
 
+**Note:** File Upload questions require both Enterprise customer type AND S3 storage to be configured on the server.
+
 **Backend Enforcement** (Go):
 - **Form Creation Limit** (`internal/gapi/rpc_form.go:CreateForm`): Checks `CountUserForms` before allowing creation
 - **File Upload Restriction** (`internal/gapi/rpc_form.go:CreateQuestion`): Blocks `QUESTION_TYPE_FILE_UPLOAD` for non-enterprise
+- **File Upload S3 Check** (`internal/gapi/rpc_form.go:GetServerConfig`): Returns S3 enabled status; frontend filters File Upload when S3 is disabled
 - **Matrix Question Restriction** (`internal/gapi/rpc_form.go:CreateQuestion`): Blocks `QUESTION_TYPE_MATRIX` for SME users
 - **Ranking Question Restriction** (`internal/gapi/rpc_form.go:CreateQuestion`): Blocks `QUESTION_TYPE_RANKING` for non-enterprise
 - **Excel Export Restriction** (`internal/gapi/rpc_response.go:ExportResponses`): Validates customer_type before Excel export
 
 **Frontend Enforcement** (TypeScript/React):
-- **Form Builder** (`components/form-builder/form-builder.tsx`): Filters out file_upload, matrix, and ranking question types based on customer type
+- **Form Builder** (`components/form-builder/form-builder.tsx`): Filters out file_upload when customer is NOT enterprise OR S3 is NOT configured; filters matrix, ranking based on customer type
 - **Export Menu** (`components/responses/responses-dashboard.tsx`): Hides Excel option for non-enterprise
 - **Form Player** (`components/form-player/form-player.tsx`): Shows company logo/name for enterprise users
 
@@ -83,6 +86,7 @@ The Go backend implements three gRPC services defined in `proto/`:
 - `PublishForm` - Publish a form
 - `GetFormStats` - Get form response statistics
 - `CreateQuestion` - Add a question to a form
+- `GetServerConfig` - Get server configuration status (public endpoint, returns S3 enabled status)
 
 **ResponseService** (`proto/response.proto`)
 - `SubmitResponse` - Submit or partially save form responses

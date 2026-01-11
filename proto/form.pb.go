@@ -2227,6 +2227,131 @@ func (x *ReorderQuestionsResponse) GetSuccess() bool {
 	return false
 }
 
+// Server Configuration
+type GetServerConfigRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetServerConfigRequest) Reset() {
+	*x = GetServerConfigRequest{}
+	mi := &file_proto_form_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetServerConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetServerConfigRequest) ProtoMessage() {}
+
+func (x *GetServerConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_form_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetServerConfigRequest.ProtoReflect.Descriptor instead.
+func (*GetServerConfigRequest) Descriptor() ([]byte, []int) {
+	return file_proto_form_proto_rawDescGZIP(), []int{27}
+}
+
+type ServerConfig struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	S3Enabled     bool                   `protobuf:"varint,1,opt,name=s3_enabled,json=s3Enabled,proto3" json:"s3_enabled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServerConfig) Reset() {
+	*x = ServerConfig{}
+	mi := &file_proto_form_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServerConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServerConfig) ProtoMessage() {}
+
+func (x *ServerConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_form_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServerConfig.ProtoReflect.Descriptor instead.
+func (*ServerConfig) Descriptor() ([]byte, []int) {
+	return file_proto_form_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ServerConfig) GetS3Enabled() bool {
+	if x != nil {
+		return x.S3Enabled
+	}
+	return false
+}
+
+type GetServerConfigResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *ServerConfig          `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetServerConfigResponse) Reset() {
+	*x = GetServerConfigResponse{}
+	mi := &file_proto_form_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetServerConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetServerConfigResponse) ProtoMessage() {}
+
+func (x *GetServerConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_form_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetServerConfigResponse.ProtoReflect.Descriptor instead.
+func (*GetServerConfigResponse) Descriptor() ([]byte, []int) {
+	return file_proto_form_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *GetServerConfigResponse) GetConfig() *ServerConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
 var File_proto_form_proto protoreflect.FileDescriptor
 
 const file_proto_form_proto_rawDesc = "" +
@@ -2402,7 +2527,13 @@ const file_proto_form_proto_rawDesc = "" +
 	"\aform_id\x18\x01 \x01(\tR\x06formId\x12!\n" +
 	"\fquestion_ids\x18\x02 \x03(\tR\vquestionIds\"4\n" +
 	"\x18ReorderQuestionsResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess*s\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x18\n" +
+	"\x16GetServerConfigRequest\"-\n" +
+	"\fServerConfig\x12\x1d\n" +
+	"\n" +
+	"s3_enabled\x18\x01 \x01(\bR\ts3Enabled\"P\n" +
+	"\x17GetServerConfigResponse\x125\n" +
+	"\x06config\x18\x01 \x01(\v2\x1d.weladee.form.v1.ServerConfigR\x06config*s\n" +
 	"\n" +
 	"FormStatus\x12\x1b\n" +
 	"\x17FORM_STATUS_UNSPECIFIED\x10\x00\x12\x15\n" +
@@ -2461,7 +2592,7 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x1eFORM_STATUS_FILTER_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18FORM_STATUS_FILTER_DRAFT\x10\x01\x12 \n" +
 	"\x1cFORM_STATUS_FILTER_PUBLISHED\x10\x02\x12\x1d\n" +
-	"\x19FORM_STATUS_FILTER_CLOSED\x10\x032\xdd\b\n" +
+	"\x19FORM_STATUS_FILTER_CLOSED\x10\x032\xc3\t\n" +
 	"\vFormService\x12U\n" +
 	"\n" +
 	"CreateForm\x12\".weladee.form.v1.CreateFormRequest\x1a#.weladee.form.v1.CreateFormResponse\x12L\n" +
@@ -2477,7 +2608,8 @@ const file_proto_form_proto_rawDesc = "" +
 	"\x0eCreateQuestion\x12&.weladee.form.v1.CreateQuestionRequest\x1a'.weladee.form.v1.CreateQuestionResponse\x12a\n" +
 	"\x0eUpdateQuestion\x12&.weladee.form.v1.UpdateQuestionRequest\x1a'.weladee.form.v1.UpdateQuestionResponse\x12a\n" +
 	"\x0eDeleteQuestion\x12&.weladee.form.v1.DeleteQuestionRequest\x1a'.weladee.form.v1.DeleteQuestionResponse\x12g\n" +
-	"\x10ReorderQuestions\x12(.weladee.form.v1.ReorderQuestionsRequest\x1a).weladee.form.v1.ReorderQuestionsResponseB*Z(github.com/weladee/weladee-form/proto/pbb\x06proto3"
+	"\x10ReorderQuestions\x12(.weladee.form.v1.ReorderQuestionsRequest\x1a).weladee.form.v1.ReorderQuestionsResponse\x12d\n" +
+	"\x0fGetServerConfig\x12'.weladee.form.v1.GetServerConfigRequest\x1a(.weladee.form.v1.GetServerConfigResponseB*Z(github.com/weladee/weladee-form/proto/pbb\x06proto3"
 
 var (
 	file_proto_form_proto_rawDescOnce sync.Once
@@ -2492,7 +2624,7 @@ func file_proto_form_proto_rawDescGZIP() []byte {
 }
 
 var file_proto_form_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
-var file_proto_form_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_proto_form_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_proto_form_proto_goTypes = []any{
 	(FormStatus)(0),                  // 0: weladee.form.v1.FormStatus
 	(FormTheme)(0),                   // 1: weladee.form.v1.FormTheme
@@ -2528,80 +2660,86 @@ var file_proto_form_proto_goTypes = []any{
 	(*DeleteQuestionResponse)(nil),   // 31: weladee.form.v1.DeleteQuestionResponse
 	(*ReorderQuestionsRequest)(nil),  // 32: weladee.form.v1.ReorderQuestionsRequest
 	(*ReorderQuestionsResponse)(nil), // 33: weladee.form.v1.ReorderQuestionsResponse
-	(*structpb.Struct)(nil),          // 34: google.protobuf.Struct
-	(*timestamppb.Timestamp)(nil),    // 35: google.protobuf.Timestamp
-	(*PaginationRequest)(nil),        // 36: weladee.form.v1.PaginationRequest
-	(*PaginationResponse)(nil),       // 37: weladee.form.v1.PaginationResponse
+	(*GetServerConfigRequest)(nil),   // 34: weladee.form.v1.GetServerConfigRequest
+	(*ServerConfig)(nil),             // 35: weladee.form.v1.ServerConfig
+	(*GetServerConfigResponse)(nil),  // 36: weladee.form.v1.GetServerConfigResponse
+	(*structpb.Struct)(nil),          // 37: google.protobuf.Struct
+	(*timestamppb.Timestamp)(nil),    // 38: google.protobuf.Timestamp
+	(*PaginationRequest)(nil),        // 39: weladee.form.v1.PaginationRequest
+	(*PaginationResponse)(nil),       // 40: weladee.form.v1.PaginationResponse
 }
 var file_proto_form_proto_depIdxs = []int32{
 	2,  // 0: weladee.form.v1.Question.type:type_name -> weladee.form.v1.QuestionType
-	34, // 1: weladee.form.v1.Question.options:type_name -> google.protobuf.Struct
-	34, // 2: weladee.form.v1.Question.validation_rules:type_name -> google.protobuf.Struct
-	34, // 3: weladee.form.v1.Question.settings:type_name -> google.protobuf.Struct
-	35, // 4: weladee.form.v1.Question.created_at:type_name -> google.protobuf.Timestamp
-	35, // 5: weladee.form.v1.Question.updated_at:type_name -> google.protobuf.Timestamp
+	37, // 1: weladee.form.v1.Question.options:type_name -> google.protobuf.Struct
+	37, // 2: weladee.form.v1.Question.validation_rules:type_name -> google.protobuf.Struct
+	37, // 3: weladee.form.v1.Question.settings:type_name -> google.protobuf.Struct
+	38, // 4: weladee.form.v1.Question.created_at:type_name -> google.protobuf.Timestamp
+	38, // 5: weladee.form.v1.Question.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 6: weladee.form.v1.Form.theme:type_name -> weladee.form.v1.FormTheme
 	3,  // 7: weladee.form.v1.Form.progress_bar_style:type_name -> weladee.form.v1.ProgressBarStyle
-	34, // 8: weladee.form.v1.Form.settings:type_name -> google.protobuf.Struct
+	37, // 8: weladee.form.v1.Form.settings:type_name -> google.protobuf.Struct
 	7,  // 9: weladee.form.v1.Form.questions:type_name -> weladee.form.v1.Question
-	35, // 10: weladee.form.v1.Form.created_at:type_name -> google.protobuf.Timestamp
-	35, // 11: weladee.form.v1.Form.updated_at:type_name -> google.protobuf.Timestamp
+	38, // 10: weladee.form.v1.Form.created_at:type_name -> google.protobuf.Timestamp
+	38, // 11: weladee.form.v1.Form.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 12: weladee.form.v1.CreateFormRequest.theme:type_name -> weladee.form.v1.FormTheme
 	3,  // 13: weladee.form.v1.CreateFormRequest.progress_bar_style:type_name -> weladee.form.v1.ProgressBarStyle
 	7,  // 14: weladee.form.v1.CreateFormRequest.questions:type_name -> weladee.form.v1.Question
-	34, // 15: weladee.form.v1.CreateFormRequest.settings:type_name -> google.protobuf.Struct
+	37, // 15: weladee.form.v1.CreateFormRequest.settings:type_name -> google.protobuf.Struct
 	8,  // 16: weladee.form.v1.CreateFormResponse.form:type_name -> weladee.form.v1.Form
 	8,  // 17: weladee.form.v1.GetFormResponse.form:type_name -> weladee.form.v1.Form
 	8,  // 18: weladee.form.v1.GetFormBySlugResponse.form:type_name -> weladee.form.v1.Form
 	1,  // 19: weladee.form.v1.UpdateFormRequest.theme:type_name -> weladee.form.v1.FormTheme
 	3,  // 20: weladee.form.v1.UpdateFormRequest.progress_bar_style:type_name -> weladee.form.v1.ProgressBarStyle
-	34, // 21: weladee.form.v1.UpdateFormRequest.settings:type_name -> google.protobuf.Struct
+	37, // 21: weladee.form.v1.UpdateFormRequest.settings:type_name -> google.protobuf.Struct
 	8,  // 22: weladee.form.v1.UpdateFormResponse.form:type_name -> weladee.form.v1.Form
-	36, // 23: weladee.form.v1.ListFormsRequest.pagination:type_name -> weladee.form.v1.PaginationRequest
+	39, // 23: weladee.form.v1.ListFormsRequest.pagination:type_name -> weladee.form.v1.PaginationRequest
 	4,  // 24: weladee.form.v1.ListFormsRequest.sort_by:type_name -> weladee.form.v1.FormSortBy
 	5,  // 25: weladee.form.v1.ListFormsRequest.sort_order:type_name -> weladee.form.v1.FormSortOrder
 	6,  // 26: weladee.form.v1.ListFormsRequest.status_filter:type_name -> weladee.form.v1.FormStatusFilter
 	8,  // 27: weladee.form.v1.ListFormsResponse.forms:type_name -> weladee.form.v1.Form
-	37, // 28: weladee.form.v1.ListFormsResponse.pagination:type_name -> weladee.form.v1.PaginationResponse
+	40, // 28: weladee.form.v1.ListFormsResponse.pagination:type_name -> weladee.form.v1.PaginationResponse
 	8,  // 29: weladee.form.v1.PublishFormResponse.form:type_name -> weladee.form.v1.Form
 	9,  // 30: weladee.form.v1.GetFormStatsResponse.stats:type_name -> weladee.form.v1.FormStats
 	2,  // 31: weladee.form.v1.CreateQuestionRequest.type:type_name -> weladee.form.v1.QuestionType
-	34, // 32: weladee.form.v1.CreateQuestionRequest.options:type_name -> google.protobuf.Struct
-	34, // 33: weladee.form.v1.CreateQuestionRequest.validation_rules:type_name -> google.protobuf.Struct
+	37, // 32: weladee.form.v1.CreateQuestionRequest.options:type_name -> google.protobuf.Struct
+	37, // 33: weladee.form.v1.CreateQuestionRequest.validation_rules:type_name -> google.protobuf.Struct
 	7,  // 34: weladee.form.v1.CreateQuestionResponse.question:type_name -> weladee.form.v1.Question
 	2,  // 35: weladee.form.v1.UpdateQuestionRequest.type:type_name -> weladee.form.v1.QuestionType
-	34, // 36: weladee.form.v1.UpdateQuestionRequest.options:type_name -> google.protobuf.Struct
-	34, // 37: weladee.form.v1.UpdateQuestionRequest.validation_rules:type_name -> google.protobuf.Struct
+	37, // 36: weladee.form.v1.UpdateQuestionRequest.options:type_name -> google.protobuf.Struct
+	37, // 37: weladee.form.v1.UpdateQuestionRequest.validation_rules:type_name -> google.protobuf.Struct
 	7,  // 38: weladee.form.v1.UpdateQuestionResponse.question:type_name -> weladee.form.v1.Question
-	10, // 39: weladee.form.v1.FormService.CreateForm:input_type -> weladee.form.v1.CreateFormRequest
-	12, // 40: weladee.form.v1.FormService.GetForm:input_type -> weladee.form.v1.GetFormRequest
-	14, // 41: weladee.form.v1.FormService.GetFormBySlug:input_type -> weladee.form.v1.GetFormBySlugRequest
-	16, // 42: weladee.form.v1.FormService.UpdateForm:input_type -> weladee.form.v1.UpdateFormRequest
-	18, // 43: weladee.form.v1.FormService.DeleteForm:input_type -> weladee.form.v1.DeleteFormRequest
-	20, // 44: weladee.form.v1.FormService.ListForms:input_type -> weladee.form.v1.ListFormsRequest
-	22, // 45: weladee.form.v1.FormService.PublishForm:input_type -> weladee.form.v1.PublishFormRequest
-	24, // 46: weladee.form.v1.FormService.GetFormStats:input_type -> weladee.form.v1.GetFormStatsRequest
-	26, // 47: weladee.form.v1.FormService.CreateQuestion:input_type -> weladee.form.v1.CreateQuestionRequest
-	28, // 48: weladee.form.v1.FormService.UpdateQuestion:input_type -> weladee.form.v1.UpdateQuestionRequest
-	30, // 49: weladee.form.v1.FormService.DeleteQuestion:input_type -> weladee.form.v1.DeleteQuestionRequest
-	32, // 50: weladee.form.v1.FormService.ReorderQuestions:input_type -> weladee.form.v1.ReorderQuestionsRequest
-	11, // 51: weladee.form.v1.FormService.CreateForm:output_type -> weladee.form.v1.CreateFormResponse
-	13, // 52: weladee.form.v1.FormService.GetForm:output_type -> weladee.form.v1.GetFormResponse
-	15, // 53: weladee.form.v1.FormService.GetFormBySlug:output_type -> weladee.form.v1.GetFormBySlugResponse
-	17, // 54: weladee.form.v1.FormService.UpdateForm:output_type -> weladee.form.v1.UpdateFormResponse
-	19, // 55: weladee.form.v1.FormService.DeleteForm:output_type -> weladee.form.v1.DeleteFormResponse
-	21, // 56: weladee.form.v1.FormService.ListForms:output_type -> weladee.form.v1.ListFormsResponse
-	23, // 57: weladee.form.v1.FormService.PublishForm:output_type -> weladee.form.v1.PublishFormResponse
-	25, // 58: weladee.form.v1.FormService.GetFormStats:output_type -> weladee.form.v1.GetFormStatsResponse
-	27, // 59: weladee.form.v1.FormService.CreateQuestion:output_type -> weladee.form.v1.CreateQuestionResponse
-	29, // 60: weladee.form.v1.FormService.UpdateQuestion:output_type -> weladee.form.v1.UpdateQuestionResponse
-	31, // 61: weladee.form.v1.FormService.DeleteQuestion:output_type -> weladee.form.v1.DeleteQuestionResponse
-	33, // 62: weladee.form.v1.FormService.ReorderQuestions:output_type -> weladee.form.v1.ReorderQuestionsResponse
-	51, // [51:63] is the sub-list for method output_type
-	39, // [39:51] is the sub-list for method input_type
-	39, // [39:39] is the sub-list for extension type_name
-	39, // [39:39] is the sub-list for extension extendee
-	0,  // [0:39] is the sub-list for field type_name
+	35, // 39: weladee.form.v1.GetServerConfigResponse.config:type_name -> weladee.form.v1.ServerConfig
+	10, // 40: weladee.form.v1.FormService.CreateForm:input_type -> weladee.form.v1.CreateFormRequest
+	12, // 41: weladee.form.v1.FormService.GetForm:input_type -> weladee.form.v1.GetFormRequest
+	14, // 42: weladee.form.v1.FormService.GetFormBySlug:input_type -> weladee.form.v1.GetFormBySlugRequest
+	16, // 43: weladee.form.v1.FormService.UpdateForm:input_type -> weladee.form.v1.UpdateFormRequest
+	18, // 44: weladee.form.v1.FormService.DeleteForm:input_type -> weladee.form.v1.DeleteFormRequest
+	20, // 45: weladee.form.v1.FormService.ListForms:input_type -> weladee.form.v1.ListFormsRequest
+	22, // 46: weladee.form.v1.FormService.PublishForm:input_type -> weladee.form.v1.PublishFormRequest
+	24, // 47: weladee.form.v1.FormService.GetFormStats:input_type -> weladee.form.v1.GetFormStatsRequest
+	26, // 48: weladee.form.v1.FormService.CreateQuestion:input_type -> weladee.form.v1.CreateQuestionRequest
+	28, // 49: weladee.form.v1.FormService.UpdateQuestion:input_type -> weladee.form.v1.UpdateQuestionRequest
+	30, // 50: weladee.form.v1.FormService.DeleteQuestion:input_type -> weladee.form.v1.DeleteQuestionRequest
+	32, // 51: weladee.form.v1.FormService.ReorderQuestions:input_type -> weladee.form.v1.ReorderQuestionsRequest
+	34, // 52: weladee.form.v1.FormService.GetServerConfig:input_type -> weladee.form.v1.GetServerConfigRequest
+	11, // 53: weladee.form.v1.FormService.CreateForm:output_type -> weladee.form.v1.CreateFormResponse
+	13, // 54: weladee.form.v1.FormService.GetForm:output_type -> weladee.form.v1.GetFormResponse
+	15, // 55: weladee.form.v1.FormService.GetFormBySlug:output_type -> weladee.form.v1.GetFormBySlugResponse
+	17, // 56: weladee.form.v1.FormService.UpdateForm:output_type -> weladee.form.v1.UpdateFormResponse
+	19, // 57: weladee.form.v1.FormService.DeleteForm:output_type -> weladee.form.v1.DeleteFormResponse
+	21, // 58: weladee.form.v1.FormService.ListForms:output_type -> weladee.form.v1.ListFormsResponse
+	23, // 59: weladee.form.v1.FormService.PublishForm:output_type -> weladee.form.v1.PublishFormResponse
+	25, // 60: weladee.form.v1.FormService.GetFormStats:output_type -> weladee.form.v1.GetFormStatsResponse
+	27, // 61: weladee.form.v1.FormService.CreateQuestion:output_type -> weladee.form.v1.CreateQuestionResponse
+	29, // 62: weladee.form.v1.FormService.UpdateQuestion:output_type -> weladee.form.v1.UpdateQuestionResponse
+	31, // 63: weladee.form.v1.FormService.DeleteQuestion:output_type -> weladee.form.v1.DeleteQuestionResponse
+	33, // 64: weladee.form.v1.FormService.ReorderQuestions:output_type -> weladee.form.v1.ReorderQuestionsResponse
+	36, // 65: weladee.form.v1.FormService.GetServerConfig:output_type -> weladee.form.v1.GetServerConfigResponse
+	53, // [53:66] is the sub-list for method output_type
+	40, // [40:53] is the sub-list for method input_type
+	40, // [40:40] is the sub-list for extension type_name
+	40, // [40:40] is the sub-list for extension extendee
+	0,  // [0:40] is the sub-list for field type_name
 }
 
 func init() { file_proto_form_proto_init() }
@@ -2619,7 +2757,7 @@ func file_proto_form_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_form_proto_rawDesc), len(file_proto_form_proto_rawDesc)),
 			NumEnums:      7,
-			NumMessages:   27,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

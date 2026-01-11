@@ -266,6 +266,17 @@ message ReorderQuestionsResponse {
   bool success = 1;
 }
 
+// Server Configuration
+message GetServerConfigRequest {}
+
+message ServerConfig {
+  bool s3_enabled = 1;
+}
+
+message GetServerConfigResponse {
+  ServerConfig config = 1;
+}
+
 // Form Service
 service FormService {
   rpc CreateForm(CreateFormRequest) returns (CreateFormResponse);
@@ -282,4 +293,7 @@ service FormService {
   rpc UpdateQuestion(UpdateQuestionRequest) returns (UpdateQuestionResponse);
   rpc DeleteQuestion(DeleteQuestionRequest) returns (DeleteQuestionResponse);
   rpc ReorderQuestions(ReorderQuestionsRequest) returns (ReorderQuestionsResponse);
+
+  // Server configuration
+  rpc GetServerConfig(GetServerConfigRequest) returns (GetServerConfigResponse);
 }

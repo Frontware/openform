@@ -135,6 +135,14 @@ func (a *connectFormServiceAdapter) ReorderQuestions(ctx context.Context, req *c
 	return connect.NewResponse(resp), nil
 }
 
+func (a *connectFormServiceAdapter) GetServerConfig(ctx context.Context, req *connect.Request[pb.GetServerConfigRequest]) (*connect.Response[pb.GetServerConfigResponse], error) {
+	resp, err := a.impl.GetServerConfig(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
 // Adapt gRPC ResponseService to Connect interface
 type connectResponseServiceAdapter struct {
 	impl *gapi.ResponseServerImpl

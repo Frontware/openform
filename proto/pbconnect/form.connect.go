@@ -63,6 +63,9 @@ const (
 	// FormServiceReorderQuestionsProcedure is the fully-qualified name of the FormService's
 	// ReorderQuestions RPC.
 	FormServiceReorderQuestionsProcedure = "/weladee.form.v1.FormService/ReorderQuestions"
+	// FormServiceGetServerConfigProcedure is the fully-qualified name of the FormService's
+	// GetServerConfig RPC.
+	FormServiceGetServerConfigProcedure = "/weladee.form.v1.FormService/GetServerConfig"
 )
 
 // FormServiceClient is a client for the weladee.form.v1.FormService service.
@@ -80,6 +83,8 @@ type FormServiceClient interface {
 	UpdateQuestion(context.Context, *connect.Request[pb.UpdateQuestionRequest]) (*connect.Response[pb.UpdateQuestionResponse], error)
 	DeleteQuestion(context.Context, *connect.Request[pb.DeleteQuestionRequest]) (*connect.Response[pb.DeleteQuestionResponse], error)
 	ReorderQuestions(context.Context, *connect.Request[pb.ReorderQuestionsRequest]) (*connect.Response[pb.ReorderQuestionsResponse], error)
+	// Server configuration
+	GetServerConfig(context.Context, *connect.Request[pb.GetServerConfigRequest]) (*connect.Response[pb.GetServerConfigResponse], error)
 }
 
 // NewFormServiceClient constructs a client for the weladee.form.v1.FormService service. By default,
@@ -165,6 +170,12 @@ func NewFormServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(formServiceMethods.ByName("ReorderQuestions")),
 			connect.WithClientOptions(opts...),
 		),
+		getServerConfig: connect.NewClient[pb.GetServerConfigRequest, pb.GetServerConfigResponse](
+			httpClient,
+			baseURL+FormServiceGetServerConfigProcedure,
+			connect.WithSchema(formServiceMethods.ByName("GetServerConfig")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -182,6 +193,7 @@ type formServiceClient struct {
 	updateQuestion   *connect.Client[pb.UpdateQuestionRequest, pb.UpdateQuestionResponse]
 	deleteQuestion   *connect.Client[pb.DeleteQuestionRequest, pb.DeleteQuestionResponse]
 	reorderQuestions *connect.Client[pb.ReorderQuestionsRequest, pb.ReorderQuestionsResponse]
+	getServerConfig  *connect.Client[pb.GetServerConfigRequest, pb.GetServerConfigResponse]
 }
 
 // CreateForm calls weladee.form.v1.FormService.CreateForm.
@@ -244,6 +256,11 @@ func (c *formServiceClient) ReorderQuestions(ctx context.Context, req *connect.R
 	return c.reorderQuestions.CallUnary(ctx, req)
 }
 
+// GetServerConfig calls weladee.form.v1.FormService.GetServerConfig.
+func (c *formServiceClient) GetServerConfig(ctx context.Context, req *connect.Request[pb.GetServerConfigRequest]) (*connect.Response[pb.GetServerConfigResponse], error) {
+	return c.getServerConfig.CallUnary(ctx, req)
+}
+
 // FormServiceHandler is an implementation of the weladee.form.v1.FormService service.
 type FormServiceHandler interface {
 	CreateForm(context.Context, *connect.Request[pb.CreateFormRequest]) (*connect.Response[pb.CreateFormResponse], error)
@@ -259,6 +276,8 @@ type FormServiceHandler interface {
 	UpdateQuestion(context.Context, *connect.Request[pb.UpdateQuestionRequest]) (*connect.Response[pb.UpdateQuestionResponse], error)
 	DeleteQuestion(context.Context, *connect.Request[pb.DeleteQuestionRequest]) (*connect.Response[pb.DeleteQuestionResponse], error)
 	ReorderQuestions(context.Context, *connect.Request[pb.ReorderQuestionsRequest]) (*connect.Response[pb.ReorderQuestionsResponse], error)
+	// Server configuration
+	GetServerConfig(context.Context, *connect.Request[pb.GetServerConfigRequest]) (*connect.Response[pb.GetServerConfigResponse], error)
 }
 
 // NewFormServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -340,6 +359,12 @@ func NewFormServiceHandler(svc FormServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(formServiceMethods.ByName("ReorderQuestions")),
 		connect.WithHandlerOptions(opts...),
 	)
+	formServiceGetServerConfigHandler := connect.NewUnaryHandler(
+		FormServiceGetServerConfigProcedure,
+		svc.GetServerConfig,
+		connect.WithSchema(formServiceMethods.ByName("GetServerConfig")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/weladee.form.v1.FormService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case FormServiceCreateFormProcedure:
@@ -366,6 +391,8 @@ func NewFormServiceHandler(svc FormServiceHandler, opts ...connect.HandlerOption
 			formServiceDeleteQuestionHandler.ServeHTTP(w, r)
 		case FormServiceReorderQuestionsProcedure:
 			formServiceReorderQuestionsHandler.ServeHTTP(w, r)
+		case FormServiceGetServerConfigProcedure:
+			formServiceGetServerConfigHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -421,4 +448,8 @@ func (UnimplementedFormServiceHandler) DeleteQuestion(context.Context, *connect.
 
 func (UnimplementedFormServiceHandler) ReorderQuestions(context.Context, *connect.Request[pb.ReorderQuestionsRequest]) (*connect.Response[pb.ReorderQuestionsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weladee.form.v1.FormService.ReorderQuestions is not implemented"))
+}
+
+func (UnimplementedFormServiceHandler) GetServerConfig(context.Context, *connect.Request[pb.GetServerConfigRequest]) (*connect.Response[pb.GetServerConfigResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weladee.form.v1.FormService.GetServerConfig is not implemented"))
 }

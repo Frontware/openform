@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateFormRequest, CreateFormResponse, CreateQuestionRequest, CreateQuestionResponse, DeleteFormRequest, DeleteFormResponse, DeleteQuestionRequest, DeleteQuestionResponse, GetFormBySlugRequest, GetFormBySlugResponse, GetFormRequest, GetFormResponse, GetFormStatsRequest, GetFormStatsResponse, ListFormsRequest, ListFormsResponse, PublishFormRequest, PublishFormResponse, ReorderQuestionsRequest, ReorderQuestionsResponse, UpdateFormRequest, UpdateFormResponse, UpdateQuestionRequest, UpdateQuestionResponse } from "./form_pb";
+import { CreateFormRequest, CreateFormResponse, CreateQuestionRequest, CreateQuestionResponse, DeleteFormRequest, DeleteFormResponse, DeleteQuestionRequest, DeleteQuestionResponse, GetFormBySlugRequest, GetFormBySlugResponse, GetFormRequest, GetFormResponse, GetFormStatsRequest, GetFormStatsResponse, GetServerConfigRequest, GetServerConfigResponse, ListFormsRequest, ListFormsResponse, PublishFormRequest, PublishFormResponse, ReorderQuestionsRequest, ReorderQuestionsResponse, UpdateFormRequest, UpdateFormResponse, UpdateQuestionRequest, UpdateQuestionResponse } from "./form_pb";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -122,6 +122,17 @@ export const FormService = {
       name: "ReorderQuestions",
       I: ReorderQuestionsRequest,
       O: ReorderQuestionsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * Server configuration
+     *
+     * @generated from rpc weladee.form.v1.FormService.GetServerConfig
+     */
+    getServerConfig: {
+      name: "GetServerConfig",
+      I: GetServerConfigRequest,
+      O: GetServerConfigResponse,
       kind: MethodKind.Unary,
     },
   }

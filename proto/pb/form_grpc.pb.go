@@ -31,6 +31,7 @@ const (
 	FormService_UpdateQuestion_FullMethodName   = "/weladee.form.v1.FormService/UpdateQuestion"
 	FormService_DeleteQuestion_FullMethodName   = "/weladee.form.v1.FormService/DeleteQuestion"
 	FormService_ReorderQuestions_FullMethodName = "/weladee.form.v1.FormService/ReorderQuestions"
+	FormService_GetServerConfig_FullMethodName  = "/weladee.form.v1.FormService/GetServerConfig"
 )
 
 // FormServiceClient is the client API for FormService service.
@@ -52,6 +53,8 @@ type FormServiceClient interface {
 	UpdateQuestion(ctx context.Context, in *UpdateQuestionRequest, opts ...grpc.CallOption) (*UpdateQuestionResponse, error)
 	DeleteQuestion(ctx context.Context, in *DeleteQuestionRequest, opts ...grpc.CallOption) (*DeleteQuestionResponse, error)
 	ReorderQuestions(ctx context.Context, in *ReorderQuestionsRequest, opts ...grpc.CallOption) (*ReorderQuestionsResponse, error)
+	// Server configuration
+	GetServerConfig(ctx context.Context, in *GetServerConfigRequest, opts ...grpc.CallOption) (*GetServerConfigResponse, error)
 }
 
 type formServiceClient struct {
@@ -182,6 +185,16 @@ func (c *formServiceClient) ReorderQuestions(ctx context.Context, in *ReorderQue
 	return out, nil
 }
 
+func (c *formServiceClient) GetServerConfig(ctx context.Context, in *GetServerConfigRequest, opts ...grpc.CallOption) (*GetServerConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetServerConfigResponse)
+	err := c.cc.Invoke(ctx, FormService_GetServerConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FormServiceServer is the server API for FormService service.
 // All implementations must embed UnimplementedFormServiceServer
 // for forward compatibility.
@@ -201,6 +214,8 @@ type FormServiceServer interface {
 	UpdateQuestion(context.Context, *UpdateQuestionRequest) (*UpdateQuestionResponse, error)
 	DeleteQuestion(context.Context, *DeleteQuestionRequest) (*DeleteQuestionResponse, error)
 	ReorderQuestions(context.Context, *ReorderQuestionsRequest) (*ReorderQuestionsResponse, error)
+	// Server configuration
+	GetServerConfig(context.Context, *GetServerConfigRequest) (*GetServerConfigResponse, error)
 	mustEmbedUnimplementedFormServiceServer()
 }
 
@@ -246,6 +261,9 @@ func (UnimplementedFormServiceServer) DeleteQuestion(context.Context, *DeleteQue
 }
 func (UnimplementedFormServiceServer) ReorderQuestions(context.Context, *ReorderQuestionsRequest) (*ReorderQuestionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReorderQuestions not implemented")
+}
+func (UnimplementedFormServiceServer) GetServerConfig(context.Context, *GetServerConfigRequest) (*GetServerConfigResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetServerConfig not implemented")
 }
 func (UnimplementedFormServiceServer) mustEmbedUnimplementedFormServiceServer() {}
 func (UnimplementedFormServiceServer) testEmbeddedByValue()                     {}
@@ -484,6 +502,24 @@ func _FormService_ReorderQuestions_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FormService_GetServerConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetServerConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FormServiceServer).GetServerConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FormService_GetServerConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FormServiceServer).GetServerConfig(ctx, req.(*GetServerConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FormService_ServiceDesc is the grpc.ServiceDesc for FormService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -538,6 +574,10 @@ var FormService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReorderQuestions",
 			Handler:    _FormService_ReorderQuestions_Handler,
+		},
+		{
+			MethodName: "GetServerConfig",
+			Handler:    _FormService_GetServerConfig_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

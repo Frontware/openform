@@ -542,6 +542,8 @@ export class Form extends Message<Form> {
   forceCaptcha = false;
 
   /**
+   * "never", "immediate", "daily"
+   *
    * @generated from field: string email_notification_mode = 14;
    */
   emailNotificationMode = "";
@@ -985,7 +987,14 @@ export class UpdateFormRequest extends Message<UpdateFormRequest> {
   forceCaptcha?: boolean;
 
   /**
-   * @generated from field: optional google.protobuf.Struct settings = 13;
+   * "never", "immediate", "daily"
+   *
+   * @generated from field: optional string email_notification_mode = 13;
+   */
+  emailNotificationMode?: string;
+
+  /**
+   * @generated from field: optional google.protobuf.Struct settings = 14;
    */
   settings?: Struct;
 
@@ -1009,7 +1018,8 @@ export class UpdateFormRequest extends Message<UpdateFormRequest> {
     { no: 10, name: "custom_thank_you_message", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 11, name: "redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 12, name: "force_captcha", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
-    { no: 13, name: "settings", kind: "message", T: Struct, opt: true },
+    { no: 13, name: "email_notification_mode", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 14, name: "settings", kind: "message", T: Struct, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateFormRequest {
@@ -1795,6 +1805,113 @@ export class ReorderQuestionsResponse extends Message<ReorderQuestionsResponse> 
 
   static equals(a: ReorderQuestionsResponse | PlainMessage<ReorderQuestionsResponse> | undefined, b: ReorderQuestionsResponse | PlainMessage<ReorderQuestionsResponse> | undefined): boolean {
     return proto3.util.equals(ReorderQuestionsResponse, a, b);
+  }
+}
+
+/**
+ * Server Configuration
+ *
+ * @generated from message weladee.form.v1.GetServerConfigRequest
+ */
+export class GetServerConfigRequest extends Message<GetServerConfigRequest> {
+  constructor(data?: PartialMessage<GetServerConfigRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "weladee.form.v1.GetServerConfigRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetServerConfigRequest {
+    return new GetServerConfigRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetServerConfigRequest {
+    return new GetServerConfigRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetServerConfigRequest {
+    return new GetServerConfigRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetServerConfigRequest | PlainMessage<GetServerConfigRequest> | undefined, b: GetServerConfigRequest | PlainMessage<GetServerConfigRequest> | undefined): boolean {
+    return proto3.util.equals(GetServerConfigRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message weladee.form.v1.ServerConfig
+ */
+export class ServerConfig extends Message<ServerConfig> {
+  /**
+   * @generated from field: bool s3_enabled = 1;
+   */
+  s3Enabled = false;
+
+  constructor(data?: PartialMessage<ServerConfig>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "weladee.form.v1.ServerConfig";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "s3_enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ServerConfig {
+    return new ServerConfig().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ServerConfig {
+    return new ServerConfig().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ServerConfig {
+    return new ServerConfig().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ServerConfig | PlainMessage<ServerConfig> | undefined, b: ServerConfig | PlainMessage<ServerConfig> | undefined): boolean {
+    return proto3.util.equals(ServerConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message weladee.form.v1.GetServerConfigResponse
+ */
+export class GetServerConfigResponse extends Message<GetServerConfigResponse> {
+  /**
+   * @generated from field: weladee.form.v1.ServerConfig config = 1;
+   */
+  config?: ServerConfig;
+
+  constructor(data?: PartialMessage<GetServerConfigResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "weladee.form.v1.GetServerConfigResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "config", kind: "message", T: ServerConfig },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetServerConfigResponse {
+    return new GetServerConfigResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetServerConfigResponse {
+    return new GetServerConfigResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetServerConfigResponse {
+    return new GetServerConfigResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetServerConfigResponse | PlainMessage<GetServerConfigResponse> | undefined, b: GetServerConfigResponse | PlainMessage<GetServerConfigResponse> | undefined): boolean {
+    return proto3.util.equals(GetServerConfigResponse, a, b);
   }
 }
 

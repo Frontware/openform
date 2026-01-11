@@ -224,7 +224,23 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
 
+  // S3 enabled state for file upload question type
+  const [s3Enabled, setS3Enabled] = useState<boolean | null>(null)
 
+
+  // Fetch S3 configuration status on mount
+  useEffect(() => {
+    const fetchS3Status = async () => {
+      try {
+        const response = await formClient.getServerConfig({})
+        setS3Enabled(response.config?.s3Enabled ?? false)
+      } catch (error) {
+        console.error('Failed to fetch server config:', error)
+        setS3Enabled(false) // Default to disabled on error
+      }
+    }
+    fetchS3Status()
+  }, [])
 
 
   // Get user's customer type and filter available question types
@@ -246,14 +262,17 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
 
 
     // Filter question types based on customer type:
-    // - file_upload: Enterprise only
+    // - file_upload: Enterprise only AND S3 configured
     // - matrix: Standard and Enterprise only
     // - ranking: Enterprise only
 
 
     return questionTypes.filter(qt => {
-      // File upload: Enterprise only
-      if (qt.type === 'file_upload' && customerType !== 'enterprise') return false
+      // File upload: Enterprise only AND S3 configured
+      if (qt.type === 'file_upload') {
+        if (customerType !== 'enterprise') return false
+        if (s3Enabled !== true) return false  // Only show if S3 is confirmed enabled
+      }
 
       // Matrix: Standard and Enterprise only
       if (qt.type === 'matrix' && customerType !== 'standard' && customerType !== 'enterprise') return false
@@ -265,7 +284,7 @@ export function FormBuilder({ form: initialForm }: FormBuilderProps) {
     })
 
 
-  }, [])
+  }, [s3Enabled])
 
 
 
